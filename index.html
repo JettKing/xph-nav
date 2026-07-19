@@ -6,7 +6,10 @@
 <title>徐胖虎资源社</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+box-sizing:border-box
+}
+
 body{
 margin:0;
 background:#f5f5f7;
@@ -20,48 +23,26 @@ margin:auto;
 padding:20px
 }
 
+
 /* Banner */
+
 .banner{
 height:170px;
 border-radius:26px;
 overflow:hidden;
-position:relative;
-box-shadow:0 12px 35px #00000014
+box-shadow:0 12px 35px rgba(0,0,0,.08)
 }
 
 .banner img{
 width:100%;
 height:100%;
 object-fit:cover;
-display:none
-}
-
-.banner img.active{
 display:block
-}
-
-.dots{
-position:absolute;
-bottom:12px;
-width:100%;
-text-align:center
-}
-
-.dot{
-display:inline-block;
-width:7px;
-height:7px;
-border-radius:50%;
-background:#ffffffaa;
-margin:0 4px
-}
-
-.dot.active{
-background:white
 }
 
 
 /* 状态 */
+
 .status{
 display:flex;
 gap:10px;
@@ -77,32 +58,34 @@ justify-content:center;
 border-radius:18px;
 background:rgba(255,255,255,.8);
 backdrop-filter:blur(15px);
-box-shadow:0 8px 20px #00000010;
+box-shadow:0 8px 20px rgba(0,0,0,.06);
 font-size:13px;
 color:#555;
 white-space:nowrap
 }
 
 .green{
-width:7px;
-height:7px;
-border-radius:50%;
+width:8px;
+height:8px;
 background:#34c759;
+border-radius:50%;
 margin-right:6px
 }
 
 
 /* 卡片 */
+
 .card{
-background:white;
+background:#fff;
 border-radius:26px;
 padding:24px;
 margin-top:20px;
-box-shadow:0 10px 30px #00000010
+box-shadow:0 10px 30px rgba(0,0,0,.06)
 }
 
 
 /* 设备 */
+
 .device{
 text-align:center;
 font-size:13px;
@@ -111,7 +94,8 @@ margin-bottom:18px
 }
 
 
-/* 订阅 */
+/* 添加订阅 */
+
 .item{
 display:flex;
 align-items:center;
@@ -142,9 +126,17 @@ color:white;
 margin-right:14px
 }
 
-.c{background:#111}
-.q{background:#1677ff}
-.s{background:#34c759}
+.c{
+background:#111
+}
+
+.q{
+background:#1677ff
+}
+
+.s{
+background:#34c759
+}
 
 .name{
 font-size:16px;
@@ -163,12 +155,12 @@ color:#aaa
 }
 
 
-/* 下载 */
+/* 客户端 */
 
 .apps{
 display:flex;
 justify-content:center;
-gap:30px
+gap:28px
 }
 
 .app{
@@ -181,8 +173,8 @@ justify-content:center;
 font-size:28px;
 font-weight:700;
 color:white;
-box-shadow:0 8px 20px #00000022;
-text-decoration:none
+text-decoration:none;
+box-shadow:0 8px 20px rgba(0,0,0,.12)
 }
 
 
@@ -201,10 +193,10 @@ height:70px
 display:block;
 margin-top:20px;
 background:#229ED9;
-color:white;
-text-decoration:none;
+color:#fff;
 padding:15px;
 border-radius:18px;
+text-decoration:none;
 font-weight:600
 }
 
@@ -231,6 +223,7 @@ margin:25px
 }
 
 </style>
+
 </head>
 
 
@@ -239,35 +232,30 @@ margin:25px
 <div class="container">
 
 
+<!-- 单张Banner -->
+
 <div class="banner">
 
-<img class="active" src="https://dummyimage.com/900x400/e8e8e8/555&text=Banner+1">
-
-<img src="https://dummyimage.com/900x400/dcdcdc/555&text=Banner+2">
-
-<img src="https://dummyimage.com/900x400/f0f0f0/555&text=Banner+3">
-
-<div class="dots">
-<span class="dot active"></span>
-<span class="dot"></span>
-<span class="dot"></span>
-</div>
+<img src="banner.png">
 
 </div>
 
 
+
+<!-- 时间 浏览 -->
 
 <div class="status">
 
 <div class="status-box" id="time">
-时间 00-00 00:00:00
+时间
 </div>
+
 
 <div class="status-box">
 
 <span class="green"></span>
 
-浏览 <span id="views">2006</span>
+浏览 <span id="views">0</span>
 
 </div>
 
@@ -276,6 +264,7 @@ margin:25px
 
 
 
+<!-- 添加订阅 -->
 
 <div class="card">
 
@@ -310,10 +299,10 @@ Clash Mi
 
 </div>
 
+
 <div class="arrow">
 ›
 </div>
-
 
 </a>
 
@@ -321,7 +310,7 @@ Clash Mi
 
 
 <a class="item"
-href="quantumult-x:///add-resource?remote-resource=%7B%22server_remote%22%3A%5B%22https%3A%2F%2Fpastebin.com%2Fraw%2F9nddQckK%2C%20tag%3D%E5%BE%90%E8%83%96%E8%99%8E%E8%B5%84%E6%BA%90%E7%A4%BE%22%5D%7D">
+href="quantumult-x:///add-resource?remote-resource=%7B%22server_remote%22%3A%5B%22https%3A%2F%2Fpastebin.com%2Fraw%2F9nddQckK%22%5D%7D&tag=%E5%BE%90%E8%83%96%E8%99%8E%E8%B5%84%E6%BA%90%E7%A4%BE">
 
 
 <div class="left">
@@ -343,6 +332,7 @@ Quantumult X
 </div>
 
 </div>
+
 
 <div class="arrow">
 ›
@@ -377,6 +367,7 @@ Shadowrocket
 
 </div>
 
+
 <div class="arrow">
 ›
 </div>
@@ -391,13 +382,14 @@ Shadowrocket
 
 
 
+<!-- 客户端 -->
+
 <div class="card">
 
 <div class="apps">
 
 
-<a class="app c"
-id="clashDownload">
+<a class="app c" id="clashDownload">
 C
 </a>
 
@@ -422,6 +414,8 @@ S
 
 
 
+<!-- Telegram -->
+
 <div class="card telegram">
 
 
@@ -431,12 +425,12 @@ d="M21.5 3.5L2.8 10.7c-1.2.5-1.2 1.2-.2 1.6l4.8 1.5 1.8 5.5c.2.7.1 1 .8 1 .5 0 .
 </svg>
 
 
-
 <a class="channel"
 href="https://t.me/xph_fx">
-徐胖虎资源社
-</a>
 
+徐胖虎资源社
+
+</a>
 
 
 <div class="desc">
@@ -458,45 +452,23 @@ AI工具 | 实用软件 | 效率神器 | 优质网站 | 数字资源
 
 <div class="footer">
 
-©️ 徐胖虎资源社 · XPH Link
+徐胖虎资源社 · 节点导航
 
 </div>
 
 
+
 </div>
+
 
 
 
 <script>
 
 
-// Banner
-
-let imgs=document.querySelectorAll(".banner img");
-let dots=document.querySelectorAll(".dot");
-let index=0;
-
-setInterval(()=>{
-
-imgs[index].classList.remove("active");
-dots[index].classList.remove("active");
-
-index++;
-
-if(index>=imgs.length){
-index=0;
-}
-
-imgs[index].classList.add("active");
-dots[index].classList.add("active");
-
-},3500);
-
-
-
 // 时间
 
-function time(){
+function updateTime(){
 
 let d=new Date();
 
@@ -507,18 +479,21 @@ let h=String(d.getHours()).padStart(2,"0");
 let min=String(d.getMinutes()).padStart(2,"0");
 let s=String(d.getSeconds()).padStart(2,"0");
 
+
 document.getElementById("time").innerHTML=
 "时间 "+m+"-"+day+" "+h+":"+min+":"+s;
 
 }
 
-setInterval(time,1000);
-time();
+
+setInterval(updateTime,1000);
+
+updateTime();
 
 
 
 
-// 浏览
+// 浏览统计
 
 let views=localStorage.getItem("views")||18479;
 
@@ -531,42 +506,55 @@ document.getElementById("views").innerHTML=views;
 
 
 
-// 设备
+
+// 自动检测设备
 
 let ua=navigator.userAgent.toLowerCase();
 
 let device=document.getElementById("device");
 
-if(ua.includes("iphone")||ua.includes("ipad")){
+let clash=document.getElementById("clashDownload");
+
+
+if(
+ua.includes("iphone")||
+ua.includes("ipad")
+){
 
 device.innerHTML="已检测到苹果设备";
 
-document.getElementById("clashDownload").href=
+clash.href=
 "https://apps.apple.com/us/app/clash-mi/id6744321968";
 
 }
 
-else if(ua.includes("android")){
+
+else if(
+ua.includes("android")
+){
 
 device.innerHTML="已检测到安卓设备";
 
-document.getElementById("clashDownload").href=
+clash.href=
 "https://clashmi.app/download";
 
 }
+
 
 else{
 
 device.innerHTML="已检测到电脑设备";
 
-document.getElementById("clashDownload").href=
+clash.href=
 "https://clashmi.app/download";
 
 }
 
 
 
-// 禁止查看代码
+
+
+// 禁止查看源码
 
 document.oncontextmenu=function(){
 return false;
@@ -576,9 +564,9 @@ return false;
 document.onkeydown=function(e){
 
 if(
-e.keyCode==123 ||
-(e.ctrlKey&&e.keyCode==85) ||
-(e.ctrlKey&&e.shiftKey&&e.keyCode==73)
+e.keyCode===123 ||
+(e.ctrlKey&&e.keyCode===85) ||
+(e.ctrlKey&&e.shiftKey&&e.keyCode===73)
 ){
 
 return false;
@@ -589,6 +577,7 @@ return false;
 
 
 </script>
+
 
 </body>
 </html>
