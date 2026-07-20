@@ -135,14 +135,6 @@ margin-right:6px;
 
 
 
-.stats-text{
-display:flex;
-flex-direction:column;
-align-items:flex-start;
-justify-content:center;
-line-height:1.45;
-}
-
 /* 卡片 */
 
 .card{
@@ -511,11 +503,7 @@ margin:10px 25px 15px;
 
 <span class="green"></span>
 
-今日&nbsp;<span id="todayViews">0</span>
-&nbsp;&nbsp;｜&nbsp;&nbsp;
-总计&nbsp;<span id="totalViews">0</span>
-
-</div>
+浏览&nbsp;<span id="views">0</span>
 
 </div>
 
@@ -1020,31 +1008,54 @@ updateTime();
 
 
 const lastVisit = localStorage.getItem("xph_last_visit");
+
 const now = Date.now();
+
 const thirtyMinutes = 30 * 60 * 1000;
+
+
 
 if (!lastVisit || now - Number(lastVisit) > thirtyMinutes) {
 
-    fetch("https://xph-stats.huaaplus.workers.dev")
-    .then(r => r.json())
-    .then(data => {
-        document.getElementById("views").innerHTML = data.visits || 0;
-        localStorage.setItem("xph_last_visit", String(now));
-    })
-    .catch(() => {
-        document.getElementById("views").innerHTML = "0";
-    });
 
-} else {
+fetch("https://xph-stats.huaaplus.workers.dev")
 
-    fetch("https://xph-stats.huaaplus.workers.dev?read=1")
-    .then(r => r.json())
-    .then(data => {
-        document.getElementById("views").innerHTML = data.visits || 0;
-    })
-    .catch(() => {
-        document.getElementById("views").innerHTML = "0";
-    });
+.then(r => r.json())
+
+.then(data => {
+
+document.getElementById("views").innerHTML = data.visits || 0;
+
+localStorage.setItem("xph_last_visit", String(now));
+
+})
+
+.catch(() => {
+
+document.getElementById("views").innerHTML = "0";
+
+});
+
+
+}else{
+
+
+fetch("https://xph-stats.huaaplus.workers.dev?read=1")
+
+.then(r => r.json())
+
+.then(data => {
+
+document.getElementById("views").innerHTML = data.visits || 0;
+
+})
+
+.catch(() => {
+
+document.getElementById("views").innerHTML = "0";
+
+});
+
 
 }
 
