@@ -4,18 +4,15 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>徐胖虎资源社</title>
-
 
 <style>
 
 *{
 box-sizing:border-box;
 }
-
 
 body{
 
@@ -28,12 +25,12 @@ font-family:
 BlinkMacSystemFont,
 "SF Pro Display",
 "Helvetica Neue",
-Arial,sans-serif;
+Arial,
+sans-serif;
 
 color:#1d1d1f;
 
 }
-
 
 .container{
 
@@ -44,7 +41,6 @@ margin:auto;
 padding:20px;
 
 }
-
 
 
 /* Banner */
@@ -61,7 +57,6 @@ box-shadow:0 12px 35px rgba(0,0,0,.08);
 
 }
 
-
 .banner img{
 
 width:100%;
@@ -75,9 +70,6 @@ display:block;
 }
 
 
-
-
-
 /* 状态 */
 
 .status{
@@ -89,8 +81,6 @@ gap:10px;
 margin-top:15px;
 
 }
-
-
 
 .status-box{
 
@@ -110,6 +100,8 @@ background:rgba(255,255,255,.8);
 
 backdrop-filter:blur(15px);
 
+-webkit-backdrop-filter:blur(15px);
+
 box-shadow:0 8px 20px rgba(0,0,0,.06);
 
 font-size:13px;
@@ -117,7 +109,6 @@ font-size:13px;
 color:#555;
 
 }
-
 
 .green{
 
@@ -131,8 +122,9 @@ border-radius:50%;
 
 margin-right:6px;
 
-}
+flex-shrink:0;
 
+}
 
 
 /* 卡片 */
@@ -150,9 +142,6 @@ margin-top:20px;
 box-shadow:0 10px 30px rgba(0,0,0,.06);
 
 }
-
-
-
 
 
 /* 折叠 */
@@ -173,7 +162,6 @@ cursor:pointer;
 
 }
 
-
 .arrow{
 
 font-size:22px;
@@ -182,14 +170,11 @@ transition:.3s;
 
 }
 
-
 .open .arrow{
 
 transform:rotate(90deg);
 
 }
-
-
 
 .content{
 
@@ -201,14 +186,11 @@ transition:max-height .35s ease;
 
 }
 
-
 .open .content{
 
 max-height:1000px;
 
 }
-
-
 
 
 /* 统一按钮 */
@@ -235,8 +217,6 @@ color:#111;
 
 }
 
-
-
 .menu-icon{
 
 width:38px;
@@ -257,9 +237,9 @@ font-size:20px;
 
 margin-right:12px;
 
+flex-shrink:0;
+
 }
-
-
 
 .menu-name{
 
@@ -268,8 +248,6 @@ font-size:15px;
 font-weight:600;
 
 }
-
-
 
 
 /* 快速添加订阅 */
@@ -294,17 +272,15 @@ padding:0 14px;
 
 }
 
-
-
 .sub-left{
 
 display:flex;
 
 align-items:center;
 
+min-width:0;
+
 }
-
-
 
 .app-icon{
 
@@ -326,9 +302,9 @@ color:white;
 
 margin-right:12px;
 
+flex-shrink:0;
+
 }
-
-
 
 .clash{
 
@@ -336,21 +312,17 @@ background:#111;
 
 }
 
-
 .quantum{
 
 background:#1677ff;
 
 }
 
-
 .shadow{
 
 background:#34c759;
 
 }
-
-
 
 .sub-name{
 
@@ -360,17 +332,15 @@ font-weight:600;
 
 }
 
-
-
 .actions{
 
 display:flex;
 
 gap:8px;
 
+flex-shrink:0;
+
 }
-
-
 
 .small-btn{
 
@@ -389,7 +359,6 @@ text-decoration:none;
 box-shadow:0 3px 8px rgba(0,0,0,.05);
 
 }
-
 
 
 /* 官方频道入口 */
@@ -421,8 +390,6 @@ margin-top:20px;
 }
 
 
-
-
 /* 标签 */
 
 .desc{
@@ -439,7 +406,6 @@ color:#666;
 
 }
 
-
 .tags{
 
 text-align:center;
@@ -447,8 +413,6 @@ text-align:center;
 white-space:nowrap;
 
 }
-
-
 
 
 /* 底部版权 */
@@ -465,32 +429,24 @@ margin:10px 25px 15px;
 
 }
 
-
 </style>
 
 </head>
 
 
-
 <body>
-
 
 <div class="container">
 
 
-
 <div class="banner">
 
-<img src="banner.png">
+<img src="banner.png" alt="徐胖虎资源社">
 
 </div>
 
 
-
-
-
 <div class="status">
-
 
 <div class="status-box" id="time">
 
@@ -507,29 +463,19 @@ margin:10px 25px 15px;
 
 </div>
 
-
 </div>
-
-
-
-
 
 
 
 <div class="card" id="resource">
 
-
 <div class="fold-title" onclick="toggleBox('resource')">
-
 
 精选资源中心
 
-
 <span class="arrow">›</span>
 
-
 </div>
-
 
 
 <div class="content">
@@ -548,7 +494,6 @@ AI工具
 </a>
 
 
-
 <a class="menu-item" href="#">
 
 <div class="menu-icon">🛠</div>
@@ -560,7 +505,6 @@ AI工具
 </div>
 
 </a>
-
 
 
 <a class="menu-item" href="#">
@@ -576,7 +520,6 @@ AI工具
 </a>
 
 
-
 <a class="menu-item" href="#">
 
 <div class="menu-icon">🌐</div>
@@ -590,7 +533,6 @@ AI工具
 </a>
 
 
-
 <a class="menu-item" href="#">
 
 <div class="menu-icon">📚</div>
@@ -602,7 +544,6 @@ AI工具
 </div>
 
 </a>
-
 
 
 <a class="menu-item" href="#">
@@ -624,25 +565,15 @@ AI工具
 
 
 
-
-
-
-
-
 <div class="card" id="subscribe">
-
 
 <div class="fold-title" onclick="toggleBox('subscribe')">
 
-
 快速添加订阅
-
 
 <span class="arrow">›</span>
 
-
 </div>
-
 
 
 <div class="content">
@@ -650,9 +581,7 @@ AI工具
 
 <div class="sub-item">
 
-
 <div class="sub-left">
-
 
 <div class="app-icon clash">
 
@@ -660,50 +589,45 @@ C
 
 </div>
 
-
 <div class="sub-name">
 
 Clash Mi
 
 </div>
 
-
 </div>
-
 
 
 <div class="actions">
 
-
-<a class="small-btn"
-href="clash://install-config?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2FJettKing%2FNodal%40main%2Fvpn.yaml&name=%E5%BE%90%E8%83%96%E8%99%8E%E8%B5%84%E6%BA%90%E7%A4%BE">
+<a
+class="small-btn"
+href="clash://install-config?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2FJettKing%2FNodal%40main%2Fvpn.yaml&name=%E5%BE%90%E8%83%96%E8%99%8E%E8%B5%84%E6%BA%90%E7%A4%BE"
+>
 
 添加
 
 </a>
 
 
-<a class="small-btn" id="clashDownload">
+<a
+class="small-btn"
+id="clashDownload"
+>
 
 下载
 
 </a>
 
-
 </div>
 
-
 </div>
-
-
 
 
 
 <div class="sub-item">
 
-
 <div class="sub-left">
-
 
 <div class="app-icon quantum">
 
@@ -711,51 +635,45 @@ Q
 
 </div>
 
-
 <div class="sub-name">
 
 Quantumult X
 
 </div>
 
-
 </div>
-
 
 
 <div class="actions">
 
-
-<a class="small-btn"
-href="quantumult-x:///add-resource?remote-resource=%7B%22server_remote%22%3A%5B%22https%3A%2F%2Fpastebin.com%2Fraw%2F9nddQckK%2C%20tag%3D%E5%BE%90%E8%83%96%E8%99%8E%E8%B5%84%E6%BA%90%E7%A4%BE%22%5D%7D">
+<a
+class="small-btn"
+href="quantumult-x:///add-resource?remote-resource=%7B%22server_remote%22%3A%5B%22https%3A%2F%2Fpastebin.com%2Fraw%2F9nddQckK%2C%20tag%3D%E5%BE%90%E8%83%96%E8%99%8E%E8%B5%84%E6%BA%90%E7%A4%BE%22%5D%7D"
+>
 
 添加
 
 </a>
 
 
-<a class="small-btn"
-href="https://apps.apple.com/us/app/quantumult-x/id1443988620">
+<a
+class="small-btn"
+href="https://apps.apple.com/us/app/quantumult-x/id1443988620"
+>
 
 下载
 
 </a>
 
-
 </div>
 
-
 </div>
-
-
 
 
 
 <div class="sub-item">
 
-
 <div class="sub-left">
-
 
 <div class="app-icon shadow">
 
@@ -763,70 +681,56 @@ S
 
 </div>
 
-
 <div class="sub-name">
 
 Shadowrocket
 
 </div>
 
-
 </div>
-
 
 
 <div class="actions">
 
-
-<a class="small-btn"
-href="shadowrocket://add/https://pastebin.com/raw/9nddQckK">
+<a
+class="small-btn"
+href="shadowrocket://add/https://pastebin.com/raw/9nddQckK"
+>
 
 添加
 
 </a>
 
 
-<a class="small-btn"
-href="https://apps.apple.com/us/app/shadowrocket/id932747118">
+<a
+class="small-btn"
+href="https://apps.apple.com/us/app/shadowrocket/id932747118"
+>
 
 下载
 
 </a>
 
+</div>
 
 </div>
 
 
 </div>
 
-
-
 </div>
-
-
-</div>
-
-
-
-
-
 
 
 
 <div class="card" id="service">
 
-
 <div class="fold-title" onclick="toggleBox('service')">
-
 
 更多服务中心
 
-
 <span class="arrow">›</span>
 
-
 </div>
-
 
 
 <div class="content">
@@ -845,8 +749,6 @@ href="https://apps.apple.com/us/app/shadowrocket/id932747118">
 </a>
 
 
-
-
 <a class="menu-item" href="#">
 
 <div class="menu-icon">🤖</div>
@@ -858,8 +760,6 @@ AI工具包
 </div>
 
 </a>
-
-
 
 
 <a class="menu-item" href="#">
@@ -875,8 +775,6 @@ AI工具包
 </a>
 
 
-
-
 <a class="menu-item" href="#">
 
 <div class="menu-icon">👑</div>
@@ -888,8 +786,6 @@ AI工具包
 </div>
 
 </a>
-
-
 
 
 <a class="menu-item" href="#">
@@ -905,17 +801,16 @@ AI工具包
 </a>
 
 
-
 </div>
 
 </div>
 
 
 
-
-
-
-<a class="channel-btn" href="https://t.me/xph_fx">
+<a
+class="channel-btn"
+href="https://t.me/xph_fx"
+>
 
 官方频道入口
 
@@ -923,12 +818,9 @@ AI工具包
 
 
 
-
-
 <div class="desc">
 
 发现好工具，分享好资源
-
 
 <div class="tags">
 
@@ -940,9 +832,6 @@ AI工具 | 实用软件 | 效率神器 | 优质网站 | 数字资源
 
 
 
-
-
-
 <div class="footer">
 
 ©️ 2026 徐胖虎资源社
@@ -950,12 +839,7 @@ AI工具 | 实用软件 | 效率神器 | 优质网站 | 数字资源
 </div>
 
 
-
 </div>
-
-
-
-
 
 
 
@@ -964,111 +848,133 @@ AI工具 | 实用软件 | 效率神器 | 优质网站 | 数字资源
 
 function toggleBox(id){
 
-let box=document.getElementById(id);
+const box = document.getElementById(id);
+
+if(box){
 
 box.classList.toggle("open");
 
 }
 
+}
 
 
 
 function updateTime(){
 
-let d=new Date();
+const d = new Date();
+
+const m = String(d.getMonth()+1).padStart(2,"0");
+
+const day = String(d.getDate()).padStart(2,"0");
+
+const h = String(d.getHours()).padStart(2,"0");
+
+const min = String(d.getMinutes()).padStart(2,"0");
+
+const s = String(d.getSeconds()).padStart(2,"0");
 
 
-let m=String(d.getMonth()+1).padStart(2,"0");
-
-let day=String(d.getDate()).padStart(2,"0");
-
-
-let h=String(d.getHours()).padStart(2,"0");
-
-let min=String(d.getMinutes()).padStart(2,"0");
-
-let s=String(d.getSeconds()).padStart(2,"0");
-
-
-
-document.getElementById("time").innerHTML=
+document.getElementById("time").textContent =
 
 "时间 "+m+"-"+day+" "+h+":"+min+":"+s;
-
 
 }
 
 
-setInterval(updateTime,1000);
-
 updateTime();
 
+setInterval(updateTime,1000);
 
 
 
+const viewsElement = document.getElementById("views");
 
-const lastVisit = localStorage.getItem("xph_last_visit");
+const lastVisit = Number(
+localStorage.getItem("xph_last_visit") || 0
+);
 
 const now = Date.now();
 
 const thirtyMinutes = 30 * 60 * 1000;
 
+const shouldCount =
+
+!lastVisit ||
+
+now - lastVisit > thirtyMinutes;
 
 
-if (!lastVisit || now - Number(lastVisit) > thirtyMinutes) {
+const statsUrl = shouldCount
+
+? "https://xph-stats.huaaplus.workers.dev"
+
+: "https://xph-stats.huaaplus.workers.dev?read=1";
 
 
-fetch("https://xph-stats.huaaplus.workers.dev")
+fetch(statsUrl)
 
-.then(r => r.json())
+.then(response => {
 
-.then(data => {
+if(!response.ok){
 
-document.getElementById("views").innerHTML = data.visits || 0;
-
-localStorage.setItem("xph_last_visit", String(now));
-
-})
-
-.catch(() => {
-
-document.getElementById("views").innerHTML = "0";
-
-});
-
-
-}else{
-
-
-fetch("https://xph-stats.huaaplus.workers.dev?read=1")
-
-.then(r => r.json())
-
-.then(data => {
-
-document.getElementById("views").innerHTML = data.visits || 0;
-
-})
-
-.catch(() => {
-
-document.getElementById("views").innerHTML = "0";
-
-});
-
+throw new Error("HTTP "+response.status);
 
 }
 
+return response.json();
+
+})
+
+.then(data => {
+
+const count =
+
+data.visits ??
+
+data.total ??
+
+data.views ??
+
+0;
+
+
+viewsElement.textContent = count;
+
+
+if(shouldCount){
+
+localStorage.setItem(
+
+"xph_last_visit",
+
+String(now)
+
+);
+
+}
+
+})
+
+.catch(error => {
+
+console.error(
+
+"访问量读取失败：",
+
+error
+
+);
+
+viewsElement.textContent = "0";
+
+});
 
 
 
+const ua = navigator.userAgent.toLowerCase();
 
-
-let ua=navigator.userAgent.toLowerCase();
-
-
-let clash=document.getElementById("clashDownload");
-
+const clash = document.getElementById("clashDownload");
 
 
 if(
@@ -1079,53 +985,42 @@ ua.includes("ipad")
 
 ){
 
-
-clash.href=
+clash.href =
 
 "https://apps.apple.com/us/app/clash-mi/id6744321968";
 
-
 }else{
 
-
-clash.href=
+clash.href =
 
 "https://clashmi.app/download";
-
 
 }
 
 
 
-
-
-
-document.oncontextmenu=function(){
+document.oncontextmenu = function(){
 
 return false;
 
 };
 
 
-
-document.onkeydown=function(e){
-
+document.onkeydown = function(e){
 
 if(
 
-e.keyCode===123 ||
+e.keyCode === 123 ||
 
-(e.ctrlKey&&e.keyCode===85) ||
+(e.ctrlKey && e.keyCode === 85) ||
 
-(e.ctrlKey&&e.shiftKey&&e.keyCode===73)
+(e.ctrlKey && e.shiftKey && e.keyCode === 73)
 
 ){
-
 
 return false;
 
 }
-
 
 };
 
