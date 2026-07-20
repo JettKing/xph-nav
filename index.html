@@ -1019,14 +1019,34 @@ updateTime();
 
 
 
-fetch("https://xph-stats.huaaplus.workers.dev")
-.then(r=>r.json())
-.then(data=>{
+const lastVisit = localStorage.getItem("xph_last_visit");
+const now = Date.now();
+const thirtyMinutes = 30 * 60 * 1000;
 
-document.getElementById("todayViews").textContent = data.today ?? 0;
-document.getElementById("totalViews").textContent = data.visits ?? 0;
+if (!lastVisit || now - Number(lastVisit) > thirtyMinutes) {
 
-});
+    fetch("https://xph-stats.huaaplus.workers.dev")
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById("views").innerHTML = data.visits || 0;
+        localStorage.setItem("xph_last_visit", String(now));
+    })
+    .catch(() => {
+        document.getElementById("views").innerHTML = "0";
+    });
+
+} else {
+
+    fetch("https://xph-stats.huaaplus.workers.dev?read=1")
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById("views").innerHTML = data.visits || 0;
+    })
+    .catch(() => {
+        document.getElementById("views").innerHTML = "0";
+    });
+
+}
 
 
 
