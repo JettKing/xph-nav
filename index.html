@@ -1007,13 +1007,13 @@ updateTime();
 
 
 
-fetch("/api/views")
+fetch("https://xph-stats.huaaplus.workers.dev")
 .then(r=>r.json())
 .then(data=>{
-    document.getElementById("views").innerHTML=data.views || 0;
+    document.getElementById("views").innerHTML=data.visits || 0;
 })
 .catch(()=>{
-    document.getElementById("views").innerHTML=0;
+    document.getElementById("views").innerHTML="0";
 });
 
 
