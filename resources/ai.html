@@ -58,6 +58,10 @@ text-decoration:none;
 color:#111;
 font-size:26px;
 box-shadow:0 8px 20px rgba(0,0,0,.06);
+border:0;
+padding:0;
+cursor:pointer;
+font-family:inherit;
 }
 
 .page-title{
@@ -274,9 +278,14 @@ margin:35px 0 15px;
 
 <div class="header">
 
-<a class="back-btn" href="../index.html">
+<button
+class="back-btn"
+id="backButton"
+type="button"
+aria-label="返回"
+>
 ‹
-</a>
+</button>
 
 <div class="page-title">
 AI工具
@@ -741,6 +750,28 @@ visibleCount === 0
 }
 
 );
+
+});
+
+
+/* =========================
+   原生返回逻辑
+   不创建新的历史记录
+========================= */
+
+const backButton = document.getElementById("backButton");
+
+backButton.addEventListener("click", function(){
+
+if(window.history.length > 1){
+
+window.history.back();
+
+}else{
+
+window.location.replace("/");
+
+}
 
 });
 
