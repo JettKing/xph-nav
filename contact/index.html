@@ -27,7 +27,6 @@ box-sizing:border-box;
 -webkit-tap-highlight-color:transparent;
 }
 
-
 body{
 
 margin:0;
@@ -45,7 +44,6 @@ sans-serif;
 color:#1d1d1f;
 
 }
-
 
 .container{
 
@@ -79,7 +77,6 @@ position:relative;
 
 }
 
-
 .back{
 
 position:absolute;
@@ -104,14 +101,19 @@ font-size:34px;
 
 font-weight:300;
 
-text-decoration:none;
-
 color:#111;
+
+border:0;
+
+padding:0;
+
+cursor:pointer;
+
+font-family:inherit;
 
 box-shadow:0 10px 30px rgba(0,0,0,.06);
 
 }
-
 
 .title{
 
@@ -134,7 +136,6 @@ padding-bottom:18px;
 
 }
 
-
 .hero h1{
 
 font-size:40px;
@@ -148,7 +149,6 @@ margin:0;
 font-weight:800;
 
 }
-
 
 .hero p{
 
@@ -183,7 +183,6 @@ box-shadow:0 10px 30px rgba(0,0,0,.045);
 
 }
 
-
 .contact-title{
 
 font-size:21px;
@@ -191,7 +190,6 @@ font-size:21px;
 font-weight:700;
 
 }
-
 
 .telegram{
 
@@ -215,7 +213,6 @@ text-decoration:none;
 
 }
 
-
 .telegram-icon{
 
 font-size:28px;
@@ -226,7 +223,6 @@ flex-shrink:0;
 
 }
 
-
 .telegram-name{
 
 font-size:17px;
@@ -234,7 +230,6 @@ font-size:17px;
 font-weight:600;
 
 }
-
 
 .telegram-desc{
 
@@ -263,7 +258,6 @@ margin-bottom:18px;
 
 }
 
-
 .service{
 
 background:#fff;
@@ -281,7 +275,6 @@ align-items:center;
 box-shadow:0 8px 25px rgba(0,0,0,.04);
 
 }
-
 
 .icon{
 
@@ -304,7 +297,6 @@ font-size:22px;
 flex-shrink:0;
 
 }
-
 
 .text{
 
@@ -340,7 +332,6 @@ line-height:1.9;
 box-shadow:0 8px 25px rgba(0,0,0,.04);
 
 }
-
 
 .notice-title{
 
@@ -409,17 +400,16 @@ font-size:14px;
 
 <div class="topbar">
 
-
-<a
+<button
 class="back"
 id="backButton"
-href="/"
+type="button"
 aria-label="返回"
 >
 
 ‹
 
-</a>
+</button>
 
 
 <div class="title">
@@ -428,7 +418,6 @@ aria-label="返回"
 
 </div>
 
-
 </div>
 
 
@@ -436,7 +425,6 @@ aria-label="返回"
 <!-- 页面介绍 -->
 
 <section class="hero">
-
 
 <h1>
 
@@ -450,7 +438,6 @@ aria-label="返回"
 遇到问题、合作需求或资源建议，可以随时联系我们。
 
 </p>
-
 
 </section>
 
@@ -520,13 +507,11 @@ Telegram 官方频道
 
 <div class="service">
 
-
 <div class="icon">
 
 📢
 
 </div>
-
 
 <div class="text">
 
@@ -534,13 +519,11 @@ Telegram 官方频道
 
 </div>
 
-
 </div>
 
 
 
 <div class="service">
-
 
 <div class="icon">
 
@@ -548,20 +531,17 @@ Telegram 官方频道
 
 </div>
 
-
 <div class="text">
 
 资源收录
 
 </div>
 
-
 </div>
 
 
 
 <div class="service">
-
 
 <div class="icon">
 
@@ -569,13 +549,11 @@ Telegram 官方频道
 
 </div>
 
-
 <div class="text">
 
 使用反馈
 
 </div>
-
 
 </div>
 
@@ -583,20 +561,17 @@ Telegram 官方频道
 
 <div class="service">
 
-
 <div class="icon">
 
 💡
 
 </div>
 
-
 <div class="text">
 
 产品咨询
 
 </div>
-
 
 </div>
 
@@ -649,93 +624,39 @@ Telegram 官方频道
 <script>
 
 /* =========================
-   智能返回
+   原生返回逻辑
+   不创建新的历史记录
 ========================= */
 
 const backButton = document.getElementById("backButton");
 
-const params = new URLSearchParams(
-window.location.search
-);
-
-const type = params.get("type");
-
-const from = params.get("from");
-
+backButton.addEventListener("click", function(){
 
 /*
-从商务合作页面进入联系支持
-返回商务合作页面
+有上一页时
+直接返回浏览器历史中的上一页
 */
 
-const businessTypes = [
+if(window.history.length > 1){
 
-"channel",
-
-"brand",
-
-"resource",
-
-"longterm",
-
-"business"
-
-];
-
-
-if(
-
-from === "business" ||
-
-businessTypes.includes(type)
-
-){
-
-backButton.href =
-
-"/resources/business.html";
+window.history.back();
 
 }
 
 
 /*
-从商城进入
-返回数字商城
-*/
-
-else if(from === "shop"){
-
-backButton.href =
-
-"/shop/";
-
-}
-
-
-/*
-从会员专区进入
-返回会员专区
-*/
-
-else if(from === "member"){
-
-backButton.href =
-
-"/member/";
-
-}
-
-
-/*
-其他情况
-默认返回首页
+没有上一页时
+直接替换为首页
+不会新增历史记录
 */
 
 else{
 
-backButton.href = "/";
+window.location.replace("/");
 
 }
+
+});
 
 </script>
 
