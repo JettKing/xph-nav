@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>隐藏宝藏 - 徐胖虎资源社</title>
+
+<meta name="description" content="徐胖虎资源社精选隐藏宝藏，发现小众实用、值得收藏的优质工具与宝藏资源。">
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+background:#f5f5f7;
+font-family:
+-apple-system,
+BlinkMacSystemFont,
+"SF Pro Display",
+"Helvetica Neue",
+Arial,
+sans-serif;
+color:#1d1d1f;
+}
+
+.container{
+max-width:430px;
+margin:auto;
+padding:20px;
+padding-bottom:60px;
+}
+
+/* 顶部 */
+
+.topbar{
+height:90px;
+position:relative;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.back{
+position:absolute;
+left:0;
+width:58px;
+height:58px;
+border-radius:50%;
+background:white;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:38px;
+font-weight:300;
+text-decoration:none;
+color:#111;
+box-shadow:0 10px 30px rgba(0,0,0,.06);
+}
+
+.top-title{
+font-size:20px;
+font-weight:700;
+}
+
+/* 标题 */
+
+.hero{
+margin-top:25px;
+}
+
+.hero h1{
+font-size:38px;
+margin:0;
+font-weight:800;
+letter-spacing:-1px;
+}
+
+.hero p{
+font-size:16px;
+color:#8e8e93;
+line-height:1.8;
+margin-top:18px;
+}
+
+/* 搜索 */
+
+.search-box{
+margin-top:28px;
+height:70px;
+background:white;
+border-radius:22px;
+display:flex;
+align-items:center;
+padding:0 22px;
+box-shadow:0 10px 30px rgba(0,0,0,.04);
+}
+
+.search-icon{
+font-size:22px;
+margin-right:15px;
+}
+
+.search-box input{
+border:none;
+outline:none;
+font-size:17px;
+width:100%;
+background:transparent;
+color:#1d1d1f;
+}
+
+.search-box input::placeholder{
+color:#b5b5ba;
+}
+
+/* 分类 */
+
+.categories{
+display:flex;
+gap:10px;
+margin-top:22px;
+overflow-x:auto;
+padding-bottom:5px;
+scrollbar-width:none;
+}
+
+.categories::-webkit-scrollbar{
+display:none;
+}
+
+.category{
+border:none;
+background:white;
+padding:13px 20px;
+border-radius:18px;
+font-size:15px;
+color:#555;
+white-space:nowrap;
+cursor:pointer;
+}
+
+.category.active{
+background:#3478f6;
+color:white;
+}
+
+/* 标题区域 */
+
+.section-title{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-top:36px;
+margin-bottom:18px;
+}
+
+.section-title h2{
+font-size:24px;
+margin:0;
+}
+
+.count{
+color:#aaa;
+font-size:15px;
+}
+
+/* 资源卡片 */
+
+.card{
+background:white;
+border-radius:24px;
+padding:20px;
+margin-bottom:16px;
+box-shadow:0 10px 30px rgba(0,0,0,.04);
+}
+
+.card-main{
+display:flex;
+align-items:center;
+}
+
+.icon{
+width:58px;
+height:58px;
+border-radius:16px;
+background:#f2f5ff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:27px;
+flex-shrink:0;
+}
+
+.info{
+margin-left:16px;
+min-width:0;
+}
+
+.info h3{
+margin:0;
+font-size:21px;
+font-weight:700;
+}
+
+.info p{
+margin:8px 0 0;
+color:#8e8e93;
+font-size:15px;
+line-height:1.5;
+}
+
+.card-bottom{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-top:18px;
+}
+
+.tag{
+background:#f5f5f7;
+color:#8e8e93;
+padding:9px 14px;
+border-radius:13px;
+font-size:14px;
+}
+
+.visit{
+background:#3478f6;
+color:white;
+text-decoration:none;
+padding:11px 20px;
+border-radius:15px;
+font-size:16px;
+}
+
+/* 无结果 */
+
+.no-result{
+display:none;
+text-align:center;
+padding:50px 20px;
+color:#8e8e93;
+font-size:16px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+
+<div class="topbar">
+
+<a class="back" href="../index.html">‹</a>
+
+<div class="top-title">隐藏宝藏</div>
+
+</div>
+
+
+<div class="hero">
+
+<h1>隐藏宝藏</h1>
+
+<p>
+发现那些不太出名，却真正值得收藏的小众宝藏。
+</p>
+
+</div>
+
+
+<div class="search-box">
+
+<span class="search-icon">⌕</span>
+
+<input
+id="searchInput"
+type="text"
+placeholder="搜索隐藏宝藏..."
+>
+
+</div>
+
+
+<div class="categories">
+
+<button class="category active" data-category="全部">
+全部
+</button>
+
+<button class="category" data-category="小众工具">
+小众工具
+</button>
+
+<button class="category" data-category="开发资源">
+开发资源
+</button>
+
+<button class="category" data-category="创作工具">
+创作工具
+</button>
+
+<button class="category" data-category="宝藏网站">
+宝藏网站
+</button>
+
+</div>
+
+
+<div class="section-title">
+
+<h2>宝藏精选</h2>
+
+<span class="count" id="resourceCount">
+5 个资源
+</span>
+
+</div>
+
+
+<div id="resourceList">
+
+
+<!-- Excalidraw -->
+
+<div
+class="card"
+data-category="创作工具"
+data-search="Excalidraw 白板 手绘 绘图 流程图 创作工具"
+>
+
+<div class="card-main">
+
+<div class="icon">
+✏️
+</div>
+
+<div class="info">
+
+<h3>Excalidraw</h3>
+
+<p>
+简洁好用的手绘风在线白板工具
+</p>
+
+</div>
+
+</div>
+
+<div class="card-bottom">
+
+<span class="tag">
+创作工具
+</span>
+
+<a
+class="visit"
+href="https://excalidraw.com/"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+<!-- PairDrop -->
+
+<div
+class="card"
+data-category="小众工具"
+data-search="PairDrop 文件传输 局域网 跨设备 AirDrop 小众工具"
+>
+
+<div class="card-main">
+
+<div class="icon">
+📲
+</div>
+
+<div class="info">
+
+<h3>PairDrop</h3>
+
+<p>
+无需安装即可跨设备快速传输文件
+</p>
+
+</div>
+
+</div>
+
+<div class="card-bottom">
+
+<span class="tag">
+小众工具
+</span>
+
+<a
+class="visit"
+href="https://pairdrop.net/"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+<!-- DevToys -->
+
+<div
+class="card"
+data-category="开发资源"
+data-search="DevToys 开发者 工具箱 JSON 编码 解码 开发资源"
+>
+
+<div class="card-main">
+
+<div class="icon">
+🧰
+</div>
+
+<div class="info">
+
+<h3>DevToys</h3>
+
+<p>
+为开发者打造的一站式实用工具箱
+</p>
+
+</div>
+
+</div>
+
+<div class="card-bottom">
+
+<span class="tag">
+开发资源
+</span>
+
+<a
+class="visit"
+href="https://devtoys.app/"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+<!-- Photopea -->
+
+<div
+class="card"
+data-category="创作工具"
+data-search="Photopea 在线图片编辑 Photoshop PSD 设计 创作工具"
+>
+
+<div class="card-main">
+
+<div class="icon">
+🖌️
+</div>
+
+<div class="info">
+
+<h3>Photopea</h3>
+
+<p>
+功能强大的免费在线图片编辑工具
+</p>
+
+</div>
+
+</div>
+
+<div class="card-bottom">
+
+<span class="tag">
+创作工具
+</span>
+
+<a
+class="visit"
+href="https://www.photopea.com/"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+<!-- Radio Garden -->
+
+<div
+class="card"
+data-category="宝藏网站"
+data-search="Radio Garden 全球 电台 音乐 广播 宝藏网站"
+>
+
+<div class="card-main">
+
+<div class="icon">
+🌍
+</div>
+
+<div class="info">
+
+<h3>Radio Garden</h3>
+
+<p>
+转动地球即可收听世界各地电台
+</p>
+
+</div>
+
+</div>
+
+<div class="card-bottom">
+
+<span class="tag">
+宝藏网站
+</span>
+
+<a
+class="visit"
+href="https://radio.garden/"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<div
+class="no-result"
+id="noResult"
+>
+没有找到相关资源
+</div>
+
+
+</div>
+
+
+<script>
+
+const searchInput =
+document.getElementById("searchInput");
+
+const cards =
+document.querySelectorAll(".card");
+
+const categories =
+document.querySelectorAll(".category");
+
+const resourceCount =
+document.getElementById("resourceCount");
+
+const noResult =
+document.getElementById("noResult");
+
+let currentCategory =
+"全部";
+
+
+function filterResources(){
+
+const keyword =
+searchInput.value
+.trim()
+.toLowerCase();
+
+let visibleCount =
+0;
+
+
+cards.forEach(card => {
+
+const category =
+card.dataset.category;
+
+const searchText =
+card.dataset.search
+.toLowerCase();
+
+
+const categoryMatch =
+
+currentCategory === "全部" ||
+
+category === currentCategory;
+
+
+const searchMatch =
+
+keyword === "" ||
+
+searchText.includes(keyword);
+
+
+if(
+categoryMatch &&
+searchMatch
+){
+
+card.style.display =
+"block";
+
+visibleCount++;
+
+}else{
+
+card.style.display =
+"none";
+
+}
+
+});
+
+
+resourceCount.textContent =
+visibleCount + " 个资源";
+
+
+if(
+visibleCount === 0
+){
+
+noResult.style.display =
+"block";
+
+}else{
+
+noResult.style.display =
+"none";
+
+}
+
+}
+
+
+searchInput.addEventListener(
+"input",
+filterResources
+);
+
+
+categories.forEach(button => {
+
+button.addEventListener(
+"click",
+function(){
+
+categories.forEach(item => {
+
+item.classList.remove(
+"active"
+);
+
+});
+
+
+this.classList.add(
+"active"
+);
+
+
+currentCategory =
+this.dataset.category;
+
+
+filterResources();
+
+});
+
+});
+
+</script>
+
+</body>
+
+</html>
