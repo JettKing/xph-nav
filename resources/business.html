@@ -885,60 +885,19 @@ href="/contact/?type=business"
 <script>
 
 /* =========================
-   返回上一页
+   原生返回逻辑
+   不创建新的历史记录
 ========================= */
 
 const backButton = document.getElementById("backButton");
 
 backButton.addEventListener("click", function(){
 
-const referrer = document.referrer;
-
-let isSameSite = false;
-
-if(referrer){
-
-try{
-
-isSameSite =
-
-new URL(referrer).origin === window.location.origin;
-
-}catch(error){
-
-isSameSite = false;
-
-}
-
-}
-
-
-/*
-存在有效的站内上一页
-直接使用浏览器历史返回
-不会新增新的历史记录
-*/
-
-if(
-
-window.history.length > 1 &&
-
-isSameSite
-
-){
+if(window.history.length > 1){
 
 window.history.back();
 
-}
-
-
-/*
-直接访问当前页面时
-使用 replace 返回首页
-避免继续增加历史记录
-*/
-
-else{
+}else{
 
 window.location.replace("/");
 
