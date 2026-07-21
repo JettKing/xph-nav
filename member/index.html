@@ -5,17 +5,29 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 
 <title>会员专区 - 徐胖虎资源社</title>
 
 <meta name="description" content="徐胖虎资源社会员专区，提供专属资源、高级工具合集和会员福利。">
 
+<meta name="robots" content="index,follow">
+
+<link rel="canonical" href="https://xph.asia/member/">
+
+<link rel="icon" href="/favicon.ico">
+
+<link rel="apple-touch-icon" href="/favicon.ico">
+
 
 <style>
 
 *{
+
 box-sizing:border-box;
+
+-webkit-tap-highlight-color:transparent;
+
 }
 
 
@@ -26,11 +38,18 @@ margin:0;
 background:#f5f5f7;
 
 font-family:
+
 -apple-system,
+
 BlinkMacSystemFont,
+
 "SF Pro Display",
+
 "Helvetica Neue",
-Arial,sans-serif;
+
+Arial,
+
+sans-serif;
 
 color:#1d1d1f;
 
@@ -43,18 +62,24 @@ max-width:430px;
 
 margin:auto;
 
-padding:20px;
+padding:
 
-padding-bottom:60px;
+calc(24px + env(safe-area-inset-top))
+
+20px
+
+calc(35px + env(safe-area-inset-bottom));
 
 }
 
 
-/* 顶部 */
+/* =========================
+   顶部导航
+========================= */
 
 .topbar{
 
-height:70px;
+height:72px;
 
 display:flex;
 
@@ -73,13 +98,13 @@ position:absolute;
 
 left:0;
 
-width:52px;
+width:56px;
 
-height:52px;
+height:56px;
 
 border-radius:50%;
 
-background:white;
+background:#fff;
 
 display:flex;
 
@@ -87,13 +112,11 @@ align-items:center;
 
 justify-content:center;
 
-font-size:32px;
+font-size:34px;
+
+font-weight:300;
 
 color:#111;
-
-text-decoration:none;
-
-box-shadow:0 10px 30px rgba(0,0,0,.06);
 
 border:0;
 
@@ -102,6 +125,8 @@ padding:0;
 cursor:pointer;
 
 font-family:inherit;
+
+box-shadow:0 10px 30px rgba(0,0,0,.06);
 
 }
 
@@ -115,13 +140,15 @@ font-weight:700;
 }
 
 
-/* 头部 */
+/* =========================
+   会员介绍
+========================= */
 
 .hero{
 
 margin-top:35px;
 
-background:white;
+background:#fff;
 
 border-radius:28px;
 
@@ -138,7 +165,7 @@ display:inline-block;
 
 background:#ffb800;
 
-color:white;
+color:#fff;
 
 padding:8px 15px;
 
@@ -171,11 +198,13 @@ line-height:1.8;
 }
 
 
-/* 会员卡 */
+/* =========================
+   会员卡片
+========================= */
 
 .vip-card{
 
-background:white;
+background:#fff;
 
 border-radius:28px;
 
@@ -244,7 +273,9 @@ margin-right:12px;
 }
 
 
-/* 权益 */
+/* =========================
+   会员权益
+========================= */
 
 .section-title{
 
@@ -259,7 +290,7 @@ margin-top:35px;
 
 .benefit{
 
-background:white;
+background:#fff;
 
 border-radius:22px;
 
@@ -292,7 +323,9 @@ font-size:15px;
 }
 
 
-/* 按钮 */
+/* =========================
+   加入按钮
+========================= */
 
 .join{
 
@@ -302,7 +335,7 @@ border-radius:20px;
 
 background:#3478f6;
 
-color:white;
+color:#fff;
 
 display:flex;
 
@@ -321,11 +354,15 @@ margin-top:25px;
 }
 
 
+/* =========================
+   提示区域
+========================= */
+
 .notice{
 
 margin-top:20px;
 
-background:white;
+background:#fff;
 
 border-radius:24px;
 
@@ -340,6 +377,10 @@ line-height:1.8;
 }
 
 
+/* =========================
+   底部版权
+========================= */
+
 .footer{
 
 text-align:center;
@@ -353,6 +394,26 @@ margin-top:35px;
 }
 
 
+/* =========================
+   小屏幕适配
+========================= */
+
+@media(max-width:380px){
+
+.hero h1{
+
+font-size:32px;
+
+}
+
+.hero p{
+
+font-size:14px;
+
+}
+
+}
+
 </style>
 
 
@@ -365,14 +426,21 @@ margin-top:35px;
 <div class="container">
 
 
+<!-- 顶部导航 -->
+
 <div class="topbar">
 
 
 <button
+
 class="back"
+
 id="backButton"
+
 type="button"
+
 aria-label="返回"
+
 >
 
 ‹
@@ -389,8 +457,7 @@ aria-label="返回"
 
 </div>
 
-
-
+<!-- 页面介绍 -->
 
 <div class="hero">
 
@@ -421,7 +488,7 @@ VIP专区
 
 
 
-
+<!-- 会员卡片 -->
 
 <div class="vip-card">
 
@@ -443,56 +510,77 @@ VIP专区
 
 <div class="feature">
 
+
 <div class="feature-icon">
+
 📚
+
 </div>
+
 
 专属数字资源
 
+
 </div>
 
 
 
 <div class="feature">
 
+
 <div class="feature-icon">
+
 ⚡
+
 </div>
+
 
 优先获取最新内容
 
+
 </div>
 
 
 
 <div class="feature">
 
+
 <div class="feature-icon">
+
 🤖
+
 </div>
+
 
 高级AI工具合集
 
+
 </div>
 
 
 
 <div class="feature">
 
+
 <div class="feature-icon">
+
 🎁
+
 </div>
+
 
 会员专属福利
 
-</div>
-
 
 </div>
 
 
+</div>
 
 
+
+
+<!-- 会员权益 -->
 
 <div class="section-title">
 
@@ -502,12 +590,15 @@ VIP专区
 
 
 
-
 <div class="benefit">
 
+
 <div class="benefit-icon">
+
 📦
+
 </div>
+
 
 <div class="benefit-text">
 
@@ -515,15 +606,20 @@ VIP专区
 
 </div>
 
+
 </div>
 
 
 
 <div class="benefit">
 
+
 <div class="benefit-icon">
+
 🚀
+
 </div>
+
 
 <div class="benefit-text">
 
@@ -531,15 +627,20 @@ VIP专区
 
 </div>
 
+
 </div>
 
 
 
 <div class="benefit">
 
+
 <div class="benefit-icon">
+
 💎
+
 </div>
+
 
 <div class="benefit-text">
 
@@ -547,15 +648,20 @@ VIP专区
 
 </div>
 
+
 </div>
 
 
 
 <div class="benefit">
 
+
 <div class="benefit-icon">
+
 🛠
+
 </div>
+
 
 <div class="benefit-text">
 
@@ -563,13 +669,27 @@ VIP专区
 
 </div>
 
+
 </div>
 
 
 
 
 
-<a class="join" href="https://t.me/xph_fx">
+<!-- 加入会员 -->
+
+
+<a
+
+class="join"
+
+href="https://t.me/xph_fx"
+
+target="_blank"
+
+rel="noopener noreferrer"
+
+>
 
 申请加入会员
 
@@ -579,7 +699,11 @@ VIP专区
 
 
 
+<!-- 温馨提示 -->
+
+
 <div class="notice">
+
 
 目前会员系统正在完善中。
 
@@ -587,45 +711,104 @@ VIP专区
 
 开放后将提供更丰富的资源权益与服务。
 
+
 </div>
 
 
 
+
+<!-- 底部版权 -->
 
 
 <div class="footer">
 
-©️ 2026 徐胖虎资源社
+© 2026 徐胖虎资源社
 
 </div>
 
 
 
 </div>
+
 
 
 <script>
+
 
 /* =========================
    原生返回逻辑
    不创建新的历史记录
 ========================= */
 
+
 const backButton = document.getElementById("backButton");
+
 
 backButton.addEventListener("click", function(){
 
+
 if(window.history.length > 1){
+
 
 window.history.back();
 
+
 }else{
+
 
 window.location.replace("/");
 
+
 }
 
+
 });
+
+
+
+/* =========================
+   禁止右键
+========================= */
+
+
+document.oncontextmenu = function(){
+
+
+return false;
+
+
+};
+
+
+
+/* =========================
+   禁止常见开发者快捷键
+========================= */
+
+
+document.onkeydown = function(e){
+
+
+if(
+
+e.keyCode === 123 ||
+
+(e.ctrlKey && e.keyCode === 85) ||
+
+(e.ctrlKey && e.shiftKey && e.keyCode === 73)
+
+){
+
+
+return false;
+
+
+}
+
+
+};
+
+
 
 </script>
 
