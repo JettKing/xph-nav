@@ -109,6 +109,14 @@ font-size:34px;
 
 font-weight:300;
 
+border:0;
+
+padding:0;
+
+cursor:pointer;
+
+font-family:inherit;
+
 box-shadow:0 10px 30px rgba(0,0,0,.06);
 
 }
@@ -514,13 +522,14 @@ margin-left:13px;
 
 <div class="topbar">
 
-<a
+<button
 class="back-btn"
-href="/"
-aria-label="返回首页"
+id="backButton"
+type="button"
+aria-label="返回"
 >
 ‹
-</a>
+</button>
 
 <div class="top-title">
 
@@ -870,6 +879,74 @@ href="/contact/?type=business"
 
 
 </div>
+
+
+
+<script>
+
+/* =========================
+   返回上一页
+========================= */
+
+const backButton = document.getElementById("backButton");
+
+backButton.addEventListener("click", function(){
+
+const referrer = document.referrer;
+
+let isSameSite = false;
+
+if(referrer){
+
+try{
+
+isSameSite =
+
+new URL(referrer).origin === window.location.origin;
+
+}catch(error){
+
+isSameSite = false;
+
+}
+
+}
+
+
+/*
+存在有效的站内上一页
+直接使用浏览器历史返回
+不会新增新的历史记录
+*/
+
+if(
+
+window.history.length > 1 &&
+
+isSameSite
+
+){
+
+window.history.back();
+
+}
+
+
+/*
+直接访问当前页面时
+使用 replace 返回首页
+避免继续增加历史记录
+*/
+
+else{
+
+window.location.replace("/");
+
+}
+
+});
+
+</script>
 
 
 </body>
