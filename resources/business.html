@@ -9,9 +9,16 @@
 
 <title>商务合作 - 徐胖虎资源社</title>
 
-<meta name="description" content="徐胖虎资源社商务合作中心，提供频道推广、品牌合作、资源合作等服务。">
+<meta name="description" content="徐胖虎资源社商务合作，提供频道推广、品牌合作、资源合作与长期合作方案。">
 
 <meta name="robots" content="index,follow">
+
+<link rel="canonical" href="https://xph.asia/resources/business.html">
+
+<link rel="icon" href="/favicon.ico">
+
+<link rel="apple-touch-icon" href="/favicon.ico">
+
 
 <style>
 
@@ -20,11 +27,16 @@ box-sizing:border-box;
 -webkit-tap-highlight-color:transparent;
 }
 
-html,
+html{
+scroll-behavior:smooth;
+}
+
 body{
+
 margin:0;
-padding:0;
+
 background:#f5f5f7;
+
 font-family:
 -apple-system,
 BlinkMacSystemFont,
@@ -32,227 +44,460 @@ BlinkMacSystemFont,
 "Helvetica Neue",
 Arial,
 sans-serif;
-color:#1d1d1f;
-}
 
-body{
-min-height:100vh;
+color:#1d1d1f;
+
 }
 
 .container{
+
 max-width:430px;
+
 margin:auto;
+
 padding:
-calc(30px + env(safe-area-inset-top))
+calc(24px + env(safe-area-inset-top))
 20px
-calc(40px + env(safe-area-inset-bottom));
+calc(35px + env(safe-area-inset-bottom));
+
 }
 
 
-/* 顶部 */
+/* =========================
+   顶部导航
+========================= */
 
 .topbar{
-height:70px;
-position:relative;
+
+height:72px;
+
 display:flex;
+
 align-items:center;
+
 justify-content:center;
+
+position:relative;
+
 }
 
-.back{
+.back-btn{
+
 position:absolute;
+
 left:0;
+
 width:56px;
+
 height:56px;
+
 border-radius:50%;
+
 background:#fff;
+
 display:flex;
+
 align-items:center;
+
 justify-content:center;
-font-size:34px;
-font-weight:300;
-color:#111;
+
 text-decoration:none;
+
+color:#111;
+
+font-size:34px;
+
+font-weight:300;
+
 box-shadow:0 10px 30px rgba(0,0,0,.06);
+
 }
 
 .top-title{
+
 font-size:20px;
+
 font-weight:700;
+
 }
 
 
-/* 标题 */
+/* =========================
+   页面介绍
+========================= */
 
 .hero{
-margin-top:42px;
+
+padding-top:38px;
+
+padding-bottom:42px;
+
 }
 
 .hero h1{
+
 margin:0;
-font-size:38px;
-line-height:1.2;
+
+font-size:40px;
+
+line-height:1.15;
+
+letter-spacing:-1.5px;
+
 font-weight:800;
-letter-spacing:-1px;
+
 }
 
 .hero p{
-margin:22px 0 0;
-font-size:16px;
-line-height:1.8;
+
+margin:24px 0 0;
+
+font-size:15px;
+
+line-height:1.7;
+
 color:#8e8e93;
+
+white-space:nowrap;
+
 }
 
 
-/* 合作卡片 */
+/* =========================
+   标题区域
+========================= */
+
+.section-head{
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+margin-bottom:18px;
+
+}
 
 .section-title{
-display:flex;
-align-items:center;
-justify-content:space-between;
-margin-top:42px;
-margin-bottom:18px;
-}
 
-.section-title h2{
-margin:0;
-font-size:24px;
+font-size:26px;
+
 font-weight:800;
+
 }
 
-.section-title span{
-font-size:14px;
+.section-count{
+
+font-size:15px;
+
 color:#aaa;
+
 }
 
-.service-card{
+
+/* =========================
+   合作卡片
+========================= */
+
+.cooperation-list{
+
+display:flex;
+
+flex-direction:column;
+
+gap:16px;
+
+}
+
+.cooperation-card{
+
 background:#fff;
+
 border-radius:26px;
+
 padding:20px;
-margin-bottom:16px;
-box-shadow:0 10px 30px rgba(0,0,0,.05);
+
+box-shadow:0 10px 30px rgba(0,0,0,.045);
+
 }
 
-.service-top{
+.card-main{
+
 display:flex;
+
 align-items:center;
+
 }
 
-.service-icon{
-width:56px;
-height:56px;
+.card-icon{
+
+width:60px;
+
+height:60px;
+
 border-radius:18px;
-background:#f2f5ff;
+
+background:#f3f6ff;
+
 display:flex;
+
 align-items:center;
+
 justify-content:center;
-font-size:28px;
+
+font-size:29px;
+
 flex-shrink:0;
+
 }
 
-.service-info{
-margin-left:15px;
+.card-info{
+
+margin-left:16px;
+
 min-width:0;
+
 }
 
-.service-name{
-font-size:19px;
+.card-name{
+
+font-size:20px;
+
 font-weight:700;
+
+line-height:1.3;
+
 }
 
-.service-desc{
+.card-desc{
+
+margin-top:8px;
+
 font-size:14px;
-color:#8e8e93;
-margin-top:7px;
+
 line-height:1.5;
-}
 
-.service-bottom{
-display:flex;
-align-items:center;
-justify-content:space-between;
-margin-top:18px;
-}
-
-.service-tag{
-padding:8px 13px;
-background:#f5f5f7;
-border-radius:12px;
-font-size:13px;
 color:#8e8e93;
+
+white-space:nowrap;
+
 }
 
-.contact-btn{
-padding:10px 20px;
+.card-bottom{
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+margin-top:18px;
+
+}
+
+.card-tag{
+
+padding:9px 14px;
+
 border-radius:14px;
+
+background:#f5f5f7;
+
+font-size:13px;
+
+color:#8e8e93;
+
+}
+
+.consult-btn{
+
+min-width:72px;
+
+height:42px;
+
+padding:0 18px;
+
+border-radius:15px;
+
 background:#3478f6;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
 color:#fff;
+
 font-size:14px;
+
+font-weight:500;
+
 text-decoration:none;
+
 }
 
 
-/* 合作说明 */
+/* =========================
+   合作说明
+========================= */
 
 .notice{
+
 background:#fff;
+
 border-radius:26px;
-padding:22px;
+
+padding:24px;
+
 margin-top:24px;
-box-shadow:0 10px 30px rgba(0,0,0,.05);
+
+box-shadow:0 10px 30px rgba(0,0,0,.045);
+
 }
 
 .notice-title{
-font-size:18px;
+
+font-size:21px;
+
 font-weight:700;
-margin-bottom:16px;
+
+margin-bottom:20px;
+
 }
 
 .notice-item{
+
 display:flex;
+
 align-items:flex-start;
+
 font-size:14px;
-line-height:1.8;
+
+line-height:1.7;
+
 color:#666;
-margin-top:8px;
+
+margin-top:12px;
+
 }
 
-.notice-dot{
+.notice-item:first-of-type{
+
+margin-top:0;
+
+}
+
+.dot{
+
 width:6px;
+
 height:6px;
-background:#3478f6;
+
 border-radius:50%;
+
+background:#3478f6;
+
+margin-right:12px;
+
 margin-top:9px;
-margin-right:10px;
+
 flex-shrink:0;
+
 }
 
 
-/* 主按钮 */
+/* =========================
+   底部联系按钮
+========================= */
 
-.main-btn{
-height:62px;
-margin-top:24px;
-border-radius:20px;
-background:#229ED9;
-color:#fff;
+.contact-btn{
+
+height:64px;
+
 display:flex;
+
 align-items:center;
+
 justify-content:center;
-font-size:16px;
+
+margin-top:24px;
+
+border-radius:20px;
+
+background:#229ed9;
+
+color:#fff;
+
+font-size:17px;
+
 font-weight:600;
+
 text-decoration:none;
-box-shadow:0 10px 25px rgba(34,158,217,.18);
+
+box-shadow:0 12px 30px rgba(34,158,217,.15);
+
 }
 
 
-/* 底部 */
+/* =========================
+   底部版权
+========================= */
 
 .footer{
+
 text-align:center;
-font-size:12px;
+
+font-size:13px;
+
 color:#aaa;
-margin-top:35px;
+
+margin-top:36px;
+
+padding-bottom:10px;
+
+}
+
+
+/* =========================
+   小屏幕适配
+========================= */
+
+@media(max-width:380px){
+
+.hero h1{
+
+font-size:36px;
+
+}
+
+.hero p{
+
+font-size:14px;
+
+}
+
+.card-desc{
+
+font-size:13px;
+
+}
+
+.card-icon{
+
+width:56px;
+
+height:56px;
+
+}
+
+.card-info{
+
+margin-left:13px;
+
+}
+
 }
 
 </style>
@@ -265,82 +510,117 @@ margin-top:35px;
 <div class="container">
 
 
+<!-- 顶部导航 -->
+
 <div class="topbar">
 
-<a class="back" href="../index.html">
+<a
+class="back-btn"
+href="/"
+aria-label="返回首页"
+>
 ‹
 </a>
 
 <div class="top-title">
+
 商务合作
-</div>
 
 </div>
 
+</div>
 
 
-<div class="hero">
+
+<!-- 页面介绍 -->
+
+<section class="hero">
 
 <h1>
-商务合作
+
+与我们合作
+
 </h1>
 
 <p>
-连接优质项目与精准用户，提供灵活、高效的推广与长期合作方案。
+
+连接优质项目与精准用户，提供高效推广合作方案。
+
 </p>
 
-</div>
+</section>
 
 
+
+<!-- 合作方式 -->
+
+<div class="section-head">
 
 <div class="section-title">
 
-<h2>
 合作方式
-</h2>
 
-<span>
+</div>
+
+<div class="section-count">
+
 4 项服务
-</span>
+
+</div>
 
 </div>
 
 
 
-<div class="service-card">
+<div class="cooperation-list">
 
-<div class="service-top">
 
-<div class="service-icon">
+<!-- 频道推广 -->
+
+<div class="cooperation-card">
+
+<div class="card-main">
+
+<div class="card-icon">
+
 📢
+
 </div>
 
-<div class="service-info">
+<div class="card-info">
 
-<div class="service-name">
+<div class="card-name">
+
 频道推广
-</div>
-
-<div class="service-desc">
-面向精准用户进行频道与项目推广
-</div>
 
 </div>
 
+<div class="card-desc">
+
+提供频道曝光与精准用户推广
+
+</div>
+
+</div>
+
 </div>
 
 
-<div class="service-bottom">
+<div class="card-bottom">
 
-<div class="service-tag">
+<div class="card-tag">
+
 推广合作
+
 </div>
 
 <a
-class="contact-btn"
-href="https://t.me/xph_fx"
+class="consult-btn"
+href="/contact/?type=channel"
 >
+
 咨询
+
 </a>
 
 </div>
@@ -349,40 +629,52 @@ href="https://t.me/xph_fx"
 
 
 
-<div class="service-card">
+<!-- 品牌合作 -->
 
-<div class="service-top">
+<div class="cooperation-card">
 
-<div class="service-icon">
+<div class="card-main">
+
+<div class="card-icon">
+
 💎
+
 </div>
 
-<div class="service-info">
+<div class="card-info">
 
-<div class="service-name">
+<div class="card-name">
+
 品牌合作
-</div>
-
-<div class="service-desc">
-品牌曝光、产品推广与长期合作
-</div>
 
 </div>
 
+<div class="card-desc">
+
+提供品牌曝光与产品推广合作
+
+</div>
+
+</div>
+
 </div>
 
 
-<div class="service-bottom">
+<div class="card-bottom">
 
-<div class="service-tag">
+<div class="card-tag">
+
 品牌推广
+
 </div>
 
 <a
-class="contact-btn"
-href="https://t.me/xph_fx"
+class="consult-btn"
+href="/contact/?type=brand"
 >
+
 咨询
+
 </a>
 
 </div>
@@ -391,40 +683,52 @@ href="https://t.me/xph_fx"
 
 
 
-<div class="service-card">
+<!-- 资源合作 -->
 
-<div class="service-top">
+<div class="cooperation-card">
 
-<div class="service-icon">
+<div class="card-main">
+
+<div class="card-icon">
+
 🤝
+
 </div>
 
-<div class="service-info">
+<div class="card-info">
 
-<div class="service-name">
+<div class="card-name">
+
 资源合作
-</div>
-
-<div class="service-desc">
-优质工具、网站与数字资源收录合作
-</div>
 
 </div>
 
+<div class="card-desc">
+
+提供优质工具与数字资源收录
+
+</div>
+
+</div>
+
 </div>
 
 
-<div class="service-bottom">
+<div class="card-bottom">
 
-<div class="service-tag">
+<div class="card-tag">
+
 资源收录
+
 </div>
 
 <a
-class="contact-btn"
-href="https://t.me/xph_fx"
+class="consult-btn"
+href="/contact/?type=resource"
 >
+
 咨询
+
 </a>
 
 </div>
@@ -433,40 +737,52 @@ href="https://t.me/xph_fx"
 
 
 
-<div class="service-card">
+<!-- 长期合作 -->
 
-<div class="service-top">
+<div class="cooperation-card">
 
-<div class="service-icon">
+<div class="card-main">
+
+<div class="card-icon">
+
 🚀
+
 </div>
 
-<div class="service-info">
+<div class="card-info">
 
-<div class="service-name">
+<div class="card-name">
+
 长期合作
-</div>
-
-<div class="service-desc">
-面向优质项目提供长期推广合作方案
-</div>
 
 </div>
 
+<div class="card-desc">
+
+提供优质项目长期推广与合作
+
+</div>
+
+</div>
+
 </div>
 
 
-<div class="service-bottom">
+<div class="card-bottom">
 
-<div class="service-tag">
+<div class="card-tag">
+
 长期合作
+
 </div>
 
 <a
-class="contact-btn"
-href="https://t.me/xph_fx"
+class="consult-btn"
+href="/contact/?type=longterm"
 >
+
 咨询
+
 </a>
 
 </div>
@@ -474,20 +790,29 @@ href="https://t.me/xph_fx"
 </div>
 
 
+</div>
+
+
+
+<!-- 合作说明 -->
 
 <div class="notice">
 
 <div class="notice-title">
+
 合作说明
+
 </div>
 
 
 <div class="notice-item">
 
-<span class="notice-dot"></span>
+<span class="dot"></span>
 
 <span>
+
 合作内容需符合相关法律法规及平台规则。
+
 </span>
 
 </div>
@@ -495,10 +820,12 @@ href="https://t.me/xph_fx"
 
 <div class="notice-item">
 
-<span class="notice-dot"></span>
+<span class="dot"></span>
 
 <span>
+
 不接受虚假、欺诈及存在明显风险的项目。
+
 </span>
 
 </div>
@@ -506,10 +833,12 @@ href="https://t.me/xph_fx"
 
 <div class="notice-item">
 
-<span class="notice-dot"></span>
+<span class="dot"></span>
 
 <span>
+
 具体合作方式与价格根据实际需求进行确认。
+
 </span>
 
 </div>
@@ -517,22 +846,31 @@ href="https://t.me/xph_fx"
 </div>
 
 
+
+<!-- 联系商务合作 -->
 
 <a
-class="main-btn"
-href="https://t.me/xph_fx"
+class="contact-btn"
+href="/contact/?type=business"
 >
+
 联系商务合作
+
 </a>
 
 
 
+<!-- 底部版权 -->
+
 <div class="footer">
+
 © 2026 徐胖虎资源社
+
 </div>
 
 
 </div>
+
 
 </body>
 
