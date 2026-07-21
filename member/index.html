@@ -95,6 +95,14 @@ text-decoration:none;
 
 box-shadow:0 10px 30px rgba(0,0,0,.06);
 
+border:0;
+
+padding:0;
+
+cursor:pointer;
+
+font-family:inherit;
+
 }
 
 
@@ -313,7 +321,6 @@ margin-top:25px;
 }
 
 
-
 .notice{
 
 margin-top:20px;
@@ -331,7 +338,6 @@ color:#777;
 line-height:1.8;
 
 }
-
 
 
 .footer{
@@ -362,11 +368,16 @@ margin-top:35px;
 <div class="topbar">
 
 
-<a class="back" href="../index.html">
+<button
+class="back"
+id="backButton"
+type="button"
+aria-label="返回"
+>
 
 ‹
 
-</a>
+</button>
 
 
 <div class="title">
@@ -591,6 +602,32 @@ VIP专区
 
 
 </div>
+
+
+<script>
+
+/* =========================
+   原生返回逻辑
+   不创建新的历史记录
+========================= */
+
+const backButton = document.getElementById("backButton");
+
+backButton.addEventListener("click", function(){
+
+if(window.history.length > 1){
+
+window.history.back();
+
+}else{
+
+window.location.replace("/");
+
+}
+
+});
+
+</script>
 
 
 </body>
