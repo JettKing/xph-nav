@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>AI工具 - 徐胖虎资源社</title>
+
+<meta name="description" content="徐胖虎资源社精选优质AI工具，涵盖AI聊天、AI绘图、AI编程、AI视频和AI办公等实用工具。">
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+background:#f5f5f7;
+font-family:
+-apple-system,
+BlinkMacSystemFont,
+"SF Pro Display",
+"Helvetica Neue",
+Arial,
+sans-serif;
+color:#1d1d1f;
+}
+
+.container{
+max-width:430px;
+margin:auto;
+padding:20px;
+}
+
+
+/* 顶部 */
+
+.header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:28px;
+}
+
+.back-btn{
+width:46px;
+height:46px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#fff;
+border-radius:50%;
+text-decoration:none;
+color:#111;
+font-size:26px;
+box-shadow:0 8px 20px rgba(0,0,0,.06);
+}
+
+.page-title{
+font-size:18px;
+font-weight:600;
+}
+
+.header-space{
+width:46px;
+}
+
+
+/* 页面介绍 */
+
+.hero{
+margin-bottom:24px;
+}
+
+.hero h1{
+font-size:30px;
+margin:0 0 8px;
+}
+
+.hero p{
+margin:0;
+font-size:14px;
+color:#777;
+line-height:1.6;
+}
+
+
+/* 搜索 */
+
+.search-box{
+height:54px;
+background:#fff;
+border-radius:18px;
+display:flex;
+align-items:center;
+padding:0 16px;
+box-shadow:0 8px 25px rgba(0,0,0,.05);
+}
+
+.search-icon{
+font-size:18px;
+margin-right:10px;
+}
+
+.search-box input{
+width:100%;
+border:none;
+outline:none;
+background:transparent;
+font-size:15px;
+color:#111;
+}
+
+.search-box input::placeholder{
+color:#aaa;
+}
+
+
+/* 分类 */
+
+.categories{
+display:flex;
+gap:8px;
+overflow-x:auto;
+margin-top:18px;
+padding-bottom:5px;
+scrollbar-width:none;
+}
+
+.categories::-webkit-scrollbar{
+display:none;
+}
+
+.category{
+flex-shrink:0;
+padding:9px 15px;
+border-radius:14px;
+background:#fff;
+font-size:13px;
+color:#555;
+cursor:pointer;
+}
+
+.category.active{
+background:#1677ff;
+color:#fff;
+}
+
+
+/* 资源统计 */
+
+.section-title{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-top:28px;
+margin-bottom:14px;
+}
+
+.section-title strong{
+font-size:18px;
+}
+
+.resource-count{
+font-size:12px;
+color:#999;
+}
+
+
+/* 资源卡片 */
+
+.resource-card{
+background:#fff;
+border-radius:22px;
+padding:16px;
+margin-bottom:14px;
+box-shadow:0 8px 25px rgba(0,0,0,.05);
+}
+
+.resource-top{
+display:flex;
+align-items:center;
+}
+
+.resource-icon{
+width:48px;
+height:48px;
+border-radius:15px;
+background:#f2f6ff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:24px;
+margin-right:13px;
+flex-shrink:0;
+}
+
+.resource-info{
+min-width:0;
+}
+
+.resource-name{
+font-size:16px;
+font-weight:600;
+margin-bottom:5px;
+}
+
+.resource-desc{
+font-size:13px;
+color:#777;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.resource-bottom{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-top:15px;
+}
+
+.tag{
+font-size:11px;
+padding:5px 9px;
+border-radius:9px;
+background:#f5f5f7;
+color:#777;
+}
+
+.visit-btn{
+padding:8px 14px;
+border-radius:12px;
+background:#1677ff;
+color:#fff;
+font-size:12px;
+text-decoration:none;
+}
+
+
+/* 空搜索结果 */
+
+.no-result{
+display:none;
+text-align:center;
+padding:50px 20px;
+color:#999;
+font-size:14px;
+}
+
+
+/* 底部 */
+
+.footer{
+text-align:center;
+font-size:12px;
+color:#aaa;
+margin:35px 0 15px;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+
+<div class="header">
+
+<a class="back-btn" href="../index.html">
+‹
+</a>
+
+<div class="page-title">
+AI工具
+</div>
+
+<div class="header-space"></div>
+
+</div>
+
+
+
+<div class="hero">
+
+<h1>AI工具</h1>
+
+<p>
+精选实用 AI 工具，帮助你提升工作与创作效率。
+</p>
+
+</div>
+
+
+
+<div class="search-box">
+
+<span class="search-icon">⌕</span>
+
+<input
+type="text"
+id="searchInput"
+placeholder="搜索 AI 工具..."
+oninput="searchResources()"
+>
+
+</div>
+
+
+
+<div class="categories">
+
+<div class="category active">
+全部
+</div>
+
+<div class="category">
+AI聊天
+</div>
+
+<div class="category">
+AI绘图
+</div>
+
+<div class="category">
+AI编程
+</div>
+
+<div class="category">
+AI视频
+</div>
+
+<div class="category">
+AI办公
+</div>
+
+</div>
+
+
+
+<div class="section-title">
+
+<strong>精选工具</strong>
+
+<span class="resource-count" id="resourceCount">
+5 个资源
+</span>
+
+</div>
+
+
+
+<div id="resourceList">
+
+
+<div class="resource-card">
+
+<div class="resource-top">
+
+<div class="resource-icon">
+🤖
+</div>
+
+<div class="resource-info">
+
+<div class="resource-name">
+ChatGPT
+</div>
+
+<div class="resource-desc">
+智能对话与内容创作 AI 助手
+</div>
+
+</div>
+
+</div>
+
+<div class="resource-bottom">
+
+<span class="tag">
+AI聊天
+</span>
+
+<a
+class="visit-btn"
+href="https://chatgpt.com"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+
+<div class="resource-card">
+
+<div class="resource-top">
+
+<div class="resource-icon">
+🎨
+</div>
+
+<div class="resource-info">
+
+<div class="resource-name">
+Midjourney
+</div>
+
+<div class="resource-desc">
+专业 AI 图像生成与创作工具
+</div>
+
+</div>
+
+</div>
+
+<div class="resource-bottom">
+
+<span class="tag">
+AI绘图
+</span>
+
+<a
+class="visit-btn"
+href="https://www.midjourney.com"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+
+<div class="resource-card">
+
+<div class="resource-top">
+
+<div class="resource-icon">
+💻
+</div>
+
+<div class="resource-info">
+
+<div class="resource-name">
+GitHub Copilot
+</div>
+
+<div class="resource-desc">
+面向开发者的 AI 编程助手
+</div>
+
+</div>
+
+</div>
+
+<div class="resource-bottom">
+
+<span class="tag">
+AI编程
+</span>
+
+<a
+class="visit-btn"
+href="https://github.com/features/copilot"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+
+<div class="resource-card">
+
+<div class="resource-top">
+
+<div class="resource-icon">
+🎬
+</div>
+
+<div class="resource-info">
+
+<div class="resource-name">
+Kling AI
+</div>
+
+<div class="resource-desc">
+AI 视频生成与创意制作平台
+</div>
+
+</div>
+
+</div>
+
+<div class="resource-bottom">
+
+<span class="tag">
+AI视频
+</span>
+
+<a
+class="visit-btn"
+href="https://klingai.com"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+
+<div class="resource-card">
+
+<div class="resource-top">
+
+<div class="resource-icon">
+✨
+</div>
+
+<div class="resource-info">
+
+<div class="resource-name">
+Gamma
+</div>
+
+<div class="resource-desc">
+AI 驱动的演示文稿制作工具
+</div>
+
+</div>
+
+</div>
+
+<div class="resource-bottom">
+
+<span class="tag">
+AI办公
+</span>
+
+<a
+class="visit-btn"
+href="https://gamma.app"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+
+<div class="no-result" id="noResult">
+
+没有找到相关 AI 工具
+
+</div>
+
+
+
+<div class="footer">
+
+©️ 2026 徐胖虎资源社
+
+</div>
+
+
+</div>
+
+
+
+<script>
+
+
+function searchResources(){
+
+const input =
+document
+.getElementById("searchInput")
+.value
+.toLowerCase()
+.trim();
+
+
+const cards =
+document.querySelectorAll(
+".resource-card"
+);
+
+
+let visibleCount = 0;
+
+
+cards.forEach(card => {
+
+const text =
+card.innerText.toLowerCase();
+
+
+if(text.includes(input)){
+
+card.style.display = "block";
+
+visibleCount++;
+
+}else{
+
+card.style.display = "none";
+
+}
+
+});
+
+
+document.getElementById(
+"resourceCount"
+).textContent =
+visibleCount + " 个资源";
+
+
+document.getElementById(
+"noResult"
+).style.display =
+visibleCount === 0
+? "block"
+: "none";
+
+}
+
+
+
+const categories =
+document.querySelectorAll(
+".category"
+);
+
+
+categories.forEach(category => {
+
+category.addEventListener(
+"click",
+function(){
+
+categories.forEach(item => {
+
+item.classList.remove(
+"active"
+);
+
+});
+
+
+this.classList.add(
+"active"
+);
+
+
+const selected =
+this.textContent.trim();
+
+
+const cards =
+document.querySelectorAll(
+".resource-card"
+);
+
+
+let visibleCount = 0;
+
+
+cards.forEach(card => {
+
+const tag =
+card
+.querySelector(".tag")
+.textContent
+.trim();
+
+
+if(
+selected === "全部" ||
+tag === selected
+){
+
+card.style.display =
+"block";
+
+visibleCount++;
+
+}else{
+
+card.style.display =
+"none";
+
+}
+
+});
+
+
+document.getElementById(
+"resourceCount"
+).textContent =
+visibleCount + " 个资源";
+
+
+document.getElementById(
+"noResult"
+).style.display =
+visibleCount === 0
+? "block"
+: "none";
+
+}
+
+);
+
+});
+
+
+</script>
+
+
+</body>
+
+</html>
