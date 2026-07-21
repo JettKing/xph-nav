@@ -23,9 +23,13 @@
 <style>
 
 *{
+
 box-sizing:border-box;
+
 -webkit-tap-highlight-color:transparent;
+
 }
+
 
 body{
 
@@ -34,16 +38,23 @@ margin:0;
 background:#f5f5f7;
 
 font-family:
+
 -apple-system,
+
 BlinkMacSystemFont,
+
 "SF Pro Display",
+
 "Helvetica Neue",
+
 Arial,
+
 sans-serif;
 
 color:#1d1d1f;
 
 }
+
 
 .container{
 
@@ -52,8 +63,11 @@ max-width:430px;
 margin:auto;
 
 padding:
+
 calc(24px + env(safe-area-inset-top))
+
 20px
+
 calc(35px + env(safe-area-inset-bottom));
 
 }
@@ -76,6 +90,7 @@ justify-content:center;
 position:relative;
 
 }
+
 
 .back{
 
@@ -115,6 +130,7 @@ box-shadow:0 10px 30px rgba(0,0,0,.06);
 
 }
 
+
 .title{
 
 font-size:20px;
@@ -136,6 +152,7 @@ padding-bottom:18px;
 
 }
 
+
 .hero h1{
 
 font-size:40px;
@@ -149,6 +166,7 @@ margin:0;
 font-weight:800;
 
 }
+
 
 .hero p{
 
@@ -183,6 +201,7 @@ box-shadow:0 10px 30px rgba(0,0,0,.045);
 
 }
 
+
 .contact-title{
 
 font-size:21px;
@@ -190,6 +209,7 @@ font-size:21px;
 font-weight:700;
 
 }
+
 
 .telegram{
 
@@ -213,6 +233,7 @@ text-decoration:none;
 
 }
 
+
 .telegram-icon{
 
 font-size:28px;
@@ -223,6 +244,7 @@ flex-shrink:0;
 
 }
 
+
 .telegram-name{
 
 font-size:17px;
@@ -230,6 +252,7 @@ font-size:17px;
 font-weight:600;
 
 }
+
 
 .telegram-desc{
 
@@ -258,6 +281,7 @@ margin-bottom:18px;
 
 }
 
+
 .service{
 
 background:#fff;
@@ -275,6 +299,7 @@ align-items:center;
 box-shadow:0 8px 25px rgba(0,0,0,.04);
 
 }
+
 
 .icon{
 
@@ -297,6 +322,7 @@ font-size:22px;
 flex-shrink:0;
 
 }
+
 
 .text{
 
@@ -332,6 +358,7 @@ line-height:1.9;
 box-shadow:0 8px 25px rgba(0,0,0,.04);
 
 }
+
 
 .notice-title{
 
@@ -371,11 +398,13 @@ padding-bottom:10px;
 
 @media(max-width:380px){
 
+
 .hero h1{
 
 font-size:36px;
 
 }
+
 
 .hero p{
 
@@ -383,7 +412,9 @@ font-size:14px;
 
 }
 
+
 }
+
 
 </style>
 
@@ -400,11 +431,17 @@ font-size:14px;
 
 <div class="topbar">
 
+
 <button
+
 class="back"
+
 id="backButton"
+
 type="button"
+
 aria-label="返回"
+
 >
 
 ‹
@@ -418,6 +455,7 @@ aria-label="返回"
 
 </div>
 
+
 </div>
 
 
@@ -425,6 +463,7 @@ aria-label="返回"
 <!-- 页面介绍 -->
 
 <section class="hero">
+
 
 <h1>
 
@@ -438,6 +477,7 @@ aria-label="返回"
 遇到问题、合作需求或资源建议，可以随时联系我们。
 
 </p>
+
 
 </section>
 
@@ -456,8 +496,15 @@ aria-label="返回"
 
 
 <a
+
 class="telegram"
+
 href="https://t.me/xph_fx"
+
+target="_blank"
+
+rel="noopener noreferrer"
+
 >
 
 
@@ -492,7 +539,6 @@ Telegram 官方频道
 
 
 </div>
-
 
 
 <!-- 服务范围 -->
@@ -577,6 +623,7 @@ Telegram 官方频道
 
 
 
+
 <!-- 温馨提示 -->
 
 <div class="notice">
@@ -608,6 +655,7 @@ Telegram 官方频道
 
 
 
+
 <!-- 底部版权 -->
 
 <div class="footer">
@@ -617,46 +665,88 @@ Telegram 官方频道
 </div>
 
 
+
 </div>
 
 
 
 <script>
 
+
 /* =========================
    原生返回逻辑
    不创建新的历史记录
 ========================= */
 
+
 const backButton = document.getElementById("backButton");
+
 
 backButton.addEventListener("click", function(){
 
-/*
-有上一页时
-直接返回浏览器历史中的上一页
-*/
 
 if(window.history.length > 1){
 
+
 window.history.back();
 
-}
 
+}else{
 
-/*
-没有上一页时
-直接替换为首页
-不会新增历史记录
-*/
-
-else{
 
 window.location.replace("/");
 
+
 }
 
+
 });
+
+
+
+/* =========================
+   禁止右键
+========================= */
+
+
+document.oncontextmenu = function(){
+
+
+return false;
+
+
+};
+
+
+
+/* =========================
+   禁止常见开发者快捷键
+========================= */
+
+
+document.onkeydown = function(e){
+
+
+if(
+
+e.keyCode === 123 ||
+
+(e.ctrlKey && e.keyCode === 85) ||
+
+(e.ctrlKey && e.shiftKey && e.keyCode === 73)
+
+){
+
+
+return false;
+
+
+}
+
+
+};
+
+
 
 </script>
 
