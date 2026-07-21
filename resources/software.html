@@ -61,7 +61,6 @@ align-items:center;
 justify-content:center;
 background:#fff;
 border-radius:50%;
-text-decoration:none;
 color:#111;
 font-size:30px;
 box-shadow:0 8px 25px rgba(0,0,0,.06);
@@ -85,12 +84,6 @@ width:50px;
 
 .hero{
 margin-bottom:25px;
-}
-
-.hero h1{
-font-size:32px;
-margin:0 0 12px;
-letter-spacing:-1px;
 }
 
 .hero p{
@@ -234,6 +227,9 @@ overflow:hidden;
 text-overflow:ellipsis;
 }
 
+
+/* 卡片底部 */
+
 .tool-bottom{
 display:flex;
 align-items:center;
@@ -247,15 +243,53 @@ background:#f5f5f7;
 border-radius:12px;
 font-size:12px;
 color:#888;
+white-space:nowrap;
 }
 
-.visit-btn{
-padding:9px 17px;
-background:#3478f6;
-border-radius:13px;
-color:#fff;
-font-size:13px;
+
+/* 按钮区域 */
+
+.tool-actions{
+display:flex;
+align-items:center;
+gap:7px;
+}
+
+.action-btn{
+height:34px;
+padding:0 11px;
+border-radius:11px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:12px;
+font-weight:500;
 text-decoration:none;
+white-space:nowrap;
+}
+
+
+/* 官网地址 */
+
+.website-btn{
+background:#3478f6;
+color:#fff;
+}
+
+
+/* 项目地址 */
+
+.project-btn{
+background:#3478f6;
+color:#fff;
+}
+
+
+/* 暂无项目 */
+
+.disabled-btn{
+background:#f5f5f7;
+color:#aaa;
 }
 
 
@@ -289,6 +323,8 @@ padding:35px 0 15px;
 <div class="container">
 
 
+<!-- 顶部 -->
+
 <div class="header">
 
 <button
@@ -310,9 +346,9 @@ aria-label="返回"
 
 
 
-<div class="hero">
+<!-- 页面介绍 -->
 
-<h1>实用软件</h1>
+<div class="hero">
 
 <p>
 精选优质实用软件，发现真正好用的软件工具。
@@ -321,6 +357,8 @@ aria-label="返回"
 </div>
 
 
+
+<!-- 搜索 -->
 
 <div class="search-box">
 
@@ -336,6 +374,8 @@ autocomplete="off"
 </div>
 
 
+
+<!-- 分类 -->
 
 <div class="categories">
 
@@ -367,6 +407,8 @@ autocomplete="off"
 
 
 
+<!-- 精选软件 -->
+
 <div class="section-header">
 
 <div class="section-title">
@@ -383,6 +425,8 @@ autocomplete="off"
 
 <div class="tools" id="tools">
 
+
+<!-- LocalSend -->
 
 <div
 class="tool-card"
@@ -408,26 +452,42 @@ LocalSend
 
 </div>
 
+
 <div class="tool-bottom">
 
 <div class="tool-tag">
 系统工具
 </div>
 
+<div class="tool-actions">
+
 <a
-class="visit-btn"
+class="action-btn website-btn"
 href="https://localsend.org"
 target="_blank"
 rel="noopener noreferrer"
 >
-访问
+官网地址
+</a>
+
+<a
+class="action-btn project-btn"
+href="https://github.com/localsend/localsend"
+target="_blank"
+rel="noopener noreferrer"
+>
+项目地址
 </a>
 
 </div>
 
 </div>
 
+</div>
 
+
+
+<!-- VLC -->
 
 <div
 class="tool-card"
@@ -453,26 +513,42 @@ VLC
 
 </div>
 
+
 <div class="tool-bottom">
 
 <div class="tool-tag">
 影音工具
 </div>
 
+<div class="tool-actions">
+
 <a
-class="visit-btn"
+class="action-btn website-btn"
 href="https://www.videolan.org/vlc/"
 target="_blank"
 rel="noopener noreferrer"
 >
-访问
+官网地址
+</a>
+
+<a
+class="action-btn project-btn"
+href="https://code.videolan.org/videolan/vlc"
+target="_blank"
+rel="noopener noreferrer"
+>
+项目地址
 </a>
 
 </div>
 
 </div>
 
+</div>
 
+
+
+<!-- Motrix -->
 
 <div
 class="tool-card"
@@ -498,26 +574,42 @@ Motrix
 
 </div>
 
+
 <div class="tool-bottom">
 
 <div class="tool-tag">
 下载工具
 </div>
 
+<div class="tool-actions">
+
 <a
-class="visit-btn"
+class="action-btn website-btn"
 href="https://motrix.app"
 target="_blank"
 rel="noopener noreferrer"
 >
-访问
+官网地址
+</a>
+
+<a
+class="action-btn project-btn"
+href="https://github.com/agalwood/Motrix"
+target="_blank"
+rel="noopener noreferrer"
+>
+项目地址
 </a>
 
 </div>
 
 </div>
 
+</div>
 
+
+
+<!-- 7-Zip -->
 
 <div
 class="tool-card"
@@ -543,26 +635,39 @@ data-name="7-Zip"
 
 </div>
 
+
 <div class="tool-bottom">
 
 <div class="tool-tag">
 文件管理
 </div>
 
+<div class="tool-actions">
+
 <a
-class="visit-btn"
+class="action-btn website-btn"
 href="https://www.7-zip.org"
 target="_blank"
 rel="noopener noreferrer"
 >
-访问
+官网地址
 </a>
 
+<span
+class="action-btn disabled-btn"
+>
+暂无项目
+</span>
+
+</div>
+
 </div>
 
 </div>
 
 
+
+<!-- RustDesk -->
 
 <div
 class="tool-card"
@@ -588,29 +693,45 @@ RustDesk
 
 </div>
 
+
 <div class="tool-bottom">
 
 <div class="tool-tag">
 网络工具
 </div>
 
+<div class="tool-actions">
+
 <a
-class="visit-btn"
+class="action-btn website-btn"
 href="https://rustdesk.com"
 target="_blank"
 rel="noopener noreferrer"
 >
-访问
+官网地址
+</a>
+
+<a
+class="action-btn project-btn"
+href="https://github.com/rustdesk/rustdesk"
+target="_blank"
+rel="noopener noreferrer"
+>
+项目地址
 </a>
 
 </div>
 
 </div>
 
+</div>
+
 
 </div>
 
 
+
+<!-- 无结果 -->
 
 <div class="empty" id="empty">
 
@@ -619,6 +740,8 @@ rel="noopener noreferrer"
 </div>
 
 
+
+<!-- 底部 -->
 
 <div class="footer">
 
@@ -651,6 +774,8 @@ document.getElementById("resourceCount");
 let currentCategory = "all";
 
 
+/* 搜索 + 分类筛选 */
+
 function filterTools(){
 
 const keyword =
@@ -675,11 +800,13 @@ card.querySelector(".tool-desc")
 const category =
 card.dataset.category;
 
+
 const matchSearch =
 
 name.includes(keyword) ||
 
 description.includes(keyword);
+
 
 const matchCategory =
 
@@ -707,15 +834,10 @@ resourceCount.textContent =
 visibleCount + " 个资源";
 
 
-if(visibleCount === 0){
-
-empty.style.display = "block";
-
-}else{
-
-empty.style.display = "none";
-
-}
+empty.style.display =
+visibleCount === 0
+? "block"
+: "none";
 
 }
 
@@ -750,14 +872,21 @@ filterTools();
 });
 
 
+
 /* =========================
    原生返回逻辑
-   不创建新的历史记录
+   有历史记录返回上一页
+   无历史记录返回首页
+   不新增历史记录
 ========================= */
 
-const backButton = document.getElementById("backButton");
+const backButton =
+document.getElementById("backButton");
 
-backButton.addEventListener("click", function(){
+
+backButton.addEventListener(
+"click",
+function(){
 
 if(window.history.length > 1){
 
