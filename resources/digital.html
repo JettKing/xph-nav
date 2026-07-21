@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>数字资源 - 徐胖虎资源社</title>
+
+<meta name="description" content="徐胖虎资源社精选优质数字资源，涵盖电子书、学习资料、模板素材、提示词和设计资源等实用内容。">
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+background:#f5f5f7;
+font-family:
+-apple-system,
+BlinkMacSystemFont,
+"SF Pro Display",
+"Helvetica Neue",
+Arial,
+sans-serif;
+color:#1d1d1f;
+}
+
+.container{
+max-width:430px;
+margin:auto;
+padding:20px;
+padding-bottom:60px;
+}
+
+/* 顶部 */
+
+.topbar{
+height:90px;
+position:relative;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.back{
+position:absolute;
+left:0;
+width:58px;
+height:58px;
+border-radius:50%;
+background:white;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:38px;
+font-weight:300;
+text-decoration:none;
+color:#111;
+box-shadow:
+0 10px 30px rgba(0,0,0,.06);
+}
+
+.top-title{
+font-size:20px;
+font-weight:700;
+}
+
+/* 标题 */
+
+.hero{
+margin-top:25px;
+}
+
+.hero h1{
+font-size:38px;
+margin:0;
+font-weight:800;
+letter-spacing:-1px;
+}
+
+.hero p{
+font-size:16px;
+color:#8e8e93;
+line-height:1.8;
+margin-top:18px;
+}
+
+/* 搜索 */
+
+.search-box{
+margin-top:28px;
+height:70px;
+background:white;
+border-radius:22px;
+display:flex;
+align-items:center;
+padding:0 22px;
+box-shadow:
+0 10px 30px rgba(0,0,0,.04);
+}
+
+.search-icon{
+font-size:22px;
+margin-right:15px;
+}
+
+.search-box input{
+border:none;
+outline:none;
+font-size:17px;
+width:100%;
+background:transparent;
+color:#1d1d1f;
+}
+
+.search-box input::placeholder{
+color:#b5b5ba;
+}
+
+/* 分类 */
+
+.categories{
+display:flex;
+gap:10px;
+margin-top:22px;
+overflow-x:auto;
+padding-bottom:5px;
+scrollbar-width:none;
+}
+
+.categories::-webkit-scrollbar{
+display:none;
+}
+
+.category{
+border:none;
+background:white;
+padding:13px 20px;
+border-radius:18px;
+font-size:15px;
+color:#555;
+white-space:nowrap;
+cursor:pointer;
+}
+
+.category.active{
+background:#3478f6;
+color:white;
+}
+
+/* 标题区域 */
+
+.section-title{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-top:36px;
+margin-bottom:18px;
+}
+
+.section-title h2{
+font-size:24px;
+margin:0;
+}
+
+.count{
+color:#aaa;
+font-size:15px;
+}
+
+/* 资源卡片 */
+
+.card{
+background:white;
+border-radius:24px;
+padding:20px;
+margin-bottom:16px;
+box-shadow:
+0 10px 30px rgba(0,0,0,.04);
+}
+
+.card-main{
+display:flex;
+align-items:center;
+}
+
+.icon{
+width:58px;
+height:58px;
+border-radius:16px;
+background:#f2f5ff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:27px;
+flex-shrink:0;
+}
+
+.info{
+margin-left:16px;
+min-width:0;
+}
+
+.info h3{
+margin:0;
+font-size:21px;
+font-weight:700;
+}
+
+.info p{
+margin:8px 0 0;
+color:#8e8e93;
+font-size:15px;
+line-height:1.5;
+}
+
+.card-bottom{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-top:18px;
+}
+
+.tag{
+background:#f5f5f7;
+color:#8e8e93;
+padding:9px 14px;
+border-radius:13px;
+font-size:14px;
+}
+
+.visit{
+background:#3478f6;
+color:white;
+text-decoration:none;
+padding:11px 20px;
+border-radius:15px;
+font-size:16px;
+}
+
+/* 无结果 */
+
+.no-result{
+display:none;
+text-align:center;
+padding:50px 20px;
+color:#8e8e93;
+font-size:16px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="topbar">
+
+<a class="back" href="../index.html">‹</a>
+
+<div class="top-title">数字资源</div>
+
+</div>
+
+
+<div class="hero">
+
+<h1>数字资源</h1>
+
+<p>
+精选实用数字资源，发现更多值得收藏的学习与创作内容。
+</p>
+
+</div>
+
+
+<div class="search-box">
+
+<span class="search-icon">⌕</span>
+
+<input
+id="searchInput"
+type="text"
+placeholder="搜索数字资源..."
+>
+
+</div>
+
+
+<div class="categories">
+
+<button class="category active" data-category="全部">
+全部
+</button>
+
+<button class="category" data-category="电子书">
+电子书
+</button>
+
+<button class="category" data-category="学习资料">
+学习资料
+</button>
+
+<button class="category" data-category="模板素材">
+模板素材
+</button>
+
+<button class="category" data-category="提示词">
+提示词
+</button>
+
+<button class="category" data-category="设计资源">
+设计资源
+</button>
+
+</div>
+
+
+<div class="section-title">
+
+<h2>精选资源</h2>
+
+<span class="count" id="resourceCount">
+5 个资源
+</span>
+
+</div>
+
+
+<div id="resourceList">
+
+
+<!-- Project Gutenberg -->
+
+<div
+class="card"
+data-category="电子书"
+data-search="Project Gutenberg Gutenberg 古登堡 免费电子书 英文名著 电子书"
+>
+
+<div class="card-main">
+
+<div class="icon">
+📚
+</div>
+
+<div class="info">
+
+<h3>Project Gutenberg</h3>
+
+<p>
+提供大量免费公共版权电子书
+</p>
+
+</div>
+
+</div>
+
+<div class="card-bottom">
+
+<span class="tag">
+电子书
+</span>
+
+<a
+class="visit"
+href="https://www.gutenberg.org/"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+<!-- Internet Archive -->
+
+<div
+class="card"
+data-category="学习资料"
+data-search="Internet Archive 互联网档案馆 数字图书馆 学习资料 书籍"
+>
+
+<div class="card-main">
+
+<div class="icon">
+🗃️
+</div>
+
+<div class="info">
+
+<h3>Internet Archive</h3>
+
+<p>
+海量书籍与数字内容资料库
+</p>
+
+</div>
+
+</div>
+
+<div class="card-bottom">
+
+<span class="tag">
+学习资料
+</span>
+
+<a
+class="visit"
+href="https://archive.org/"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+<!-- Canva -->
+
+<div
+class="card"
+data-category="模板素材"
+data-search="Canva 可画 设计模板 PPT 海报 模板素材"
+>
+
+<div class="card-main">
+
+<div class="icon">
+🎨
+</div>
+
+<div class="info">
+
+<h3>Canva</h3>
+
+<p>
+丰富的在线设计模板与创作素材
+</p>
+
+</div>
+
+</div>
+
+<div class="card-bottom">
+
+<span class="tag">
+模板素材
+</span>
+
+<a
+class="visit"
+href="https://www.canva.com/"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+<!-- PromptHero -->
+
+<div
+class="card"
+data-category="提示词"
+data-search="PromptHero AI 提示词 Prompt 绘图 提示词库"
+>
+
+<div class="card-main">
+
+<div class="icon">
+💬
+</div>
+
+<div class="info">
+
+<h3>PromptHero</h3>
+
+<p>
+发现和探索优质 AI 提示词
+</p>
+
+</div>
+
+</div>
+
+<div class="card-bottom">
+
+<span class="tag">
+提示词
+</span>
+
+<a
+class="visit"
+href="https://prompthero.com/"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+<!-- unDraw -->
+
+<div
+class="card"
+data-category="设计资源"
+data-search="unDraw 插画 免费设计资源 SVG 素材"
+>
+
+<div class="card-main">
+
+<div class="icon">
+🖼️
+</div>
+
+<div class="info">
+
+<h3>unDraw</h3>
+
+<p>
+免费可自定义的开源插画素材库
+</p>
+
+</div>
+
+</div>
+
+<div class="card-bottom">
+
+<span class="tag">
+设计资源
+</span>
+
+<a
+class="visit"
+href="https://undraw.co/"
+target="_blank"
+rel="noopener noreferrer"
+>
+访问
+</a>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<div
+class="no-result"
+id="noResult"
+>
+没有找到相关资源
+</div>
+
+
+</div>
+
+
+<script>
+
+const searchInput =
+document.getElementById("searchInput");
+
+const cards =
+document.querySelectorAll(".card");
+
+const categories =
+document.querySelectorAll(".category");
+
+const resourceCount =
+document.getElementById("resourceCount");
+
+const noResult =
+document.getElementById("noResult");
+
+let currentCategory =
+"全部";
+
+
+function filterResources(){
+
+const keyword =
+searchInput.value
+.trim()
+.toLowerCase();
+
+let visibleCount =
+0;
+
+
+cards.forEach(card => {
+
+const category =
+card.dataset.category;
+
+const searchText =
+card.dataset.search
+.toLowerCase();
+
+
+const categoryMatch =
+
+currentCategory === "全部" ||
+
+category === currentCategory;
+
+
+const searchMatch =
+
+keyword === "" ||
+
+searchText.includes(keyword);
+
+
+if(
+categoryMatch &&
+searchMatch
+){
+
+card.style.display =
+"block";
+
+visibleCount++;
+
+}else{
+
+card.style.display =
+"none";
+
+}
+
+});
+
+
+resourceCount.textContent =
+visibleCount + " 个资源";
+
+
+if(
+visibleCount === 0
+){
+
+noResult.style.display =
+"block";
+
+}else{
+
+noResult.style.display =
+"none";
+
+}
+
+}
+
+
+searchInput.addEventListener(
+"input",
+filterResources
+);
+
+
+categories.forEach(button => {
+
+button.addEventListener(
+"click",
+function(){
+
+categories.forEach(item => {
+
+item.classList.remove(
+"active"
+);
+
+});
+
+
+this.classList.add(
+"active"
+);
+
+
+currentCategory =
+this.dataset.category;
+
+
+filterResources();
+
+});
+
+});
+
+</script>
+
+</body>
+
+</html>
