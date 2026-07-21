@@ -5,7 +5,7 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 
 <title>AI工具 - 徐胖虎资源社</title>
 
@@ -15,6 +15,7 @@
 
 *{
 box-sizing:border-box;
+-webkit-tap-highlight-color:transparent;
 }
 
 body{
@@ -33,31 +34,39 @@ color:#1d1d1f;
 .container{
 max-width:430px;
 margin:auto;
-padding:20px;
+padding:
+calc(24px + env(safe-area-inset-top))
+20px
+calc(35px + env(safe-area-inset-bottom));
 }
 
 
-/* 顶部 */
+/* =========================
+   顶部导航
+========================= */
 
 .header{
+height:72px;
 display:flex;
 align-items:center;
-justify-content:space-between;
-margin-bottom:28px;
+justify-content:center;
+position:relative;
 }
 
 .back-btn{
-width:46px;
-height:46px;
+position:absolute;
+left:0;
+width:56px;
+height:56px;
 display:flex;
 align-items:center;
 justify-content:center;
 background:#fff;
 border-radius:50%;
-text-decoration:none;
 color:#111;
-font-size:26px;
-box-shadow:0 8px 20px rgba(0,0,0,.06);
+font-size:34px;
+font-weight:300;
+box-shadow:0 10px 30px rgba(0,0,0,.06);
 border:0;
 padding:0;
 cursor:pointer;
@@ -65,49 +74,45 @@ font-family:inherit;
 }
 
 .page-title{
-font-size:18px;
-font-weight:600;
-}
-
-.header-space{
-width:46px;
+font-size:20px;
+font-weight:700;
 }
 
 
-/* 页面介绍 */
+/* =========================
+   页面介绍
+========================= */
 
 .hero{
-margin-bottom:24px;
-}
-
-.hero h1{
-font-size:30px;
-margin:0 0 8px;
+padding-top:32px;
+padding-bottom:24px;
 }
 
 .hero p{
 margin:0;
-font-size:14px;
-color:#777;
-line-height:1.6;
+font-size:15px;
+color:#8e8e93;
+line-height:1.7;
 }
 
 
-/* 搜索 */
+/* =========================
+   搜索
+========================= */
 
 .search-box{
-height:54px;
+height:58px;
 background:#fff;
-border-radius:18px;
+border-radius:20px;
 display:flex;
 align-items:center;
-padding:0 16px;
-box-shadow:0 8px 25px rgba(0,0,0,.05);
+padding:0 18px;
+box-shadow:0 8px 25px rgba(0,0,0,.045);
 }
 
 .search-icon{
-font-size:18px;
-margin-right:10px;
+font-size:19px;
+margin-right:12px;
 }
 
 .search-box input{
@@ -124,11 +129,13 @@ color:#aaa;
 }
 
 
-/* 分类 */
+/* =========================
+   分类
+========================= */
 
 .categories{
 display:flex;
-gap:8px;
+gap:9px;
 overflow-x:auto;
 margin-top:18px;
 padding-bottom:5px;
@@ -141,8 +148,8 @@ display:none;
 
 .category{
 flex-shrink:0;
-padding:9px 15px;
-border-radius:14px;
+padding:10px 16px;
+border-radius:15px;
 background:#fff;
 font-size:13px;
 color:#555;
@@ -150,39 +157,43 @@ cursor:pointer;
 }
 
 .category.active{
-background:#1677ff;
+background:#3478f6;
 color:#fff;
 }
 
 
-/* 资源统计 */
+/* =========================
+   资源统计
+========================= */
 
 .section-title{
 display:flex;
 align-items:center;
 justify-content:space-between;
-margin-top:28px;
-margin-bottom:14px;
+margin-top:30px;
+margin-bottom:16px;
 }
 
 .section-title strong{
-font-size:18px;
+font-size:20px;
 }
 
 .resource-count{
-font-size:12px;
-color:#999;
+font-size:13px;
+color:#aaa;
 }
 
 
-/* 资源卡片 */
+/* =========================
+   资源卡片
+========================= */
 
 .resource-card{
 background:#fff;
-border-radius:22px;
-padding:16px;
-margin-bottom:14px;
-box-shadow:0 8px 25px rgba(0,0,0,.05);
+border-radius:24px;
+padding:18px;
+margin-bottom:15px;
+box-shadow:0 8px 25px rgba(0,0,0,.045);
 }
 
 .resource-top{
@@ -191,15 +202,15 @@ align-items:center;
 }
 
 .resource-icon{
-width:48px;
-height:48px;
-border-radius:15px;
+width:52px;
+height:52px;
+border-radius:16px;
 background:#f2f6ff;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:24px;
-margin-right:13px;
+font-size:25px;
+margin-right:14px;
 flex-shrink:0;
 }
 
@@ -208,14 +219,14 @@ min-width:0;
 }
 
 .resource-name{
-font-size:16px;
+font-size:18px;
 font-weight:600;
-margin-bottom:5px;
+margin-bottom:6px;
 }
 
 .resource-desc{
 font-size:13px;
-color:#777;
+color:#8e8e93;
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
@@ -223,30 +234,60 @@ text-overflow:ellipsis;
 
 .resource-bottom{
 display:flex;
-align-items:center;
+align-items:flex-end;
 justify-content:space-between;
-margin-top:15px;
+margin-top:17px;
+gap:14px;
 }
 
 .tag{
-font-size:11px;
-padding:5px 9px;
-border-radius:9px;
-background:#f5f5f7;
-color:#777;
-}
-
-.visit-btn{
-padding:8px 14px;
-border-radius:12px;
-background:#1677ff;
-color:#fff;
 font-size:12px;
-text-decoration:none;
+padding:7px 11px;
+border-radius:11px;
+background:#f5f5f7;
+color:#8e8e93;
+flex-shrink:0;
 }
 
 
-/* 空搜索结果 */
+/* =========================
+   地址按钮
+========================= */
+
+.resource-actions{
+display:flex;
+flex-direction:column;
+gap:8px;
+min-width:92px;
+}
+
+.action-btn{
+height:38px;
+padding:0 15px;
+border-radius:13px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:13px;
+font-weight:500;
+text-decoration:none;
+white-space:nowrap;
+}
+
+.website-btn{
+background:#3478f6;
+color:#fff;
+}
+
+.project-btn{
+background:#f2f6ff;
+color:#3478f6;
+}
+
+
+/* =========================
+   空搜索结果
+========================= */
 
 .no-result{
 display:none;
@@ -257,7 +298,9 @@ font-size:14px;
 }
 
 
-/* 底部 */
+/* =========================
+   底部
+========================= */
 
 .footer{
 text-align:center;
@@ -276,6 +319,8 @@ margin:35px 0 15px;
 <div class="container">
 
 
+<!-- 顶部导航 -->
+
 <div class="header">
 
 <button
@@ -291,15 +336,13 @@ aria-label="返回"
 AI工具
 </div>
 
-<div class="header-space"></div>
-
 </div>
 
 
 
-<div class="hero">
+<!-- 页面介绍 -->
 
-<h1>AI工具</h1>
+<div class="hero">
 
 <p>
 精选实用 AI 工具，帮助你提升工作与创作效率。
@@ -309,6 +352,8 @@ AI工具
 
 
 
+<!-- 搜索 -->
+
 <div class="search-box">
 
 <span class="search-icon">⌕</span>
@@ -317,12 +362,14 @@ AI工具
 type="text"
 id="searchInput"
 placeholder="搜索 AI 工具..."
-oninput="searchResources()"
+autocomplete="off"
 >
 
 </div>
 
 
+
+<!-- 分类 -->
 
 <div class="categories">
 
@@ -354,6 +401,8 @@ AI办公
 
 
 
+<!-- 资源统计 -->
+
 <div class="section-title">
 
 <strong>精选工具</strong>
@@ -366,8 +415,12 @@ AI办公
 
 
 
+<!-- 资源列表 -->
+
 <div id="resourceList">
 
+
+<!-- ChatGPT -->
 
 <div class="resource-card">
 
@@ -397,20 +450,26 @@ ChatGPT
 AI聊天
 </span>
 
+<div class="resource-actions">
+
 <a
-class="visit-btn"
+class="action-btn website-btn"
 href="https://chatgpt.com"
 target="_blank"
 rel="noopener noreferrer"
 >
-访问
+官网地址
 </a>
 
 </div>
 
 </div>
 
+</div>
 
+
+
+<!-- Midjourney -->
 
 <div class="resource-card">
 
@@ -440,20 +499,26 @@ Midjourney
 AI绘图
 </span>
 
+<div class="resource-actions">
+
 <a
-class="visit-btn"
+class="action-btn website-btn"
 href="https://www.midjourney.com"
 target="_blank"
 rel="noopener noreferrer"
 >
-访问
+官网地址
 </a>
 
 </div>
 
 </div>
 
+</div>
 
+
+
+<!-- GitHub Copilot -->
 
 <div class="resource-card">
 
@@ -483,20 +548,26 @@ GitHub Copilot
 AI编程
 </span>
 
+<div class="resource-actions">
+
 <a
-class="visit-btn"
+class="action-btn website-btn"
 href="https://github.com/features/copilot"
 target="_blank"
 rel="noopener noreferrer"
 >
-访问
+官网地址
 </a>
 
 </div>
 
 </div>
 
+</div>
 
+
+
+<!-- Kling AI -->
 
 <div class="resource-card">
 
@@ -526,20 +597,26 @@ AI 视频生成与创意制作平台
 AI视频
 </span>
 
+<div class="resource-actions">
+
 <a
-class="visit-btn"
+class="action-btn website-btn"
 href="https://klingai.com"
 target="_blank"
 rel="noopener noreferrer"
 >
-访问
+官网地址
 </a>
 
 </div>
 
 </div>
 
+</div>
 
+
+
+<!-- Gamma -->
 
 <div class="resource-card">
 
@@ -569,31 +646,40 @@ AI 驱动的演示文稿制作工具
 AI办公
 </span>
 
+<div class="resource-actions">
+
 <a
-class="visit-btn"
+class="action-btn website-btn"
 href="https://gamma.app"
 target="_blank"
 rel="noopener noreferrer"
 >
-访问
+官网地址
 </a>
 
 </div>
 
 </div>
 
+</div>
+
 
 </div>
 
 
 
-<div class="no-result" id="noResult">
+<!-- 无结果 -->
 
+<div
+class="no-result"
+id="noResult"
+>
 没有找到相关 AI 工具
-
 </div>
 
 
+
+<!-- 底部 -->
 
 <div class="footer">
 
@@ -608,22 +694,34 @@ rel="noopener noreferrer"
 
 <script>
 
+const searchInput =
+document.getElementById("searchInput");
 
-function searchResources(){
-
-const input =
-document
-.getElementById("searchInput")
-.value
-.toLowerCase()
-.trim();
-
+const categories =
+document.querySelectorAll(".category");
 
 const cards =
-document.querySelectorAll(
-".resource-card"
-);
+document.querySelectorAll(".resource-card");
 
+const resourceCount =
+document.getElementById("resourceCount");
+
+const noResult =
+document.getElementById("noResult");
+
+let currentCategory = "全部";
+
+
+/* =========================
+   搜索 + 分类联合筛选
+========================= */
+
+function filterResources(){
+
+const keyword =
+searchInput.value
+.toLowerCase()
+.trim();
 
 let visibleCount = 0;
 
@@ -631,10 +729,27 @@ let visibleCount = 0;
 cards.forEach(card => {
 
 const text =
-card.innerText.toLowerCase();
+card.innerText
+.toLowerCase();
+
+const tag =
+card
+.querySelector(".tag")
+.textContent
+.trim();
 
 
-if(text.includes(input)){
+const matchSearch =
+keyword === "" ||
+text.includes(keyword);
+
+
+const matchCategory =
+currentCategory === "全部" ||
+tag === currentCategory;
+
+
+if(matchSearch && matchCategory){
 
 card.style.display = "block";
 
@@ -649,15 +764,11 @@ card.style.display = "none";
 });
 
 
-document.getElementById(
-"resourceCount"
-).textContent =
+resourceCount.textContent =
 visibleCount + " 个资源";
 
 
-document.getElementById(
-"noResult"
-).style.display =
+noResult.style.display =
 visibleCount === 0
 ? "block"
 : "none";
@@ -665,12 +776,15 @@ visibleCount === 0
 }
 
 
+/* 搜索 */
 
-const categories =
-document.querySelectorAll(
-".category"
+searchInput.addEventListener(
+"input",
+filterResources
 );
 
+
+/* 分类 */
 
 categories.forEach(category => {
 
@@ -680,76 +794,18 @@ function(){
 
 categories.forEach(item => {
 
-item.classList.remove(
-"active"
-);
+item.classList.remove("active");
 
 });
 
+this.classList.add("active");
 
-this.classList.add(
-"active"
-);
-
-
-const selected =
+currentCategory =
 this.textContent.trim();
 
-
-const cards =
-document.querySelectorAll(
-".resource-card"
-);
-
-
-let visibleCount = 0;
-
-
-cards.forEach(card => {
-
-const tag =
-card
-.querySelector(".tag")
-.textContent
-.trim();
-
-
-if(
-selected === "全部" ||
-tag === selected
-){
-
-card.style.display =
-"block";
-
-visibleCount++;
-
-}else{
-
-card.style.display =
-"none";
-
-}
+filterResources();
 
 });
-
-
-document.getElementById(
-"resourceCount"
-).textContent =
-visibleCount + " 个资源";
-
-
-document.getElementById(
-"noResult"
-).style.display =
-visibleCount === 0
-? "block"
-: "none";
-
-}
-
-);
 
 });
 
@@ -759,9 +815,12 @@ visibleCount === 0
    不创建新的历史记录
 ========================= */
 
-const backButton = document.getElementById("backButton");
+const backButton =
+document.getElementById("backButton");
 
-backButton.addEventListener("click", function(){
+backButton.addEventListener(
+"click",
+function(){
 
 if(window.history.length > 1){
 
@@ -774,7 +833,6 @@ window.location.replace("/");
 }
 
 });
-
 
 </script>
 
