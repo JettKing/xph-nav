@@ -5,17 +5,26 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 
 <title>联系支持 - 徐胖虎资源社</title>
 
 <meta name="description" content="徐胖虎资源社联系支持中心，提供商务合作、资源收录、产品咨询和使用反馈服务。">
+
+<meta name="robots" content="index,follow">
+
+<link rel="canonical" href="https://xph.asia/contact/">
+
+<link rel="icon" href="/favicon.ico">
+
+<link rel="apple-touch-icon" href="/favicon.ico">
 
 
 <style>
 
 *{
 box-sizing:border-box;
+-webkit-tap-highlight-color:transparent;
 }
 
 
@@ -30,12 +39,12 @@ font-family:
 BlinkMacSystemFont,
 "SF Pro Display",
 "Helvetica Neue",
-Arial,sans-serif;
+Arial,
+sans-serif;
 
 color:#1d1d1f;
 
 }
-
 
 
 .container{
@@ -44,19 +53,21 @@ max-width:430px;
 
 margin:auto;
 
-padding:20px;
-
-padding-bottom:60px;
+padding:
+calc(24px + env(safe-area-inset-top))
+20px
+calc(35px + env(safe-area-inset-bottom));
 
 }
 
 
-
-/* 顶部 */
+/* =========================
+   顶部导航
+========================= */
 
 .topbar{
 
-height:70px;
+height:72px;
 
 display:flex;
 
@@ -69,20 +80,19 @@ position:relative;
 }
 
 
-
 .back{
 
 position:absolute;
 
 left:0;
 
-width:52px;
+width:56px;
 
-height:52px;
+height:56px;
 
 border-radius:50%;
 
-background:white;
+background:#fff;
 
 display:flex;
 
@@ -90,7 +100,9 @@ align-items:center;
 
 justify-content:center;
 
-font-size:32px;
+font-size:34px;
+
+font-weight:300;
 
 text-decoration:none;
 
@@ -99,7 +111,6 @@ color:#111;
 box-shadow:0 10px 30px rgba(0,0,0,.06);
 
 }
-
 
 
 .title{
@@ -111,21 +122,26 @@ font-weight:700;
 }
 
 
-
-/* 主标题 */
-
+/* =========================
+   页面介绍
+========================= */
 
 .hero{
 
-margin-top:35px;
+padding-top:38px;
+
+padding-bottom:18px;
 
 }
 
 
-
 .hero h1{
 
-font-size:38px;
+font-size:40px;
+
+line-height:1.15;
+
+letter-spacing:-1.5px;
 
 margin:0;
 
@@ -134,57 +150,56 @@ font-weight:800;
 }
 
 
-
 .hero p{
 
 font-size:15px;
 
-color:#888;
+color:#8e8e93;
 
-line-height:1.8;
+line-height:1.7;
 
-margin-top:15px;
+margin-top:22px;
+
+white-space:nowrap;
 
 }
 
 
-
-/* 联系卡 */
-
+/* =========================
+   联系卡片
+========================= */
 
 .contact-card{
 
-background:white;
+background:#fff;
 
-border-radius:28px;
+border-radius:26px;
 
-padding:25px;
+padding:22px;
 
-margin-top:25px;
+margin-top:24px;
 
-box-shadow:0 10px 30px rgba(0,0,0,.05);
+box-shadow:0 10px 30px rgba(0,0,0,.045);
 
 }
-
 
 
 .contact-title{
 
-font-size:22px;
+font-size:21px;
 
 font-weight:700;
 
 }
 
 
-
 .telegram{
 
-margin-top:20px;
+margin-top:18px;
 
 height:70px;
 
-background:#229ED9;
+background:#229ed9;
 
 border-radius:20px;
 
@@ -194,12 +209,11 @@ align-items:center;
 
 padding:0 20px;
 
-color:white;
+color:#fff;
 
 text-decoration:none;
 
 }
-
 
 
 .telegram-icon{
@@ -208,8 +222,9 @@ font-size:28px;
 
 margin-right:15px;
 
-}
+flex-shrink:0;
 
+}
 
 
 .telegram-name{
@@ -221,40 +236,41 @@ font-weight:600;
 }
 
 
-
 .telegram-desc{
 
 font-size:13px;
 
 opacity:.85;
 
-margin-top:3px;
+margin-top:4px;
 
 }
 
 
-
-/* 服务 */
+/* =========================
+   服务范围
+========================= */
 
 .section-title{
 
-font-size:23px;
+font-size:25px;
 
-font-weight:700;
+font-weight:800;
 
-margin-top:35px;
+margin-top:36px;
+
+margin-bottom:18px;
 
 }
-
 
 
 .service{
 
-background:white;
+background:#fff;
 
 border-radius:22px;
 
-padding:18px;
+padding:16px 18px;
 
 margin-top:14px;
 
@@ -267,16 +283,15 @@ box-shadow:0 8px 25px rgba(0,0,0,.04);
 }
 
 
-
 .icon{
 
-width:42px;
+width:44px;
 
-height:42px;
+height:44px;
 
 border-radius:14px;
 
-background:#f2f5ff;
+background:#f3f6ff;
 
 display:flex;
 
@@ -286,8 +301,9 @@ justify-content:center;
 
 font-size:22px;
 
-}
+flex-shrink:0;
 
+}
 
 
 .text{
@@ -301,58 +317,84 @@ font-weight:600;
 }
 
 
-
-/* 注意 */
+/* =========================
+   温馨提示
+========================= */
 
 .notice{
 
-background:white;
+background:#fff;
 
 border-radius:24px;
 
 padding:22px;
 
-margin-top:25px;
+margin-top:24px;
 
 font-size:14px;
 
-color:#777;
+color:#666;
 
-line-height:1.8;
+line-height:1.9;
+
+box-shadow:0 8px 25px rgba(0,0,0,.04);
 
 }
 
 
-
 .notice-title{
 
-font-size:18px;
+font-size:19px;
 
 font-weight:700;
 
 color:#111;
 
-margin-bottom:10px;
+margin-bottom:12px;
 
 }
 
 
+/* =========================
+   底部版权
+========================= */
 
 .footer{
 
 text-align:center;
 
-font-size:12px;
+font-size:13px;
 
-color:#999;
+color:#aaa;
 
-margin-top:35px;
+margin-top:36px;
+
+padding-bottom:10px;
 
 }
 
 
-</style>
+/* =========================
+   小屏幕适配
+========================= */
 
+@media(max-width:380px){
+
+.hero h1{
+
+font-size:36px;
+
+}
+
+.hero p{
+
+font-size:14px;
+
+}
+
+}
+
+</style>
 
 </head>
 
@@ -363,10 +405,17 @@ margin-top:35px;
 <div class="container">
 
 
+<!-- 顶部导航 -->
+
 <div class="topbar">
 
 
-<a class="back" href="../index.html">
+<a
+class="back"
+id="backButton"
+href="/"
+aria-label="返回"
+>
 
 ‹
 
@@ -384,9 +433,9 @@ margin-top:35px;
 
 
 
+<!-- 页面介绍 -->
 
-
-<div class="hero">
+<section class="hero">
 
 
 <h1>
@@ -403,12 +452,11 @@ margin-top:35px;
 </p>
 
 
-</div>
+</section>
 
 
 
-
-
+<!-- 官方联系方式 -->
 
 <div class="contact-card">
 
@@ -418,7 +466,6 @@ margin-top:35px;
 官方联系方式
 
 </div>
-
 
 
 <a
@@ -436,6 +483,7 @@ href="https://t.me/xph_fx"
 
 <div>
 
+
 <div class="telegram-name">
 
 Telegram 官方频道
@@ -445,7 +493,7 @@ Telegram 官方频道
 
 <div class="telegram-desc">
 
-点击进入联系
+点击进入官方频道
 
 </div>
 
@@ -456,21 +504,17 @@ Telegram 官方频道
 </a>
 
 
-
 </div>
 
 
 
-
-
+<!-- 服务范围 -->
 
 <div class="section-title">
 
 服务范围
 
 </div>
-
-
 
 
 
@@ -495,7 +539,6 @@ Telegram 官方频道
 
 
 
-
 <div class="service">
 
 
@@ -514,8 +557,6 @@ Telegram 官方频道
 
 
 </div>
-
-
 
 
 
@@ -540,8 +581,6 @@ Telegram 官方频道
 
 
 
-
-
 <div class="service">
 
 
@@ -563,8 +602,7 @@ Telegram 官方频道
 
 
 
-
-
+<!-- 温馨提示 -->
 
 <div class="notice">
 
@@ -595,21 +633,113 @@ Telegram 官方频道
 
 
 
-
-
+<!-- 底部版权 -->
 
 <div class="footer">
 
-©️ 2026 徐胖虎资源社
+© 2026 徐胖虎资源社
+
+</div>
+
 
 </div>
 
 
 
-</div>
+<script>
+
+/* =========================
+   智能返回
+========================= */
+
+const backButton = document.getElementById("backButton");
+
+const params = new URLSearchParams(
+window.location.search
+);
+
+const type = params.get("type");
+
+const from = params.get("from");
+
+
+/*
+从商务合作页面进入联系支持
+返回商务合作页面
+*/
+
+const businessTypes = [
+
+"channel",
+
+"brand",
+
+"resource",
+
+"longterm",
+
+"business"
+
+];
+
+
+if(
+
+from === "business" ||
+
+businessTypes.includes(type)
+
+){
+
+backButton.href =
+
+"/resources/business.html";
+
+}
+
+
+/*
+从商城进入
+返回数字商城
+*/
+
+else if(from === "shop"){
+
+backButton.href =
+
+"/shop/";
+
+}
+
+
+/*
+从会员专区进入
+返回会员专区
+*/
+
+else if(from === "member"){
+
+backButton.href =
+
+"/member/";
+
+}
+
+
+/*
+其他情况
+默认返回首页
+*/
+
+else{
+
+backButton.href = "/";
+
+}
+
+</script>
 
 
 </body>
-
 
 </html>
