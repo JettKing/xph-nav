@@ -61,6 +61,10 @@ font-size:32px;
 text-decoration:none;
 color:#111;
 box-shadow:0 10px 30px rgba(0,0,0,.06);
+border:0;
+padding:0;
+cursor:pointer;
+font-family:inherit;
 }
 
 .header-title{
@@ -266,7 +270,14 @@ font-size:15px;
 
 <div class="header">
 
-<a class="back" href="../index.html">‹</a>
+<button
+class="back"
+id="backButton"
+type="button"
+aria-label="返回"
+>
+‹
+</button>
 
 <div class="header-title">
 优质网站
@@ -723,6 +734,28 @@ visibleCount === 0
 : "none";
 
 }
+
+
+/* =========================
+   原生返回逻辑
+   不创建新的历史记录
+========================= */
+
+const backButton = document.getElementById("backButton");
+
+backButton.addEventListener("click", function(){
+
+if(window.history.length > 1){
+
+window.history.back();
+
+}else{
+
+window.location.replace("/");
+
+}
+
+});
 
 </script>
 
