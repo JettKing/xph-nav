@@ -11,7 +11,20 @@
 
 <meta name="description" content="徐胖虎资源社联系支持中心，提供商务合作、资源收录、产品咨询和使用反馈服务。">
 
+<meta name="keywords" content="徐胖虎资源社,联系支持,商务合作,资源收录,产品咨询,使用反馈">
+
 <meta name="robots" content="index,follow">
+
+<!-- Open Graph 分享优化 -->
+<meta property="og:title" content="联系支持 - 徐胖虎资源社">
+<meta property="og:description" content="徐胖虎资源社联系支持中心，提供商务合作、资源收录、产品咨询和使用反馈服务。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://xph.asia/contact/">
+
+<!-- Twitter 分享 -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="联系支持 - 徐胖虎资源社">
+<meta name="twitter:description" content="徐胖虎资源社联系支持中心，提供商务合作、资源收录、产品咨询和使用反馈服务。">
 
 <link rel="canonical" href="https://xph.asia/contact/">
 
@@ -153,21 +166,6 @@ padding-bottom:18px;
 }
 
 
-.hero h1{
-
-font-size:40px;
-
-line-height:1.15;
-
-letter-spacing:-1.5px;
-
-margin:0;
-
-font-weight:800;
-
-}
-
-
 .hero p{
 
 font-size:15px;
@@ -176,7 +174,7 @@ color:#8e8e93;
 
 line-height:1.7;
 
-margin-top:22px;
+margin:0;
 
 white-space:nowrap;
 
@@ -397,15 +395,6 @@ padding-bottom:10px;
 ========================= */
 
 @media(max-width:380px){
-
-
-.hero h1{
-
-font-size:36px;
-
-}
-
-
 .hero p{
 
 font-size:14px;
@@ -463,13 +452,6 @@ aria-label="返回"
 <!-- 页面介绍 -->
 
 <section class="hero">
-
-
-<h1>
-
-联系支持
-
-</h1>
 
 
 <p>
@@ -681,6 +663,7 @@ Telegram 官方频道
 
 const backButton = document.getElementById("backButton");
 
+if(backButton){
 
 backButton.addEventListener("click", function(){
 
@@ -701,6 +684,8 @@ window.location.replace("/");
 
 
 });
+
+}
 
 
 
