@@ -11,7 +11,20 @@
 
 <meta name="description" content="AI工具图鉴 Vol.1｜2026正式版，精选50款主流AI工具，覆盖AI聊天、AI绘图、AI视频、AI办公、AI编程，提供PDF与DOCX双版本。">
 
+<meta name="keywords" content="徐胖虎资源社,AI工具图鉴,AI工具,AI工具指南,AI聊天,AI绘图,AI视频,AI办公,AI编程">
+
 <meta name="robots" content="index,follow">
+
+<!-- Open Graph 分享优化 -->
+<meta property="og:title" content="AI工具图鉴 Vol.1｜2026正式版 - 徐胖虎资源社">
+<meta property="og:description" content="AI工具图鉴 Vol.1｜2026正式版，精选50款主流AI工具，覆盖AI聊天、AI绘图、AI视频、AI办公、AI编程，提供PDF与DOCX双版本。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://xph.asia/products/ai-pack.html">
+
+<!-- Twitter 分享 -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AI工具图鉴 Vol.1｜2026正式版 - 徐胖虎资源社">
+<meta name="twitter:description" content="AI工具图鉴 Vol.1｜2026正式版，精选50款主流AI工具，覆盖AI聊天、AI绘图、AI视频、AI办公、AI编程，提供PDF与DOCX双版本。">
 
 <link rel="canonical" href="https://xph.asia/products/ai-pack.html">
 
@@ -782,6 +795,8 @@ href="https://t.me/xph_fx"
 
 const backButton = document.getElementById("backButton");
 
+if(backButton){
+
 backButton.addEventListener("click", function(){
 
 if(window.history.length > 1){
@@ -795,6 +810,33 @@ window.location.replace("/");
 }
 
 });
+
+}
+
+/* =========================
+   禁止右键
+========================= */
+
+document.oncontextmenu = function(){
+return false;
+};
+
+
+/* =========================
+   禁止常见开发者快捷键
+========================= */
+
+document.onkeydown = function(e){
+
+if(
+e.keyCode === 123 ||
+(e.ctrlKey && e.keyCode === 85) ||
+(e.ctrlKey && e.shiftKey && e.keyCode === 73)
+){
+return false;
+}
+
+};
 
 </script>
 
