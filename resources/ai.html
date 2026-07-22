@@ -5,17 +5,32 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>AI工具 - 徐胖虎资源社</title>
 
 <meta name="description" content="徐胖虎资源社精选优质AI工具，涵盖AI聊天、AI绘图、AI编程、AI视频和AI办公等实用工具。">
 
+<meta name="keywords" content="徐胖虎资源社,AI工具,AI聊天,AI绘图,AI编程,AI视频,AI办公">
+<meta name="robots" content="index,follow">
+<meta property="og:title" content="AI工具 - 徐胖虎资源社">
+<meta property="og:description" content="徐胖虎资源社精选优质AI工具，涵盖AI聊天、AI绘图、AI编程、AI视频和AI办公等实用工具。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://xph.asia/resources/ai.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AI工具 - 徐胖虎资源社">
+<meta name="twitter:description" content="徐胖虎资源社精选优质AI工具，涵盖AI聊天、AI绘图、AI编程、AI视频和AI办公等实用工具。">
+
+<link rel="canonical" href="https://xph.asia/resources/ai.html">
+
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/favicon.ico">
+
+
 <style>
 
 *{
 box-sizing:border-box;
--webkit-tap-highlight-color:transparent;
 }
 
 body{
@@ -34,111 +49,97 @@ color:#1d1d1f;
 .container{
 max-width:430px;
 margin:auto;
-padding:
-calc(24px + env(safe-area-inset-top))
-20px
-calc(35px + env(safe-area-inset-bottom));
+padding:20px;
 }
 
 
-/* =========================
-   顶部导航
-========================= */
+/* 顶部 */
 
 .header{
-height:72px;
 display:flex;
 align-items:center;
-justify-content:center;
-position:relative;
+justify-content:space-between;
+margin-bottom:30px;
 }
 
 .back-btn{
-position:absolute;
-left:0;
-width:56px;
-height:56px;
+width:50px;
+height:50px;
 display:flex;
 align-items:center;
 justify-content:center;
 background:#fff;
 border-radius:50%;
 color:#111;
-font-size:34px;
-font-weight:300;
-box-shadow:0 10px 30px rgba(0,0,0,.06);
+font-size:30px;
+box-shadow:0 8px 25px rgba(0,0,0,.06);
 border:0;
 padding:0;
 cursor:pointer;
 font-family:inherit;
 }
 
-.page-title{
-font-size:20px;
-font-weight:700;
+.header-title{
+font-size:18px;
+font-weight:600;
+}
+
+.header-space{
+width:50px;
 }
 
 
-/* =========================
-   页面介绍
-========================= */
+/* 页面介绍 */
 
 .hero{
-padding-top:32px;
-padding-bottom:24px;
+margin-bottom:25px;
 }
 
 .hero p{
 margin:0;
-font-size:15px;
-color:#8e8e93;
+font-size:14px;
 line-height:1.7;
+color:#888;
 }
 
 
-/* =========================
-   搜索
-========================= */
+/* 搜索 */
 
 .search-box{
-height:58px;
-background:#fff;
-border-radius:20px;
-display:flex;
-align-items:center;
-padding:0 18px;
-box-shadow:0 8px 25px rgba(0,0,0,.045);
-}
-
-.search-icon{
-font-size:19px;
-margin-right:12px;
+position:relative;
+margin-bottom:20px;
 }
 
 .search-box input{
 width:100%;
+height:58px;
 border:none;
 outline:none;
-background:transparent;
+border-radius:20px;
+background:#fff;
+padding:0 20px 0 50px;
 font-size:15px;
 color:#111;
+box-shadow:0 8px 25px rgba(0,0,0,.04);
 }
 
-.search-box input::placeholder{
-color:#aaa;
+.search-icon{
+position:absolute;
+left:19px;
+top:50%;
+transform:translateY(-50%);
+font-size:18px;
 }
 
 
-/* =========================
-   分类
-========================= */
+/* 分类 */
 
 .categories{
 display:flex;
 gap:9px;
 overflow-x:auto;
-margin-top:18px;
 padding-bottom:5px;
+margin-bottom:30px;
 scrollbar-width:none;
 }
 
@@ -146,36 +147,35 @@ scrollbar-width:none;
 display:none;
 }
 
-.category{
-flex-shrink:0;
-padding:10px 16px;
-border-radius:15px;
+.category-btn{
+border:none;
+white-space:nowrap;
+padding:10px 17px;
+border-radius:18px;
 background:#fff;
-font-size:13px;
 color:#555;
+font-size:14px;
 cursor:pointer;
 }
 
-.category.active{
+.category-btn.active{
 background:#3478f6;
 color:#fff;
 }
 
 
-/* =========================
-   资源统计
-========================= */
+/* 标题 */
 
-.section-title{
+.section-header{
 display:flex;
 align-items:center;
 justify-content:space-between;
-margin-top:30px;
-margin-bottom:16px;
+margin-bottom:15px;
 }
 
-.section-title strong{
+.section-title{
 font-size:20px;
+font-weight:700;
 }
 
 .resource-count{
@@ -184,28 +184,31 @@ color:#aaa;
 }
 
 
-/* =========================
-   资源卡片
-========================= */
+/* 软件列表 */
 
-.resource-card{
-background:#fff;
-border-radius:24px;
-padding:18px;
-margin-bottom:15px;
-box-shadow:0 8px 25px rgba(0,0,0,.045);
+.tools{
+display:flex;
+flex-direction:column;
+gap:15px;
 }
 
-.resource-top{
+.tool-card{
+background:#fff;
+border-radius:24px;
+padding:17px;
+box-shadow:0 8px 25px rgba(0,0,0,.04);
+}
+
+.tool-main{
 display:flex;
 align-items:center;
 }
 
-.resource-icon{
+.tool-icon{
 width:52px;
 height:52px;
 border-radius:16px;
-background:#f2f6ff;
+background:#f3f6fc;
 display:flex;
 align-items:center;
 justify-content:center;
@@ -214,99 +217,109 @@ margin-right:14px;
 flex-shrink:0;
 }
 
-.resource-info{
+.tool-info{
+flex:1;
 min-width:0;
 }
 
-.resource-name{
-font-size:18px;
+.tool-name{
+font-size:17px;
 font-weight:600;
-margin-bottom:6px;
+margin-bottom:5px;
 }
 
-.resource-desc{
+.tool-desc{
 font-size:13px;
-color:#8e8e93;
+color:#888;
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
 }
 
-.resource-bottom{
+
+/* 卡片底部 */
+
+.tool-bottom{
 display:flex;
-align-items:flex-end;
+align-items:center;
 justify-content:space-between;
-margin-top:17px;
-gap:14px;
+margin-top:15px;
 }
 
-.tag{
-font-size:12px;
+.tool-tag{
 padding:7px 11px;
-border-radius:11px;
 background:#f5f5f7;
-color:#8e8e93;
-flex-shrink:0;
+border-radius:12px;
+font-size:12px;
+color:#888;
+white-space:nowrap;
 }
 
 
-/* =========================
-   地址按钮
-========================= */
+/* 按钮区域 */
 
-.resource-actions{
+.tool-actions{
 display:flex;
-flex-direction:column;
-gap:8px;
-min-width:92px;
+align-items:center;
+gap:7px;
 }
 
 .action-btn{
-height:38px;
-padding:0 15px;
-border-radius:13px;
+height:34px;
+padding:0 11px;
+border-radius:11px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:13px;
+font-size:12px;
 font-weight:500;
 text-decoration:none;
 white-space:nowrap;
 }
+
+
+/* 官网地址 */
 
 .website-btn{
 background:#3478f6;
 color:#fff;
 }
 
+
+/* 项目地址 */
+
 .project-btn{
-background:#f2f6ff;
-color:#3478f6;
+background:#3478f6;
+color:#fff;
 }
 
 
-/* =========================
-   空搜索结果
-========================= */
+/* 暂无项目 */
 
-.no-result{
+.disabled-btn{
+background:#f5f5f7;
+color:#aaa;
+}
+
+
+/* 无结果 */
+
+.empty{
 display:none;
 text-align:center;
 padding:50px 20px;
-color:#999;
 font-size:14px;
+color:#999;
 }
 
 
-/* =========================
-   底部
-========================= */
+/* 底部 */
 
 .footer{
 text-align:center;
 font-size:12px;
 color:#aaa;
-margin:35px 0 15px;
+padding:35px 0 15px;
 }
 
 </style>
@@ -319,7 +332,7 @@ margin:35px 0 15px;
 <div class="container">
 
 
-<!-- 顶部导航 -->
+<!-- 顶部 -->
 
 <div class="header">
 
@@ -332,9 +345,11 @@ aria-label="返回"
 ‹
 </button>
 
-<div class="page-title">
+<div class="header-title">
 AI工具
 </div>
+
+<div class="header-space"></div>
 
 </div>
 
@@ -361,7 +376,7 @@ AI工具
 <input
 type="text"
 id="searchInput"
-placeholder="搜索 AI 工具..."
+placeholder="搜索AI工具..."
 autocomplete="off"
 >
 
@@ -372,309 +387,126 @@ autocomplete="off"
 <!-- 分类 -->
 
 <div class="categories">
-
-<div class="category active">
-全部
-</div>
-
-<div class="category">
-AI聊天
-</div>
-
-<div class="category">
-AI绘图
-</div>
-
-<div class="category">
-AI编程
-</div>
-
-<div class="category">
-AI视频
-</div>
-
-<div class="category">
-AI办公
-</div>
-
+<button class="category-btn active" data-category="all">全部</button>
+<button class="category-btn" data-category="chat">AI聊天</button>
+<button class="category-btn" data-category="image">AI绘图</button>
+<button class="category-btn" data-category="code">AI编程</button>
+<button class="category-btn" data-category="video">AI视频</button>
+<button class="category-btn" data-category="office">AI办公</button>
 </div>
 
 
 
-<!-- 资源统计 -->
+<!-- 精选工具 -->
+
+<div class="section-header">
 
 <div class="section-title">
+精选工具
+</div>
 
-<strong>精选工具</strong>
-
-<span class="resource-count" id="resourceCount">
+<div class="resource-count" id="resourceCount">
 5 个资源
-</span>
+</div>
 
 </div>
 
 
 
-<!-- 资源列表 -->
-
-<div id="resourceList">
-
-
+<div class="tools" id="tools">
 <!-- ChatGPT -->
-
-<div class="resource-card">
-
-<div class="resource-top">
-
-<div class="resource-icon">
-🤖
+<div class="tool-card" data-category="chat" data-name="ChatGPT">
+<div class="tool-main">
+<div class="tool-icon">🤖</div>
+<div class="tool-info">
+<div class="tool-name">ChatGPT</div>
+<div class="tool-desc">智能对话与内容创作 AI 助手</div>
 </div>
-
-<div class="resource-info">
-
-<div class="resource-name">
-ChatGPT
 </div>
-
-<div class="resource-desc">
-智能对话与内容创作 AI 助手
+<div class="tool-bottom">
+<div class="tool-tag">AI聊天</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://chatgpt.com" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
 </div>
-
 </div>
-
-<div class="resource-bottom">
-
-<span class="tag">
-AI聊天
-</span>
-
-<div class="resource-actions">
-
-<a
-class="action-btn website-btn"
-href="https://chatgpt.com"
-target="_blank"
-rel="noopener noreferrer"
->
-官网地址
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-
-
 <!-- Midjourney -->
-
-<div class="resource-card">
-
-<div class="resource-top">
-
-<div class="resource-icon">
-🎨
+<div class="tool-card" data-category="image" data-name="Midjourney">
+<div class="tool-main">
+<div class="tool-icon">🎨</div>
+<div class="tool-info">
+<div class="tool-name">Midjourney</div>
+<div class="tool-desc">专业 AI 图像生成与创作工具</div>
 </div>
-
-<div class="resource-info">
-
-<div class="resource-name">
-Midjourney
 </div>
-
-<div class="resource-desc">
-专业 AI 图像生成与创作工具
+<div class="tool-bottom">
+<div class="tool-tag">AI绘图</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://www.midjourney.com" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
 </div>
-
 </div>
-
-<div class="resource-bottom">
-
-<span class="tag">
-AI绘图
-</span>
-
-<div class="resource-actions">
-
-<a
-class="action-btn website-btn"
-href="https://www.midjourney.com"
-target="_blank"
-rel="noopener noreferrer"
->
-官网地址
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-
-
 <!-- GitHub Copilot -->
-
-<div class="resource-card">
-
-<div class="resource-top">
-
-<div class="resource-icon">
-💻
+<div class="tool-card" data-category="code" data-name="GitHub Copilot">
+<div class="tool-main">
+<div class="tool-icon">💻</div>
+<div class="tool-info">
+<div class="tool-name">GitHub Copilot</div>
+<div class="tool-desc">面向开发者的 AI 编程助手</div>
 </div>
-
-<div class="resource-info">
-
-<div class="resource-name">
-GitHub Copilot
 </div>
-
-<div class="resource-desc">
-面向开发者的 AI 编程助手
+<div class="tool-bottom">
+<div class="tool-tag">AI编程</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://github.com/features/copilot" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
 </div>
-
 </div>
-
-<div class="resource-bottom">
-
-<span class="tag">
-AI编程
-</span>
-
-<div class="resource-actions">
-
-<a
-class="action-btn website-btn"
-href="https://github.com/features/copilot"
-target="_blank"
-rel="noopener noreferrer"
->
-官网地址
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-
-
 <!-- Kling AI -->
-
-<div class="resource-card">
-
-<div class="resource-top">
-
-<div class="resource-icon">
-🎬
+<div class="tool-card" data-category="video" data-name="Kling AI">
+<div class="tool-main">
+<div class="tool-icon">🎬</div>
+<div class="tool-info">
+<div class="tool-name">Kling AI</div>
+<div class="tool-desc">AI 视频生成与创意制作平台</div>
 </div>
-
-<div class="resource-info">
-
-<div class="resource-name">
-Kling AI
 </div>
-
-<div class="resource-desc">
-AI 视频生成与创意制作平台
+<div class="tool-bottom">
+<div class="tool-tag">AI视频</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://klingai.com" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
 </div>
-
 </div>
-
-<div class="resource-bottom">
-
-<span class="tag">
-AI视频
-</span>
-
-<div class="resource-actions">
-
-<a
-class="action-btn website-btn"
-href="https://klingai.com"
-target="_blank"
-rel="noopener noreferrer"
->
-官网地址
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-
-
 <!-- Gamma -->
-
-<div class="resource-card">
-
-<div class="resource-top">
-
-<div class="resource-icon">
-✨
+<div class="tool-card" data-category="office" data-name="Gamma">
+<div class="tool-main">
+<div class="tool-icon">✨</div>
+<div class="tool-info">
+<div class="tool-name">Gamma</div>
+<div class="tool-desc">AI 驱动的演示文稿制作工具</div>
 </div>
-
-<div class="resource-info">
-
-<div class="resource-name">
-Gamma
 </div>
-
-<div class="resource-desc">
-AI 驱动的演示文稿制作工具
+<div class="tool-bottom">
+<div class="tool-tag">AI办公</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://gamma.app" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
 </div>
-
 </div>
-
-<div class="resource-bottom">
-
-<span class="tag">
-AI办公
-</span>
-
-<div class="resource-actions">
-
-<a
-class="action-btn website-btn"
-href="https://gamma.app"
-target="_blank"
-rel="noopener noreferrer"
->
-官网地址
-</a>
-
 </div>
-
-</div>
-
-</div>
-
-
-</div>
-
-
 
 <!-- 无结果 -->
 
-<div
-class="no-result"
-id="noResult"
->
+<div class="empty" id="empty">
+
 没有找到相关 AI 工具
+
 </div>
 
 
@@ -697,56 +529,60 @@ id="noResult"
 const searchInput =
 document.getElementById("searchInput");
 
-const categories =
-document.querySelectorAll(".category");
+const toolCards =
+document.querySelectorAll(".tool-card");
 
-const cards =
-document.querySelectorAll(".resource-card");
+const categoryButtons =
+document.querySelectorAll(".category-btn");
+
+const empty =
+document.getElementById("empty");
 
 const resourceCount =
 document.getElementById("resourceCount");
 
-const noResult =
-document.getElementById("noResult");
-
-let currentCategory = "全部";
+let currentCategory = "all";
 
 
-/* =========================
-   搜索 + 分类联合筛选
-========================= */
+/* 搜索 + 分类筛选 */
 
-function filterResources(){
+function filterTools(){
 
 const keyword =
 searchInput.value
-.toLowerCase()
-.trim();
+.trim()
+.toLowerCase();
 
 let visibleCount = 0;
 
 
-cards.forEach(card => {
+toolCards.forEach(card => {
 
-const text =
-card.innerText
+const name =
+card.dataset.name
 .toLowerCase();
 
-const tag =
-card
-.querySelector(".tag")
+const description =
+card.querySelector(".tool-desc")
 .textContent
-.trim();
+.toLowerCase();
+
+const category =
+card.dataset.category;
 
 
 const matchSearch =
-keyword === "" ||
-text.includes(keyword);
+
+name.includes(keyword) ||
+
+description.includes(keyword);
 
 
 const matchCategory =
-currentCategory === "全部" ||
-tag === currentCategory;
+
+currentCategory === "all" ||
+
+category === currentCategory;
 
 
 if(matchSearch && matchCategory){
@@ -768,7 +604,7 @@ resourceCount.textContent =
 visibleCount + " 个资源";
 
 
-noResult.style.display =
+empty.style.display =
 visibleCount === 0
 ? "block"
 : "none";
@@ -776,47 +612,48 @@ visibleCount === 0
 }
 
 
-/* 搜索 */
 
 searchInput.addEventListener(
 "input",
-filterResources
+filterTools
 );
 
 
-/* 分类 */
 
-categories.forEach(category => {
+categoryButtons.forEach(button => {
 
-category.addEventListener(
-"click",
-function(){
+button.addEventListener("click", function(){
 
-categories.forEach(item => {
+categoryButtons.forEach(btn => {
 
-item.classList.remove("active");
+btn.classList.remove("active");
 
 });
 
 this.classList.add("active");
 
 currentCategory =
-this.textContent.trim();
+this.dataset.category;
 
-filterResources();
+filterTools();
+
+});
 
 });
 
-});
 
 
 /* =========================
    原生返回逻辑
-   不创建新的历史记录
+   有历史记录返回上一页
+   无历史记录返回首页
+   不新增历史记录
 ========================= */
 
 const backButton =
 document.getElementById("backButton");
+
+if(backButton){
 
 backButton.addEventListener(
 "click",
@@ -833,6 +670,29 @@ window.location.replace("/");
 }
 
 });
+
+}
+
+
+/* =========================
+   禁止右键
+========================= */
+document.oncontextmenu = function(){
+return false;
+};
+
+/* =========================
+   禁止常见开发者快捷键
+========================= */
+document.onkeydown = function(e){
+if(
+e.keyCode === 123 ||
+(e.ctrlKey && e.keyCode === 85) ||
+(e.ctrlKey && e.shiftKey && e.keyCode === 73)
+){
+return false;
+}
+};
 
 </script>
 
