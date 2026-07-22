@@ -12,7 +12,7 @@
 <link rel="icon" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/favicon.ico">
 <meta property="og:title" content="产品中心 - 徐胖虎资源社">
-<meta property="og:description" content="精选数字产品与AI效率资源。">
+<meta property="og:description" content="徐胖虎资源社产品中心，汇集精选数字产品与AI效率资源，精品数字产品。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xph.asia/products/">
 <meta name="twitter:card" content="summary">
@@ -87,6 +87,7 @@ body{margin:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,"S
 </style>
 </head>
 <body>
+<!-- 页面容器 -->
 <div class="container">
 
 <!-- 顶部导航 -->
@@ -117,28 +118,62 @@ body{margin:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,"S
 <div class="footer">© 2026 徐胖虎资源社</div>
 </div>
 <script>
+
 /* =========================
    原生返回逻辑
    不创建新的历史记录
 ========================= */
-const backButton=document.getElementById("backButton");
+
+const backButton = document.getElementById("backButton");
+
 if(backButton){
-backButton.addEventListener("click",function(){
-if(window.history.length>1){window.history.back();}
-else{window.location.replace("/");}
-});
+
+backButton.addEventListener("click", function(){
+
+if(window.history.length > 1){
+
+window.history.back();
+
+}else{
+
+window.location.replace("/");
+
 }
+
+});
+
+}
+
+
 /* =========================
    禁止右键
 ========================= */
-document.oncontextmenu=function(){return false;};
+
+document.oncontextmenu = function(){
+
+return false;
+
+};
+
 
 /* =========================
    禁止常见开发者快捷键
 ========================= */
-document.onkeydown=function(e){
-if(e.keyCode===123||(e.ctrlKey&&e.keyCode===85)||(e.ctrlKey&&e.shiftKey&&e.keyCode===73)){return false;}
+
+document.onkeydown = function(e){
+
+if(
+e.keyCode === 123 ||
+(e.ctrlKey && e.keyCode === 85) ||
+(e.ctrlKey && e.shiftKey && e.keyCode === 73)
+){
+
+return false;
+
+}
+
 };
+
 </script>
 </body>
 </html>
