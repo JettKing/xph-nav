@@ -8,7 +8,7 @@ category:"system",
 tag:"系统工具",
 website:"https://localsend.org",
 project:"https://github.com/localsend/localsend"
-}
+},
 
 {
 icon:"📝",
