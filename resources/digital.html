@@ -11,6 +11,22 @@
 
 <meta name="description" content="徐胖虎资源社精选优质数字资源，涵盖电子书、学习资料、模板素材、提示词和设计资源等实用内容。">
 
+<meta name="keywords" content="徐胖虎资源社,数字资源,电子书,学习资料,模板素材,提示词,设计资源">
+<meta name="robots" content="index,follow">
+<meta property="og:title" content="数字资源 - 徐胖虎资源社">
+<meta property="og:description" content="徐胖虎资源社精选优质数字资源，涵盖电子书、学习资料、模板素材、提示词和设计资源等实用内容。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://xph.asia/resources/digital.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="数字资源 - 徐胖虎资源社">
+<meta name="twitter:description" content="徐胖虎资源社精选优质数字资源，涵盖电子书、学习资料、模板素材、提示词和设计资源等实用内容。">
+
+<link rel="canonical" href="https://xph.asia/resources/digital.html">
+
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/favicon.ico">
+
+
 <style>
 
 *{
@@ -34,105 +50,96 @@ color:#1d1d1f;
 max-width:430px;
 margin:auto;
 padding:20px;
-padding-bottom:60px;
 }
+
 
 /* 顶部 */
 
-.topbar{
-height:90px;
-position:relative;
+.header{
 display:flex;
 align-items:center;
-justify-content:center;
+justify-content:space-between;
+margin-bottom:30px;
 }
 
-.back{
-position:absolute;
-left:0;
-width:58px;
-height:58px;
-border-radius:50%;
-background:white;
+.back-btn{
+width:50px;
+height:50px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:38px;
-font-weight:300;
+background:#fff;
+border-radius:50%;
 color:#111;
-box-shadow:
-0 10px 30px rgba(0,0,0,.06);
+font-size:30px;
+box-shadow:0 8px 25px rgba(0,0,0,.06);
 border:0;
 padding:0;
 cursor:pointer;
 font-family:inherit;
 }
 
-.top-title{
-font-size:20px;
-font-weight:700;
+.header-title{
+font-size:18px;
+font-weight:600;
 }
 
-/* 标题 */
+.header-space{
+width:50px;
+}
+
+
+/* 页面介绍 */
 
 .hero{
-margin-top:25px;
-}
-
-.hero h1{
-font-size:38px;
-margin:0;
-font-weight:800;
-letter-spacing:-1px;
+margin-bottom:25px;
 }
 
 .hero p{
-font-size:16px;
-color:#8e8e93;
-line-height:1.8;
-margin-top:18px;
+margin:0;
+font-size:14px;
+line-height:1.7;
+color:#888;
 }
+
 
 /* 搜索 */
 
 .search-box{
-margin-top:28px;
-height:70px;
-background:white;
-border-radius:22px;
-display:flex;
-align-items:center;
-padding:0 22px;
-box-shadow:
-0 10px 30px rgba(0,0,0,.04);
-}
-
-.search-icon{
-font-size:22px;
-margin-right:15px;
+position:relative;
+margin-bottom:20px;
 }
 
 .search-box input{
+width:100%;
+height:58px;
 border:none;
 outline:none;
-font-size:17px;
-width:100%;
-background:transparent;
-color:#1d1d1f;
+border-radius:20px;
+background:#fff;
+padding:0 20px 0 50px;
+font-size:15px;
+color:#111;
+box-shadow:0 8px 25px rgba(0,0,0,.04);
 }
 
-.search-box input::placeholder{
-color:#b5b5ba;
+.search-icon{
+position:absolute;
+left:19px;
+top:50%;
+transform:translateY(-50%);
+font-size:18px;
 }
+
 
 /* 分类 */
 
 .categories{
 display:flex;
-gap:10px;
-margin-top:22px;
+gap:9px;
 overflow-x:auto;
 padding-bottom:5px;
+margin-bottom:30px;
 scrollbar-width:none;
 }
 
@@ -140,134 +147,197 @@ scrollbar-width:none;
 display:none;
 }
 
-.category{
+.category-btn{
 border:none;
-background:white;
-padding:13px 20px;
-border-radius:18px;
-font-size:15px;
-color:#555;
 white-space:nowrap;
+padding:10px 17px;
+border-radius:18px;
+background:#fff;
+color:#555;
+font-size:14px;
 cursor:pointer;
 }
 
-.category.active{
+.category-btn.active{
 background:#3478f6;
-color:white;
+color:#fff;
 }
 
-/* 标题区域 */
+
+/* 标题 */
+
+.section-header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:15px;
+}
 
 .section-title{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-top:36px;
-margin-bottom:18px;
-}
-
-.section-title h2{
-font-size:24px;
-margin:0;
-}
-
-.count{
-color:#aaa;
-font-size:15px;
-}
-
-/* 资源卡片 */
-
-.card{
-background:white;
-border-radius:24px;
-padding:20px;
-margin-bottom:16px;
-box-shadow:
-0 10px 30px rgba(0,0,0,.04);
-}
-
-.card-main{
-display:flex;
-align-items:center;
-}
-
-.icon{
-width:58px;
-height:58px;
-border-radius:16px;
-background:#f2f5ff;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:27px;
-flex-shrink:0;
-}
-
-.info{
-margin-left:16px;
-min-width:0;
-}
-
-.info h3{
-margin:0;
-font-size:21px;
+font-size:20px;
 font-weight:700;
 }
 
-.info p{
-margin:8px 0 0;
-color:#8e8e93;
-font-size:15px;
-line-height:1.5;
+.resource-count{
+font-size:13px;
+color:#aaa;
 }
 
-.card-bottom{
+
+/* 软件列表 */
+
+.tools{
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+.tool-card{
+background:#fff;
+border-radius:24px;
+padding:17px;
+box-shadow:0 8px 25px rgba(0,0,0,.04);
+}
+
+.tool-main{
+display:flex;
+align-items:center;
+}
+
+.tool-icon{
+width:52px;
+height:52px;
+border-radius:16px;
+background:#f3f6fc;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:25px;
+margin-right:14px;
+flex-shrink:0;
+}
+
+.tool-info{
+flex:1;
+min-width:0;
+}
+
+.tool-name{
+font-size:17px;
+font-weight:600;
+margin-bottom:5px;
+}
+
+.tool-desc{
+font-size:13px;
+color:#888;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+
+/* 卡片底部 */
+
+.tool-bottom{
 display:flex;
 align-items:center;
 justify-content:space-between;
-margin-top:18px;
+margin-top:15px;
 }
 
-.tag{
+.tool-tag{
+padding:7px 11px;
 background:#f5f5f7;
-color:#8e8e93;
-padding:9px 14px;
-border-radius:13px;
-font-size:14px;
+border-radius:12px;
+font-size:12px;
+color:#888;
+white-space:nowrap;
 }
 
-.visit{
-background:#3478f6;
-color:white;
-text-decoration:none;
-padding:11px 20px;
-border-radius:15px;
-font-size:16px;
+
+/* 按钮区域 */
+
+.tool-actions{
+display:flex;
+align-items:center;
+gap:7px;
 }
+
+.action-btn{
+height:34px;
+padding:0 11px;
+border-radius:11px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:12px;
+font-weight:500;
+text-decoration:none;
+white-space:nowrap;
+}
+
+
+/* 官网地址 */
+
+.website-btn{
+background:#3478f6;
+color:#fff;
+}
+
+
+/* 项目地址 */
+
+.project-btn{
+background:#3478f6;
+color:#fff;
+}
+
+
+/* 暂无项目 */
+
+.disabled-btn{
+background:#f5f5f7;
+color:#aaa;
+}
+
 
 /* 无结果 */
 
-.no-result{
+.empty{
 display:none;
 text-align:center;
 padding:50px 20px;
-color:#8e8e93;
-font-size:16px;
+font-size:14px;
+color:#999;
+}
+
+
+/* 底部 */
+
+.footer{
+text-align:center;
+font-size:12px;
+color:#aaa;
+padding:35px 0 15px;
 }
 
 </style>
 
 </head>
 
+
 <body>
 
 <div class="container">
 
-<div class="topbar">
+
+<!-- 顶部 -->
+
+<div class="header">
 
 <button
-class="back"
+class="back-btn"
 id="backButton"
 type="button"
 aria-label="返回"
@@ -275,320 +345,183 @@ aria-label="返回"
 ‹
 </button>
 
-<div class="top-title">数字资源</div>
+<div class="header-title">
+数字资源
+</div>
+
+<div class="header-space"></div>
 
 </div>
 
 
+
+<!-- 页面介绍 -->
+
 <div class="hero">
 
-<h1>数字资源</h1>
-
 <p>
-精选实用数字资源，发现更多值得收藏的学习与创作内容。
+精选优质资源，发现更多实用内容。
 </p>
 
 </div>
 
+
+
+<!-- 搜索 -->
 
 <div class="search-box">
 
 <span class="search-icon">⌕</span>
 
 <input
-id="searchInput"
 type="text"
+id="searchInput"
 placeholder="搜索数字资源..."
+autocomplete="off"
 >
 
 </div>
 
+
+
+<!-- 分类 -->
 
 <div class="categories">
-
-<button class="category active" data-category="全部">
-全部
-</button>
-
-<button class="category" data-category="电子书">
-电子书
-</button>
-
-<button class="category" data-category="学习资料">
-学习资料
-</button>
-
-<button class="category" data-category="模板素材">
-模板素材
-</button>
-
-<button class="category" data-category="提示词">
-提示词
-</button>
-
-<button class="category" data-category="设计资源">
-设计资源
-</button>
-
+<button class="category-btn active" data-category="all">全部</button>
+<button class="category-btn" data-category="ebook">电子书</button>
+<button class="category-btn" data-category="learning">学习资料</button>
+<button class="category-btn" data-category="template">模板素材</button>
+<button class="category-btn" data-category="prompt">提示词</button>
+<button class="category-btn" data-category="design">设计资源</button>
 </div>
 
+
+
+<!-- 精选资源 -->
+
+<div class="section-header">
 
 <div class="section-title">
+精选资源
+</div>
 
-<h2>精选资源</h2>
-
-<span class="count" id="resourceCount">
+<div class="resource-count" id="resourceCount">
 5 个资源
-</span>
+</div>
 
 </div>
 
 
-<div id="resourceList">
 
-
+<div class="tools" id="tools">
 <!-- Project Gutenberg -->
-
-<div
-class="card"
-data-category="电子书"
-data-search="Project Gutenberg Gutenberg 古登堡 免费电子书 英文名著 电子书"
->
-
-<div class="card-main">
-
-<div class="icon">
-📚
+<div class="tool-card" data-category="ebook" data-name="Project Gutenberg">
+<div class="tool-main">
+<div class="tool-icon">📚</div>
+<div class="tool-info">
+<div class="tool-name">Project Gutenberg</div>
+<div class="tool-desc">提供大量免费公共版权电子书</div>
 </div>
-
-<div class="info">
-
-<h3>Project Gutenberg</h3>
-
-<p>
-提供大量免费公共版权电子书
-</p>
-
 </div>
-
+<div class="tool-bottom">
+<div class="tool-tag">电子书</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://www.gutenberg.org/" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
-<div class="card-bottom">
-
-<span class="tag">
-电子书
-</span>
-
-<a
-class="visit"
-href="https://www.gutenberg.org/"
-target="_blank"
-rel="noopener noreferrer"
->
-访问
-</a>
-
 </div>
-
 </div>
-
-
 <!-- Internet Archive -->
-
-<div
-class="card"
-data-category="学习资料"
-data-search="Internet Archive 互联网档案馆 数字图书馆 学习资料 书籍"
->
-
-<div class="card-main">
-
-<div class="icon">
-🗃️
+<div class="tool-card" data-category="learning" data-name="Internet Archive">
+<div class="tool-main">
+<div class="tool-icon">🗃️</div>
+<div class="tool-info">
+<div class="tool-name">Internet Archive</div>
+<div class="tool-desc">海量书籍与数字内容资料库</div>
 </div>
-
-<div class="info">
-
-<h3>Internet Archive</h3>
-
-<p>
-海量书籍与数字内容资料库
-</p>
-
 </div>
-
+<div class="tool-bottom">
+<div class="tool-tag">学习资料</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://archive.org/" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
-<div class="card-bottom">
-
-<span class="tag">
-学习资料
-</span>
-
-<a
-class="visit"
-href="https://archive.org/"
-target="_blank"
-rel="noopener noreferrer"
->
-访问
-</a>
-
 </div>
-
 </div>
-
-
 <!-- Canva -->
-
-<div
-class="card"
-data-category="模板素材"
-data-search="Canva 可画 设计模板 PPT 海报 模板素材"
->
-
-<div class="card-main">
-
-<div class="icon">
-🎨
+<div class="tool-card" data-category="template" data-name="Canva">
+<div class="tool-main">
+<div class="tool-icon">🎨</div>
+<div class="tool-info">
+<div class="tool-name">Canva</div>
+<div class="tool-desc">丰富的在线设计模板与创作素材</div>
 </div>
-
-<div class="info">
-
-<h3>Canva</h3>
-
-<p>
-丰富的在线设计模板与创作素材
-</p>
-
 </div>
-
+<div class="tool-bottom">
+<div class="tool-tag">模板素材</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://www.canva.com/" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
-<div class="card-bottom">
-
-<span class="tag">
-模板素材
-</span>
-
-<a
-class="visit"
-href="https://www.canva.com/"
-target="_blank"
-rel="noopener noreferrer"
->
-访问
-</a>
-
 </div>
-
 </div>
-
-
 <!-- PromptHero -->
-
-<div
-class="card"
-data-category="提示词"
-data-search="PromptHero AI 提示词 Prompt 绘图 提示词库"
->
-
-<div class="card-main">
-
-<div class="icon">
-💬
+<div class="tool-card" data-category="prompt" data-name="PromptHero">
+<div class="tool-main">
+<div class="tool-icon">💬</div>
+<div class="tool-info">
+<div class="tool-name">PromptHero</div>
+<div class="tool-desc">发现和探索优质 AI 提示词</div>
 </div>
-
-<div class="info">
-
-<h3>PromptHero</h3>
-
-<p>
-发现和探索优质 AI 提示词
-</p>
-
 </div>
-
+<div class="tool-bottom">
+<div class="tool-tag">提示词</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://prompthero.com/" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
-<div class="card-bottom">
-
-<span class="tag">
-提示词
-</span>
-
-<a
-class="visit"
-href="https://prompthero.com/"
-target="_blank"
-rel="noopener noreferrer"
->
-访问
-</a>
-
 </div>
-
 </div>
-
-
 <!-- unDraw -->
-
-<div
-class="card"
-data-category="设计资源"
-data-search="unDraw 插画 免费设计资源 SVG 素材"
->
-
-<div class="card-main">
-
-<div class="icon">
-🖼️
+<div class="tool-card" data-category="design" data-name="unDraw">
+<div class="tool-main">
+<div class="tool-icon">🖼️</div>
+<div class="tool-info">
+<div class="tool-name">unDraw</div>
+<div class="tool-desc">免费可自定义的开源插画素材库</div>
+</div>
+</div>
+<div class="tool-bottom">
+<div class="tool-tag">设计资源</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://undraw.co/" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
+</div>
+</div>
+</div>
 </div>
 
-<div class="info">
+<!-- 无结果 -->
 
-<h3>unDraw</h3>
+<div class="empty" id="empty">
 
-<p>
-免费可自定义的开源插画素材库
-</p>
-
-</div>
-
-</div>
-
-<div class="card-bottom">
-
-<span class="tag">
-设计资源
-</span>
-
-<a
-class="visit"
-href="https://undraw.co/"
-target="_blank"
-rel="noopener noreferrer"
->
-访问
-</a>
-
-</div>
-
-</div>
-
-
-</div>
-
-
-<div
-class="no-result"
-id="noResult"
->
 没有找到相关资源
+
+</div>
+
+
+
+<!-- 底部 -->
+
+<div class="footer">
+
+©️ 2026 徐胖虎资源社
+
 </div>
 
 
 </div>
+
 
 
 <script>
@@ -596,71 +529,71 @@ id="noResult"
 const searchInput =
 document.getElementById("searchInput");
 
-const cards =
-document.querySelectorAll(".card");
+const toolCards =
+document.querySelectorAll(".tool-card");
 
-const categories =
-document.querySelectorAll(".category");
+const categoryButtons =
+document.querySelectorAll(".category-btn");
+
+const empty =
+document.getElementById("empty");
 
 const resourceCount =
 document.getElementById("resourceCount");
 
-const noResult =
-document.getElementById("noResult");
-
-let currentCategory =
-"全部";
+let currentCategory = "all";
 
 
-function filterResources(){
+/* 搜索 + 分类筛选 */
+
+function filterTools(){
 
 const keyword =
 searchInput.value
 .trim()
 .toLowerCase();
 
-let visibleCount =
-0;
+let visibleCount = 0;
 
 
-cards.forEach(card => {
+toolCards.forEach(card => {
+
+const name =
+card.dataset.name
+.toLowerCase();
+
+const description =
+card.querySelector(".tool-desc")
+.textContent
+.toLowerCase();
 
 const category =
 card.dataset.category;
 
-const searchText =
-card.dataset.search
-.toLowerCase();
+
+const matchSearch =
+
+name.includes(keyword) ||
+
+description.includes(keyword);
 
 
-const categoryMatch =
+const matchCategory =
 
-currentCategory === "全部" ||
+currentCategory === "all" ||
 
 category === currentCategory;
 
 
-const searchMatch =
+if(matchSearch && matchCategory){
 
-keyword === "" ||
-
-searchText.includes(keyword);
-
-
-if(
-categoryMatch &&
-searchMatch
-){
-
-card.style.display =
-"block";
+card.style.display = "block";
 
 visibleCount++;
 
 }else{
 
-card.style.display =
-"none";
+card.style.display = "none";
 
 }
 
@@ -671,67 +604,56 @@ resourceCount.textContent =
 visibleCount + " 个资源";
 
 
-if(
+empty.style.display =
 visibleCount === 0
-){
-
-noResult.style.display =
-"block";
-
-}else{
-
-noResult.style.display =
-"none";
+? "block"
+: "none";
 
 }
 
-}
 
 
 searchInput.addEventListener(
 "input",
-filterResources
+filterTools
 );
 
 
-categories.forEach(button => {
 
-button.addEventListener(
-"click",
-function(){
+categoryButtons.forEach(button => {
 
-categories.forEach(item => {
+button.addEventListener("click", function(){
 
-item.classList.remove(
-"active"
-);
+categoryButtons.forEach(btn => {
+
+btn.classList.remove("active");
 
 });
 
-
-this.classList.add(
-"active"
-);
-
+this.classList.add("active");
 
 currentCategory =
 this.dataset.category;
 
+filterTools();
 
-filterResources();
+});
 
 });
 
-});
 
 
 /* =========================
    原生返回逻辑
-   不创建新的历史记录
+   有历史记录返回上一页
+   无历史记录返回首页
+   不新增历史记录
 ========================= */
 
 const backButton =
 document.getElementById("backButton");
+
+if(backButton){
 
 backButton.addEventListener(
 "click",
@@ -749,7 +671,31 @@ window.location.replace("/");
 
 });
 
+}
+
+
+/* =========================
+   禁止右键
+========================= */
+document.oncontextmenu = function(){
+return false;
+};
+
+/* =========================
+   禁止常见开发者快捷键
+========================= */
+document.onkeydown = function(e){
+if(
+e.keyCode === 123 ||
+(e.ctrlKey && e.keyCode === 85) ||
+(e.ctrlKey && e.shiftKey && e.keyCode === 73)
+){
+return false;
+}
+};
+
 </script>
+
 
 </body>
 
