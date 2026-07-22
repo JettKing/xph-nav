@@ -11,11 +11,20 @@
 
 <meta name="description" content="徐胖虎资源社精选优质实用软件，涵盖系统工具、影音工具、下载工具、文件管理和网络工具等实用软件。">
 
+<meta name="keywords" content="徐胖虎资源社,实用软件,系统工具,影音工具,下载工具,文件管理,网络工具">
 <meta name="robots" content="index,follow">
+<meta property="og:title" content="实用软件 - 徐胖虎资源社">
+<meta property="og:description" content="徐胖虎资源社精选优质实用软件，涵盖系统工具、影音工具、下载工具、文件管理和网络工具等实用软件。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://xph.asia/resources/software.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="实用软件 - 徐胖虎资源社">
+<meta name="twitter:description" content="徐胖虎资源社精选优质实用软件，涵盖系统工具、影音工具、下载工具、文件管理和网络工具等实用软件。">
 
 <link rel="canonical" href="https://xph.asia/resources/software.html">
 
-<link rel="icon" href="../favicon.ico">
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/favicon.ico">
 
 
 <style>
@@ -44,7 +53,9 @@ padding:20px;
 }
 
 
-/* 顶部 */
+/* =========================
+   顶部导航
+========================= */
 
 .header{
 display:flex;
@@ -80,7 +91,9 @@ width:50px;
 }
 
 
-/* 页面介绍 */
+/* =========================
+   页面介绍
+========================= */
 
 .hero{
 margin-bottom:25px;
@@ -94,7 +107,9 @@ color:#888;
 }
 
 
-/* 搜索 */
+/* =========================
+   搜索区域
+========================= */
 
 .search-box{
 position:relative;
@@ -123,7 +138,9 @@ font-size:18px;
 }
 
 
-/* 分类 */
+/* =========================
+   分类筛选
+========================= */
 
 .categories{
 display:flex;
@@ -155,7 +172,9 @@ color:#fff;
 }
 
 
-/* 标题 */
+/* =========================
+   资源标题
+========================= */
 
 .section-header{
 display:flex;
@@ -175,7 +194,9 @@ color:#aaa;
 }
 
 
-/* 软件列表 */
+/* =========================
+   资源列表
+========================= */
 
 .tools{
 display:flex;
@@ -228,7 +249,9 @@ text-overflow:ellipsis;
 }
 
 
-/* 卡片底部 */
+/* =========================
+   资源卡片底部
+========================= */
 
 .tool-bottom{
 display:flex;
@@ -247,7 +270,9 @@ white-space:nowrap;
 }
 
 
-/* 按钮区域 */
+/* =========================
+   资源按钮
+========================= */
 
 .tool-actions{
 display:flex;
@@ -269,7 +294,9 @@ white-space:nowrap;
 }
 
 
-/* 官网地址 */
+/* =========================
+   官网地址按钮
+========================= */
 
 .website-btn{
 background:#3478f6;
@@ -277,7 +304,9 @@ color:#fff;
 }
 
 
-/* 项目地址 */
+/* =========================
+   项目地址按钮
+========================= */
 
 .project-btn{
 background:#3478f6;
@@ -285,7 +314,9 @@ color:#fff;
 }
 
 
-/* 暂无项目 */
+/* =========================
+   暂无项目状态
+========================= */
 
 .disabled-btn{
 background:#f5f5f7;
@@ -293,7 +324,9 @@ color:#aaa;
 }
 
 
-/* 无结果 */
+/* =========================
+   空状态
+========================= */
 
 .empty{
 display:none;
@@ -304,7 +337,9 @@ color:#999;
 }
 
 
-/* 底部 */
+/* =========================
+   底部版权
+========================= */
 
 .footer{
 text-align:center;
@@ -756,6 +791,10 @@ rel="noopener noreferrer"
 
 <script>
 
+/* =========================
+   搜索与分类筛选
+========================= */
+
 const searchInput =
 document.getElementById("searchInput");
 
@@ -774,7 +813,7 @@ document.getElementById("resourceCount");
 let currentCategory = "all";
 
 
-/* 搜索 + 分类筛选 */
+
 
 function filterTools(){
 
@@ -883,6 +922,7 @@ filterTools();
 const backButton =
 document.getElementById("backButton");
 
+if(backButton){
 
 backButton.addEventListener(
 "click",
@@ -899,6 +939,38 @@ window.location.replace("/");
 }
 
 });
+
+}
+
+
+/* =========================
+   禁止右键
+========================= */
+
+document.oncontextmenu = function(){
+
+return false;
+
+};
+
+
+/* =========================
+   禁止常见开发者快捷键
+========================= */
+
+document.onkeydown = function(e){
+
+if(
+e.keyCode === 123 ||
+(e.ctrlKey && e.keyCode === 85) ||
+(e.ctrlKey && e.shiftKey && e.keyCode === 73)
+){
+
+return false;
+
+}
+
+};
 
 </script>
 
