@@ -5,11 +5,27 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>效率神器 - 徐胖虎资源社</title>
 
 <meta name="description" content="徐胖虎资源社精选优质效率神器，涵盖时间管理、笔记管理、团队协作和自动化等实用效率工具。">
+
+<meta name="keywords" content="徐胖虎资源社,效率神器,效率工具,时间管理,笔记工具,团队协作,自动化">
+<meta name="robots" content="index,follow">
+<meta property="og:title" content="效率神器 - 徐胖虎资源社">
+<meta property="og:description" content="徐胖虎资源社精选优质效率神器，涵盖时间管理、笔记工具、团队协作和自动化等实用效率工具。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://xph.asia/resources/productivity.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="效率神器 - 徐胖虎资源社">
+<meta name="twitter:description" content="徐胖虎资源社精选优质效率神器，涵盖时间管理、笔记工具、团队协作和自动化等实用效率工具。">
+
+<link rel="canonical" href="https://xph.asia/resources/productivity.html">
+
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/favicon.ico">
+
 
 <style>
 
@@ -40,27 +56,23 @@ padding:20px;
 /* 顶部 */
 
 .header{
-height:80px;
 display:flex;
 align-items:center;
-justify-content:center;
-position:relative;
+justify-content:space-between;
+margin-bottom:30px;
 }
 
-.back{
-position:absolute;
-left:0;
-width:52px;
-height:52px;
-border-radius:50%;
-background:white;
+.back-btn{
+width:50px;
+height:50px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:32px;
-text-decoration:none;
+background:#fff;
+border-radius:50%;
 color:#111;
-box-shadow:0 10px 30px rgba(0,0,0,.06);
+font-size:30px;
+box-shadow:0 8px 25px rgba(0,0,0,.06);
 border:0;
 padding:0;
 cursor:pointer;
@@ -68,60 +80,55 @@ font-family:inherit;
 }
 
 .header-title{
-font-size:20px;
+font-size:18px;
 font-weight:600;
 }
 
-
-/* 标题 */
-
-.hero{
-margin-top:25px;
+.header-space{
+width:50px;
 }
 
-.hero h1{
-font-size:34px;
-margin:0;
-font-weight:700;
+
+/* 页面介绍 */
+
+.hero{
+margin-bottom:25px;
 }
 
 .hero p{
-font-size:15px;
-color:#888;
+margin:0;
+font-size:14px;
 line-height:1.7;
-margin-top:15px;
+color:#888;
 }
 
 
 /* 搜索 */
 
 .search-box{
-height:64px;
-background:white;
-border-radius:22px;
-margin-top:25px;
-display:flex;
-align-items:center;
-padding:0 20px;
-box-shadow:0 10px 30px rgba(0,0,0,.04);
-}
-
-.search-icon{
-font-size:20px;
-margin-right:15px;
+position:relative;
+margin-bottom:20px;
 }
 
 .search-box input{
+width:100%;
+height:58px;
 border:none;
 outline:none;
-background:transparent;
-font-size:16px;
-width:100%;
+border-radius:20px;
+background:#fff;
+padding:0 20px 0 50px;
+font-size:15px;
 color:#111;
+box-shadow:0 8px 25px rgba(0,0,0,.04);
 }
 
-.search-box input::placeholder{
-color:#aaa;
+.search-icon{
+position:absolute;
+left:19px;
+top:50%;
+transform:translateY(-50%);
+font-size:18px;
 }
 
 
@@ -129,9 +136,10 @@ color:#aaa;
 
 .categories{
 display:flex;
-gap:10px;
-margin-top:20px;
+gap:9px;
 overflow-x:auto;
+padding-bottom:5px;
+margin-bottom:30px;
 scrollbar-width:none;
 }
 
@@ -139,55 +147,59 @@ scrollbar-width:none;
 display:none;
 }
 
-.category{
+.category-btn{
 border:none;
-background:white;
-padding:12px 18px;
-border-radius:16px;
-font-size:14px;
 white-space:nowrap;
-cursor:pointer;
+padding:10px 17px;
+border-radius:18px;
+background:#fff;
 color:#555;
+font-size:14px;
+cursor:pointer;
 }
 
-.category.active{
+.category-btn.active{
 background:#3478f6;
-color:white;
+color:#fff;
 }
 
 
-/* 标题栏 */
+/* 标题 */
 
-.section-title{
+.section-header{
 display:flex;
 align-items:center;
 justify-content:space-between;
-margin-top:35px;
 margin-bottom:15px;
 }
 
-.section-title h2{
-font-size:21px;
-margin:0;
+.section-title{
+font-size:20px;
+font-weight:700;
 }
 
-.count{
-font-size:14px;
+.resource-count{
+font-size:13px;
 color:#aaa;
 }
 
 
-/* 工具卡片 */
+/* 软件列表 */
 
-.tool-card{
-background:white;
-border-radius:24px;
-padding:18px;
-margin-bottom:16px;
-box-shadow:0 10px 30px rgba(0,0,0,.04);
+.tools{
+display:flex;
+flex-direction:column;
+gap:15px;
 }
 
-.tool-top{
+.tool-card{
+background:#fff;
+border-radius:24px;
+padding:17px;
+box-shadow:0 8px 25px rgba(0,0,0,.04);
+}
+
+.tool-main{
 display:flex;
 align-items:center;
 }
@@ -196,64 +208,118 @@ align-items:center;
 width:52px;
 height:52px;
 border-radius:16px;
-background:#f3f6ff;
+background:#f3f6fc;
 display:flex;
 align-items:center;
 justify-content:center;
 font-size:25px;
+margin-right:14px;
 flex-shrink:0;
 }
 
 .tool-info{
-margin-left:15px;
+flex:1;
 min-width:0;
 }
 
 .tool-name{
-font-size:19px;
+font-size:17px;
 font-weight:600;
-margin-bottom:6px;
+margin-bottom:5px;
 }
 
 .tool-desc{
-font-size:14px;
+font-size:13px;
 color:#888;
-line-height:1.5;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
 }
+
+
+/* 卡片底部 */
 
 .tool-bottom{
 display:flex;
 align-items:center;
 justify-content:space-between;
-margin-top:18px;
+margin-top:15px;
 }
 
-.tag{
+.tool-tag{
+padding:7px 11px;
 background:#f5f5f7;
-padding:8px 12px;
 border-radius:12px;
-font-size:13px;
+font-size:12px;
 color:#888;
+white-space:nowrap;
 }
 
-.visit{
-background:#3478f6;
-color:white;
+
+/* 按钮区域 */
+
+.tool-actions{
+display:flex;
+align-items:center;
+gap:7px;
+}
+
+.action-btn{
+height:34px;
+padding:0 11px;
+border-radius:11px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:12px;
+font-weight:500;
 text-decoration:none;
-padding:10px 18px;
-border-radius:14px;
-font-size:14px;
+white-space:nowrap;
 }
 
 
-/* 无搜索结果 */
+/* 官网地址 */
+
+.website-btn{
+background:#3478f6;
+color:#fff;
+}
+
+
+/* 项目地址 */
+
+.project-btn{
+background:#3478f6;
+color:#fff;
+}
+
+
+/* 暂无项目 */
+
+.disabled-btn{
+background:#f5f5f7;
+color:#aaa;
+}
+
+
+/* 无结果 */
 
 .empty{
 display:none;
 text-align:center;
 padding:50px 20px;
+font-size:14px;
 color:#999;
-font-size:15px;
+}
+
+
+/* 底部 */
+
+.footer{
+text-align:center;
+font-size:12px;
+color:#aaa;
+padding:35px 0 15px;
 }
 
 </style>
@@ -271,7 +337,7 @@ font-size:15px;
 <div class="header">
 
 <button
-class="back"
+class="back-btn"
 id="backButton"
 type="button"
 aria-label="返回"
@@ -283,15 +349,15 @@ aria-label="返回"
 效率神器
 </div>
 
+<div class="header-space"></div>
+
 </div>
 
 
 
-<!-- 标题 -->
+<!-- 页面介绍 -->
 
 <div class="hero">
-
-<h1>效率神器</h1>
 
 <p>
 精选高效实用工具，帮助你节省时间、优化工作流程。
@@ -311,7 +377,7 @@ aria-label="返回"
 type="text"
 id="searchInput"
 placeholder="搜索效率神器..."
-oninput="filterTools()"
+autocomplete="off"
 >
 
 </div>
@@ -321,58 +387,24 @@ oninput="filterTools()"
 <!-- 分类 -->
 
 <div class="categories">
-
-<button
-class="category active"
-onclick="selectCategory(this,'全部')"
->
-全部
-</button>
-
-<button
-class="category"
-onclick="selectCategory(this,'时间管理')"
->
-时间管理
-</button>
-
-<button
-class="category"
-onclick="selectCategory(this,'笔记工具')"
->
-笔记工具
-</button>
-
-<button
-class="category"
-onclick="selectCategory(this,'团队协作')"
->
-团队协作
-</button>
-
-<button
-class="category"
-onclick="selectCategory(this,'自动化')"
->
-自动化
-</button>
-
+<button class="category-btn active" data-category="all">全部</button>
+<button class="category-btn" data-category="time">时间管理</button>
+<button class="category-btn" data-category="notes">笔记工具</button>
+<button class="category-btn" data-category="team">团队协作</button>
+<button class="category-btn" data-category="automation">自动化</button>
 </div>
 
 
 
-<!-- 标题 -->
+<!-- 精选工具 -->
+
+<div class="section-header">
 
 <div class="section-title">
-
-<h2>
 精选工具
-</h2>
+</div>
 
-<div
-class="count"
-id="count"
->
+<div class="resource-count" id="resourceCount">
 5 个资源
 </div>
 
@@ -380,266 +412,110 @@ id="count"
 
 
 
-<!-- 工具列表 -->
-
-<div id="toolList">
-
-
+<div class="tools" id="tools">
 <!-- Notion -->
-
-<div
-class="tool-card"
-data-category="笔记工具"
-data-name="Notion"
->
-
-<div class="tool-top">
-
-<div class="tool-icon">
-📝
-</div>
-
+<div class="tool-card" data-category="notes" data-name="Notion">
+<div class="tool-main">
+<div class="tool-icon">📝</div>
 <div class="tool-info">
-
-<div class="tool-name">
-Notion
+<div class="tool-name">Notion</div>
+<div class="tool-desc">集笔记、知识库与项目管理于一体</div>
 </div>
-
-<div class="tool-desc">
-集笔记、知识库与项目管理于一体
 </div>
-
-</div>
-
-</div>
-
 <div class="tool-bottom">
-
-<span class="tag">
-笔记工具
-</span>
-
-<a
-class="visit"
-href="https://www.notion.so/"
-target="_blank"
-rel="noopener noreferrer"
->
-访问
-</a>
-
+<div class="tool-tag">笔记工具</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://www.notion.so/" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
 </div>
-
-
-
+</div>
 <!-- Todoist -->
-
-<div
-class="tool-card"
-data-category="时间管理"
-data-name="Todoist"
->
-
-<div class="tool-top">
-
-<div class="tool-icon">
-✅
-</div>
-
+<div class="tool-card" data-category="time" data-name="Todoist">
+<div class="tool-main">
+<div class="tool-icon">✅</div>
 <div class="tool-info">
-
-<div class="tool-name">
-Todoist
+<div class="tool-name">Todoist</div>
+<div class="tool-desc">简单高效的任务与待办事项管理工具</div>
 </div>
-
-<div class="tool-desc">
-简单高效的任务与待办事项管理工具
 </div>
-
-</div>
-
-</div>
-
 <div class="tool-bottom">
-
-<span class="tag">
-时间管理
-</span>
-
-<a
-class="visit"
-href="https://todoist.com/"
-target="_blank"
-rel="noopener noreferrer"
->
-访问
-</a>
-
+<div class="tool-tag">时间管理</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://todoist.com/" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
 </div>
-
-
-
+</div>
 <!-- Trello -->
-
-<div
-class="tool-card"
-data-category="团队协作"
-data-name="Trello"
->
-
-<div class="tool-top">
-
-<div class="tool-icon">
-📋
-</div>
-
+<div class="tool-card" data-category="team" data-name="Trello">
+<div class="tool-main">
+<div class="tool-icon">📋</div>
 <div class="tool-info">
-
-<div class="tool-name">
-Trello
+<div class="tool-name">Trello</div>
+<div class="tool-desc">直观易用的看板式项目协作工具</div>
 </div>
-
-<div class="tool-desc">
-直观易用的看板式项目协作工具
 </div>
-
-</div>
-
-</div>
-
 <div class="tool-bottom">
-
-<span class="tag">
-团队协作
-</span>
-
-<a
-class="visit"
-href="https://trello.com/"
-target="_blank"
-rel="noopener noreferrer"
->
-访问
-</a>
-
+<div class="tool-tag">团队协作</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://trello.com/" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
 </div>
-
-
-
+</div>
 <!-- Zapier -->
-
-<div
-class="tool-card"
-data-category="自动化"
-data-name="Zapier"
->
-
-<div class="tool-top">
-
-<div class="tool-icon">
-⚡
-</div>
-
+<div class="tool-card" data-category="automation" data-name="Zapier">
+<div class="tool-main">
+<div class="tool-icon">⚡</div>
 <div class="tool-info">
-
-<div class="tool-name">
-Zapier
+<div class="tool-name">Zapier</div>
+<div class="tool-desc">连接不同应用实现自动化工作流程</div>
 </div>
-
-<div class="tool-desc">
-连接不同应用实现自动化工作流程
 </div>
-
-</div>
-
-</div>
-
 <div class="tool-bottom">
-
-<span class="tag">
-自动化
-</span>
-
-<a
-class="visit"
-href="https://zapier.com/"
-target="_blank"
-rel="noopener noreferrer"
->
-访问
-</a>
-
+<div class="tool-tag">自动化</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://zapier.com/" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
 </div>
-
-
-
+</div>
 <!-- TickTick -->
-
-<div
-class="tool-card"
-data-category="时间管理"
-data-name="TickTick 滴答清单"
->
-
-<div class="tool-top">
-
-<div class="tool-icon">
-⏱️
-</div>
-
+<div class="tool-card" data-category="time" data-name="TickTick">
+<div class="tool-main">
+<div class="tool-icon">⏱️</div>
 <div class="tool-info">
-
-<div class="tool-name">
-TickTick
+<div class="tool-name">TickTick</div>
+<div class="tool-desc">任务规划、日历与专注管理效率工具</div>
 </div>
-
-<div class="tool-desc">
-任务规划、日历与专注管理效率工具
 </div>
-
-</div>
-
-</div>
-
 <div class="tool-bottom">
-
-<span class="tag">
-时间管理
-</span>
-
-<a
-class="visit"
-href="https://ticktick.com/"
-target="_blank"
-rel="noopener noreferrer"
->
-访问
-</a>
-
+<div class="tool-tag">时间管理</div>
+<div class="tool-actions">
+<a class="action-btn website-btn" href="https://ticktick.com/" target="_blank" rel="noopener noreferrer">官网地址</a>
+<span class="action-btn disabled-btn">暂无项目</span>
 </div>
-
 </div>
-
-
 </div>
-
-
+</div>
 
 <!-- 无结果 -->
 
-<div
-class="empty"
-id="empty"
->
+<div class="empty" id="empty">
+
 没有找到相关工具
+
+</div>
+
+
+
+<!-- 底部 -->
+
+<div class="footer">
+
+©️ 2026 徐胖虎资源社
+
 </div>
 
 
@@ -649,59 +525,62 @@ id="empty"
 
 <script>
 
-let currentCategory = "全部";
+const searchInput =
+document.getElementById("searchInput");
+
+const toolCards =
+document.querySelectorAll(".tool-card");
+
+const categoryButtons =
+document.querySelectorAll(".category-btn");
+
+const empty =
+document.getElementById("empty");
+
+const resourceCount =
+document.getElementById("resourceCount");
+
+let currentCategory = "all";
 
 
-function selectCategory(button,category){
-
-currentCategory = category;
-
-document
-.querySelectorAll(".category")
-.forEach(function(item){
-
-item.classList.remove("active");
-
-});
-
-button.classList.add("active");
-
-filterTools();
-
-}
-
-
+/* 搜索 + 分类筛选 */
 
 function filterTools(){
 
-const keyword = document
-.getElementById("searchInput")
-.value
-.toLowerCase()
-.trim();
-
-const cards = document
-.querySelectorAll(".tool-card");
+const keyword =
+searchInput.value
+.trim()
+.toLowerCase();
 
 let visibleCount = 0;
 
 
-cards.forEach(function(card){
+toolCards.forEach(card => {
 
-const name = card
-.dataset
-.name
+const name =
+card.dataset.name
 .toLowerCase();
 
-const category = card
-.dataset
-.category;
+const description =
+card.querySelector(".tool-desc")
+.textContent
+.toLowerCase();
+
+const category =
+card.dataset.category;
+
 
 const matchSearch =
-name.includes(keyword);
+
+name.includes(keyword) ||
+
+description.includes(keyword);
+
 
 const matchCategory =
-currentCategory === "全部" ||
+
+currentCategory === "all" ||
+
 category === currentCategory;
 
 
@@ -720,15 +599,11 @@ card.style.display = "none";
 });
 
 
-document
-.getElementById("count")
-.textContent =
+resourceCount.textContent =
 visibleCount + " 个资源";
 
 
-document
-.getElementById("empty")
-.style.display =
+empty.style.display =
 visibleCount === 0
 ? "block"
 : "none";
@@ -736,14 +611,52 @@ visibleCount === 0
 }
 
 
+
+searchInput.addEventListener(
+"input",
+filterTools
+);
+
+
+
+categoryButtons.forEach(button => {
+
+button.addEventListener("click", function(){
+
+categoryButtons.forEach(btn => {
+
+btn.classList.remove("active");
+
+});
+
+this.classList.add("active");
+
+currentCategory =
+this.dataset.category;
+
+filterTools();
+
+});
+
+});
+
+
+
 /* =========================
    原生返回逻辑
-   不创建新的历史记录
+   有历史记录返回上一页
+   无历史记录返回首页
+   不新增历史记录
 ========================= */
 
-const backButton = document.getElementById("backButton");
+const backButton =
+document.getElementById("backButton");
 
-backButton.addEventListener("click", function(){
+if(backButton){
+
+backButton.addEventListener(
+"click",
+function(){
 
 if(window.history.length > 1){
 
@@ -756,6 +669,29 @@ window.location.replace("/");
 }
 
 });
+
+}
+
+
+/* =========================
+   禁止右键
+========================= */
+document.oncontextmenu = function(){
+return false;
+};
+
+/* =========================
+   禁止常见开发者快捷键
+========================= */
+document.onkeydown = function(e){
+if(
+e.keyCode === 123 ||
+(e.ctrlKey && e.keyCode === 85) ||
+(e.ctrlKey && e.shiftKey && e.keyCode === 73)
+){
+return false;
+}
+};
 
 </script>
 
