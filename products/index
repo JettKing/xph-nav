@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>产品中心 - 徐胖虎资源社</title>
-<meta name="description" content="徐胖虎资源社产品中心，汇集精选数字产品与AI效率资源，精品数字产品。">
+<meta name="description" content="徐胖虎资源社产品中心，汇集精选数字产品与AI效率资源。">
 <meta name="keywords" content="徐胖虎资源社,产品中心,AI工具图鉴,AI工具,数字产品,效率资源">
 <meta name="author" content="徐胖虎资源社">
 <meta name="robots" content="index,follow">
@@ -17,56 +17,472 @@
 <meta property="og:url" content="https://xph.asia/products/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="产品中心 - 徐胖虎资源社">
-<meta name="twitter:description" content="徐胖虎资源社产品中心，汇集精选数字产品与AI效率资源，精品数字产品。">
+<meta name="twitter:description" content="徐胖虎资源社产品中心，汇集精选数字产品与AI效率资源。">
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;color:#1d1d1f}
-.container{max-width:430px;margin:auto;padding:calc(24px + env(safe-area-inset-top)) 20px calc(35px + env(safe-area-inset-bottom))}
-.topbar{height:72px;display:flex;align-items:center;justify-content:center;position:relative}
-.back{position:absolute;left:0;width:56px;height:56px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:300;color:#111;border:0;padding:0;cursor:pointer;font-family:inherit;box-shadow:0 10px 30px rgba(0,0,0,.06)}
-.title{font-size:20px;font-weight:700}
-.hero{margin-top:38px;background:#fff;border-radius:28px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.045)}
-.badge{display:inline-flex;height:34px;align-items:center;padding:0 14px;background:#3478f6;color:#fff;border-radius:17px;font-size:13px}
-.hero h1{font-size:28px;line-height:1.25;margin:18px 0 0;font-weight:800;letter-spacing:-1px}
-.hero p{font-size:14px;color:#8e8e93;line-height:1.7;margin:14px 0 0}
-.section-head{display:flex;align-items:flex-end;justify-content:space-between;margin:30px 2px 16px}
-.section-title{font-size:20px;font-weight:750}.section-count{font-size:14px;color:#aaa}
-.product-card{display:block;background:#fff;border-radius:28px;padding:22px;text-decoration:none;color:inherit;box-shadow:0 10px 30px rgba(0,0,0,.045)}
-.product-top{display:flex}.product-icon{width:58px;height:58px;border-radius:18px;background:#f3f6ff;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;margin-right:16px}
-.product-info{min-width:0;flex:1}.product-name{font-size:21px;font-weight:750;line-height:1.3}.product-desc{font-size:14px;color:#8e8e93;line-height:1.6;margin-top:7px}
-.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.tag{background:#f5f5f7;padding:8px 12px;border-radius:12px;font-size:12px;color:#666}
-.product-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:22px;padding-top:18px;border-top:1px solid #f2f2f2}
-.price{font-size:22px;font-weight:800}.price small{font-size:12px;font-weight:400;color:#aaa;margin-left:6px}
-.view-btn{height:42px;padding:0 17px;border-radius:14px;background:#3478f6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
-.notice{margin-top:20px;background:#fff;border-radius:26px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.045)}
-.notice-title{font-size:18px;font-weight:700}.notice p{font-size:14px;color:#777;line-height:1.7;margin:12px 0 0}
-.footer{text-align:center;font-size:13px;color:#aaa;margin-top:36px;padding-bottom:10px}
+
+/* =========================
+   基础样式
+========================= */
+
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+body{
+    margin:0;
+    background:#f5f5f7;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+    color:#1d1d1f;
+}
+
+.container{
+    max-width:430px;
+    margin:auto;
+    padding:calc(24px + env(safe-area-inset-top)) 20px calc(35px + env(safe-area-inset-bottom));
+}
+
+/* =========================
+   顶部导航
+========================= */
+
+.topbar{
+    height:72px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+}
+
+.back{
+    position:absolute;
+    left:0;
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:34px;
+    font-weight:300;
+    color:#111;
+    border:0;
+    padding:0;
+    cursor:pointer;
+    font-family:inherit;
+    box-shadow:0 10px 30px rgba(0,0,0,.06);
+}
+
+.title{
+    font-size:20px;
+    font-weight:700;
+}
+
+/* =========================
+   页面介绍
+========================= */
+
+.hero{
+    margin-top:38px;
+    background:#fff;
+    border-radius:28px;
+    padding:22px;
+    box-shadow:0 10px 30px rgba(0,0,0,.045);
+}
+
+.badge{
+    display:inline-flex;
+    height:34px;
+    align-items:center;
+    padding:0 14px;
+    background:#3478f6;
+    color:#fff;
+    border-radius:17px;
+    font-size:13px;
+    font-weight:500;
+}
+
+.hero h1{
+    font-size:28px;
+    line-height:1.25;
+    margin:18px 0 0;
+    font-weight:800;
+    letter-spacing:-1px;
+}
+
+/* =========================
+   产品区域
+========================= */
+
+.hero p{
+    font-size:14px;
+    color:#8e8e93;
+    line-height:1.7;
+    margin:14px 0 0;
+}
+
+.section-head{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    margin:30px 2px 16px;
+}
+
+.section-title{
+    font-size:20px;
+    font-weight:750;
+}
+
+.section-count{
+    font-size:14px;
+    color:#aaa;
+}
+
+.product-card{
+    display:block;
+    background:#fff;
+    border-radius:28px;
+    padding:22px;
+    text-decoration:none;
+    color:inherit;
+    box-shadow:0 10px 30px rgba(0,0,0,.045);
+}
+
+.product-top{
+    display:flex;
+}
+
+.product-icon{
+    width:58px;
+    height:58px;
+    border-radius:18px;
+    background:#f3f6ff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    flex-shrink:0;
+    margin-right:16px;
+}
+
+.product-info{
+    min-width:0;
+    flex:1;
+}
+
+.product-name{
+    font-size:21px;
+    font-weight:750;
+    line-height:1.3;
+}
+
+.product-desc{
+    font-size:14px;
+    color:#8e8e93;
+    line-height:1.6;
+    margin-top:7px;
+}
+
+.tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:20px;
+}
+
+.tag{
+    background:#f5f5f7;
+    padding:8px 12px;
+    border-radius:12px;
+    font-size:12px;
+    color:#666;
+}
+
+/* =========================
+   持续更新
+========================= */
+
+.product-bottom{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:22px;
+    padding-top:18px;
+    border-top:1px solid #f2f2f2;
+}
+
+.price{
+    font-size:22px;
+    font-weight:800;
+}
+
+.price small{
+    font-size:12px;
+    font-weight:400;
+    color:#aaa;
+    margin-left:6px;
+}
+
+/* =========================
+   底部版权
+========================= */
+
+.view-btn{
+    height:42px;
+    padding:0 17px;
+    border-radius:14px;
+    background:#3478f6;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    font-weight:600;
+}
+
+.notice{
+    margin-top:20px;
+    background:#fff;
+    border-radius:26px;
+    padding:22px;
+    box-shadow:0 10px 30px rgba(0,0,0,.045);
+}
+
+.notice-title{
+    font-size:18px;
+    font-weight:700;
+}
+
+.notice p{
+    font-size:14px;
+    color:#777;
+    line-height:1.7;
+    margin:12px 0 0;
+}
+
+.footer{
+    text-align:center;
+    font-size:13px;
+    color:#aaa;
+    margin-top:36px;
+    padding-bottom:10px;
+}
+
 </style>
 </head>
 <body>
+
 <div class="container">
-<div class="topbar"><button class="back" id="backButton" type="button" aria-label="返回">‹</button><div class="title">产品中心</div></div>
-<section class="hero"><div class="badge">精选产品</div><h1>精品数字产品</h1><p>汇聚精品内容，发现实用产品。</p></section>
-<div class="section-head"><div class="section-title">全部产品</div><div class="section-count">1 个产品</div></div>
-<a class="product-card" href="/products/ai-pack.html">
-<div class="product-top"><div class="product-icon">📘</div><div class="product-info"><div class="product-name">AI工具图鉴 Vol.1</div><div class="product-desc">2026正式版 · 精选50款主流AI工具。</div></div></div>
-<div class="tags"><span class="tag">755页</span><span class="tag">50款AI工具</span><span class="tag">持续更新</span></div>
-<div class="product-bottom"><div class="price">¥29.99 <small>限时价</small></div><div class="view-btn">查看详情</div></div>
-</a>
-<div class="notice"><div class="notice-title">持续更新</div><p>持续探索更多实用数字产品，<br>为你带来更多优质内容与选择。</p></div>
-<div class="footer">© 2026 徐胖虎资源社</div>
+
+
+<!-- =========================
+     顶部导航
+========================= -->
+
+<div class="topbar">
+
+<button
+class="back"
+id="backButton"
+type="button"
+aria-label="返回"
+>
+‹
+</button>
+
+<div class="title">
+产品中心
 </div>
+
+</div>
+
+
+<!-- =========================
+     页面介绍
+========================= -->
+
+<section class="hero">
+
+<div class="badge">
+精选产品
+</div>
+
+<h1>
+精品数字产品
+</h1>
+
+<p>
+汇聚精品内容，发现实用产品。
+</p>
+
+</section>
+
+
+<!-- =========================
+     全部产品
+========================= -->
+
+<div class="section-head">
+
+<div class="section-title">
+全部产品
+</div>
+
+<div class="section-count">
+1 个产品
+</div>
+
+</div>
+
+
+<a
+class="product-card"
+href="/products/ai-pack.html"
+>
+
+<div class="product-top">
+
+<div class="product-icon">
+📘
+</div>
+
+<div class="product-info">
+
+<div class="product-name">
+AI工具图鉴 Vol.1
+</div>
+
+<div class="product-desc">
+2026正式版 · 精选50款主流AI工具。
+</div>
+
+</div>
+
+</div>
+
+
+<div class="tags">
+
+<span class="tag">755页</span>
+
+<span class="tag">50款AI工具</span>
+
+<span class="tag">持续更新</span>
+
+</div>
+
+
+<div class="product-bottom">
+
+<div class="price">
+¥29.99 <small>限时价</small>
+</div>
+
+<div class="view-btn">
+查看详情
+</div>
+
+</div>
+
+</a>
+
+
+<!-- =========================
+     持续更新
+========================= -->
+
+<div class="notice">
+
+<div class="notice-title">
+持续更新
+</div>
+
+<p>
+持续探索更多实用数字产品，<br>
+为你带来更多优质内容与选择。
+</p>
+
+</div>
+
+
+<!-- =========================
+     底部版权
+========================= -->
+
+<div class="footer">
+© 2026 徐胖虎资源社
+</div>
+
+
+</div>
+
+
 <script>
-const backButton=document.getElementById("backButton");
+
+/* =========================
+   原生返回逻辑
+   有历史记录时返回上一页
+   无历史记录时返回网站首页
+   使用 replace 避免创建新的历史记录
+========================= */
+
+const backButton = document.getElementById("backButton");
+
 if(backButton){
-backButton.addEventListener("click",function(){
-if(window.history.length>1){window.history.back();}else{window.location.replace("/");}
-});
+
+    backButton.addEventListener("click", function(){
+
+        if(window.history.length > 1){
+
+            window.history.back();
+
+        }else{
+
+            window.location.replace("/");
+
+        }
+
+    });
+
 }
-document.oncontextmenu=function(){return false;};
-document.onkeydown=function(e){
-if(e.keyCode===123||(e.ctrlKey&&e.keyCode===85)||(e.ctrlKey&&e.shiftKey&&e.keyCode===73)){return false;}
+
+
+/* =========================
+   禁止右键菜单
+========================= */
+
+document.oncontextmenu = function(){
+
+    return false;
+
 };
+
+
+/* =========================
+   禁止常见查看源码及开发者工具快捷键
+   F12
+   Ctrl / Cmd + U
+   Ctrl / Cmd + Shift + I
+========================= */
+
+document.onkeydown = function(e){
+
+    const ctrlOrMeta = e.ctrlKey || e.metaKey;
+
+    if(
+        e.keyCode === 123 ||
+        (ctrlOrMeta && e.keyCode === 85) ||
+        (ctrlOrMeta && e.shiftKey && e.keyCode === 73)
+    ){
+
+        return false;
+
+    }
+
+};
+
 </script>
+
 </body>
 </html>
