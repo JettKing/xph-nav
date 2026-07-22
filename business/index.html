@@ -11,7 +11,20 @@
 
 <meta name="description" content="徐胖虎资源社商务合作中心，提供频道推广、品牌合作、资源合作与长期合作方案。">
 
+<meta name="keywords" content="徐胖虎资源社,商务合作,频道推广,品牌合作,资源合作,长期合作">
+
 <meta name="robots" content="index,follow">
+
+<!-- Open Graph 分享优化 -->
+<meta property="og:title" content="商务合作 - 徐胖虎资源社">
+<meta property="og:description" content="徐胖虎资源社商务合作中心，提供频道推广、品牌合作、资源合作与长期合作方案。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://xph.asia/business/">
+
+<!-- Twitter 分享 -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="商务合作 - 徐胖虎资源社">
+<meta name="twitter:description" content="徐胖虎资源社商务合作中心，提供频道推广、品牌合作、资源合作与长期合作方案。">
 
 <link rel="canonical" href="https://xph.asia/business/">
 
@@ -146,24 +159,9 @@ padding-bottom:42px;
 }
 
 
-.hero h1{
-
-margin:0;
-
-font-size:40px;
-
-line-height:1.15;
-
-letter-spacing:-1.5px;
-
-font-weight:800;
-
-}
-
-
 .hero p{
 
-margin:24px 0 0;
+margin:0;
 
 font-size:15px;
 
@@ -362,8 +360,6 @@ text-decoration:none;
 
 }
 
-<style>
-
 /* =========================
    合作说明
 ========================= */
@@ -495,13 +491,6 @@ padding-bottom:10px;
 
 @media(max-width:380px){
 
-.hero h1{
-
-font-size:36px;
-
-}
-
-
 .hero p{
 
 font-size:14px;
@@ -582,13 +571,6 @@ aria-label="返回"
 <!-- 页面介绍 -->
 
 <section class="hero">
-
-
-<h1>
-
-与我们合作
-
-</h1>
 
 
 <p>
@@ -1002,6 +984,7 @@ href="/contact/?type=business"
 
 const backButton = document.getElementById("backButton");
 
+if(backButton){
 
 backButton.addEventListener("click", function(){
 
@@ -1038,6 +1021,8 @@ window.location.replace("/");
 
 
 });
+
+}
 
 
 
