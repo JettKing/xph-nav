@@ -451,7 +451,7 @@ autocomplete="off"
 </div>
 
 <div class="resource-count" id="resourceCount">
-5 个资源
+0 个资源
 </div>
 
 </div>
@@ -460,310 +460,9 @@ autocomplete="off"
 
 <div class="tools" id="tools">
 
-
-<!-- LocalSend -->
-
-<div
-class="tool-card"
-data-category="system"
-data-name="LocalSend"
->
-
-<div class="tool-main">
-
-<div class="tool-icon">📲</div>
-
-<div class="tool-info">
-
-<div class="tool-name">
-LocalSend
-</div>
-
-<div class="tool-desc">
-跨平台局域网文件传输工具
-</div>
+<!-- 资源卡片由 /assets/js/software-data.js 自动生成 -->
 
 </div>
-
-</div>
-
-
-<div class="tool-bottom">
-
-<div class="tool-tag">
-系统工具
-</div>
-
-<div class="tool-actions">
-
-<a
-class="action-btn website-btn"
-href="https://localsend.org"
-target="_blank"
-rel="noopener noreferrer"
->
-官网地址
-</a>
-
-<a
-class="action-btn project-btn"
-href="https://github.com/localsend/localsend"
-target="_blank"
-rel="noopener noreferrer"
->
-项目地址
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<!-- VLC -->
-
-<div
-class="tool-card"
-data-category="media"
-data-name="VLC"
->
-
-<div class="tool-main">
-
-<div class="tool-icon">🎬</div>
-
-<div class="tool-info">
-
-<div class="tool-name">
-VLC
-</div>
-
-<div class="tool-desc">
-免费开源的跨平台媒体播放器
-</div>
-
-</div>
-
-</div>
-
-
-<div class="tool-bottom">
-
-<div class="tool-tag">
-影音工具
-</div>
-
-<div class="tool-actions">
-
-<a
-class="action-btn website-btn"
-href="https://www.videolan.org/vlc/"
-target="_blank"
-rel="noopener noreferrer"
->
-官网地址
-</a>
-
-<a
-class="action-btn project-btn"
-href="https://code.videolan.org/videolan/vlc"
-target="_blank"
-rel="noopener noreferrer"
->
-项目地址
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<!-- Motrix -->
-
-<div
-class="tool-card"
-data-category="download"
-data-name="Motrix"
->
-
-<div class="tool-main">
-
-<div class="tool-icon">⬇️</div>
-
-<div class="tool-info">
-
-<div class="tool-name">
-Motrix
-</div>
-
-<div class="tool-desc">
-简洁好用的全能下载工具
-</div>
-
-</div>
-
-</div>
-
-
-<div class="tool-bottom">
-
-<div class="tool-tag">
-下载工具
-</div>
-
-<div class="tool-actions">
-
-<a
-class="action-btn website-btn"
-href="https://motrix.app"
-target="_blank"
-rel="noopener noreferrer"
->
-官网地址
-</a>
-
-<a
-class="action-btn project-btn"
-href="https://github.com/agalwood/Motrix"
-target="_blank"
-rel="noopener noreferrer"
->
-项目地址
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<!-- 7-Zip -->
-
-<div
-class="tool-card"
-data-category="file"
-data-name="7-Zip"
->
-
-<div class="tool-main">
-
-<div class="tool-icon">📦</div>
-
-<div class="tool-info">
-
-<div class="tool-name">
-7-Zip
-</div>
-
-<div class="tool-desc">
-免费开源的高压缩率文件工具
-</div>
-
-</div>
-
-</div>
-
-
-<div class="tool-bottom">
-
-<div class="tool-tag">
-文件管理
-</div>
-
-<div class="tool-actions">
-
-<a
-class="action-btn website-btn"
-href="https://www.7-zip.org"
-target="_blank"
-rel="noopener noreferrer"
->
-官网地址
-</a>
-
-<span
-class="action-btn disabled-btn"
->
-暂无项目
-</span>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<!-- RustDesk -->
-
-<div
-class="tool-card"
-data-category="network"
-data-name="RustDesk"
->
-
-<div class="tool-main">
-
-<div class="tool-icon">🖥️</div>
-
-<div class="tool-info">
-
-<div class="tool-name">
-RustDesk
-</div>
-
-<div class="tool-desc">
-开源跨平台远程桌面软件
-</div>
-
-</div>
-
-</div>
-
-
-<div class="tool-bottom">
-
-<div class="tool-tag">
-网络工具
-</div>
-
-<div class="tool-actions">
-
-<a
-class="action-btn website-btn"
-href="https://rustdesk.com"
-target="_blank"
-rel="noopener noreferrer"
->
-官网地址
-</a>
-
-<a
-class="action-btn project-btn"
-href="https://github.com/rustdesk/rustdesk"
-target="_blank"
-rel="noopener noreferrer"
->
-项目地址
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-
-</div>
-
 
 
 <!-- 无结果 -->
@@ -789,7 +488,135 @@ rel="noopener noreferrer"
 
 
 
+<script src="/assets/js/software-data.js"></script>
+
 <script>
+
+/* =========================
+   资源卡片自动生成
+========================= */
+
+const toolsContainer =
+document.getElementById("tools");
+
+
+function escapeHTML(value){
+
+return String(value)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+function renderTools(){
+
+if(
+!toolsContainer ||
+!Array.isArray(softwareList)
+){
+
+return;
+
+}
+
+
+toolsContainer.innerHTML =
+softwareList.map(item => {
+
+
+const projectButton = item.project
+
+? `
+
+<a
+class="action-btn project-btn"
+href="${escapeHTML(item.project)}"
+target="_blank"
+rel="noopener noreferrer"
+>
+项目地址
+</a>
+
+`
+
+: `
+
+<span
+class="action-btn disabled-btn"
+>
+暂无项目
+</span>
+
+`;
+
+
+return `
+
+<div
+class="tool-card"
+data-category="${escapeHTML(item.category)}"
+data-name="${escapeHTML(item.name)}"
+>
+
+<div class="tool-main">
+
+<div class="tool-icon">
+${escapeHTML(item.icon)}
+</div>
+
+<div class="tool-info">
+
+<div class="tool-name">
+${escapeHTML(item.name)}
+</div>
+
+<div class="tool-desc">
+${escapeHTML(item.desc)}
+</div>
+
+</div>
+
+</div>
+
+
+<div class="tool-bottom">
+
+<div class="tool-tag">
+${escapeHTML(item.tag)}
+</div>
+
+<div class="tool-actions">
+
+<a
+class="action-btn website-btn"
+href="${escapeHTML(item.website)}"
+target="_blank"
+rel="noopener noreferrer"
+>
+官网地址
+</a>
+
+${projectButton}
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}).join("");
+
+}
+
+
+renderTools();
+
 
 /* =========================
    搜索与分类筛选
@@ -811,6 +638,10 @@ const resourceCount =
 document.getElementById("resourceCount");
 
 let currentCategory = "all";
+
+
+resourceCount.textContent =
+toolCards.length + " 个资源";
 
 
 
