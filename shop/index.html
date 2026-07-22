@@ -11,7 +11,20 @@
 
 <meta name="description" content="徐胖虎资源社数字商城，提供AI工具包、资源合集、运营资料包等精品数字产品。">
 
+<meta name="keywords" content="徐胖虎资源社,数字商城,AI工具图鉴,AI工具包,数字产品,资源合集,运营资料包">
+
 <meta name="robots" content="index,follow">
+
+<!-- Open Graph 分享优化 -->
+<meta property="og:title" content="数字商城 - 徐胖虎资源社">
+<meta property="og:description" content="徐胖虎资源社数字商城，提供AI工具包、资源合集、运营资料包等精品数字产品。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://xph.asia/shop/">
+
+<!-- Twitter 分享 -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="数字商城 - 徐胖虎资源社">
+<meta name="twitter:description" content="徐胖虎资源社数字商城，提供AI工具包、资源合集、运营资料包等精品数字产品。">
 
 <link rel="canonical" href="https://xph.asia/shop/">
 
@@ -838,6 +851,8 @@ TG运营资料包
 
 const backButton = document.getElementById("backButton");
 
+if(backButton){
+
 backButton.addEventListener("click", function(){
 
 if(window.history.length > 1){
@@ -851,6 +866,33 @@ window.location.replace("/");
 }
 
 });
+
+}
+
+/* =========================
+   禁止右键
+========================= */
+
+document.oncontextmenu = function(){
+return false;
+};
+
+
+/* =========================
+   禁止常见开发者快捷键
+========================= */
+
+document.onkeydown = function(e){
+
+if(
+e.keyCode === 123 ||
+(e.ctrlKey && e.keyCode === 85) ||
+(e.ctrlKey && e.shiftKey && e.keyCode === 73)
+){
+return false;
+}
+
+};
 
 </script>
 
