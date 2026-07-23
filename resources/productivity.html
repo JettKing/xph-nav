@@ -412,93 +412,7 @@ autocomplete="off"
 
 
 
-<div class="tools" id="tools">
-<!-- Notion -->
-<div class="tool-card" data-category="notes" data-name="Notion">
-<div class="tool-main">
-<div class="tool-icon">📝</div>
-<div class="tool-info">
-<div class="tool-name">Notion</div>
-<div class="tool-desc">集笔记、知识库与项目管理于一体</div>
-</div>
-</div>
-<div class="tool-bottom">
-<div class="tool-tag">笔记工具</div>
-<div class="tool-actions">
-<a class="action-btn website-btn" href="https://www.notion.so/" target="_blank" rel="noopener noreferrer">官网地址</a>
-<span class="action-btn disabled-btn">暂无项目</span>
-</div>
-</div>
-</div>
-<!-- Todoist -->
-<div class="tool-card" data-category="time" data-name="Todoist">
-<div class="tool-main">
-<div class="tool-icon">✅</div>
-<div class="tool-info">
-<div class="tool-name">Todoist</div>
-<div class="tool-desc">简单高效的任务与待办事项管理工具</div>
-</div>
-</div>
-<div class="tool-bottom">
-<div class="tool-tag">时间管理</div>
-<div class="tool-actions">
-<a class="action-btn website-btn" href="https://todoist.com/" target="_blank" rel="noopener noreferrer">官网地址</a>
-<span class="action-btn disabled-btn">暂无项目</span>
-</div>
-</div>
-</div>
-<!-- Trello -->
-<div class="tool-card" data-category="team" data-name="Trello">
-<div class="tool-main">
-<div class="tool-icon">📋</div>
-<div class="tool-info">
-<div class="tool-name">Trello</div>
-<div class="tool-desc">直观易用的看板式项目协作工具</div>
-</div>
-</div>
-<div class="tool-bottom">
-<div class="tool-tag">团队协作</div>
-<div class="tool-actions">
-<a class="action-btn website-btn" href="https://trello.com/" target="_blank" rel="noopener noreferrer">官网地址</a>
-<span class="action-btn disabled-btn">暂无项目</span>
-</div>
-</div>
-</div>
-<!-- Zapier -->
-<div class="tool-card" data-category="automation" data-name="Zapier">
-<div class="tool-main">
-<div class="tool-icon">⚡</div>
-<div class="tool-info">
-<div class="tool-name">Zapier</div>
-<div class="tool-desc">连接不同应用实现自动化工作流程</div>
-</div>
-</div>
-<div class="tool-bottom">
-<div class="tool-tag">自动化</div>
-<div class="tool-actions">
-<a class="action-btn website-btn" href="https://zapier.com/" target="_blank" rel="noopener noreferrer">官网地址</a>
-<span class="action-btn disabled-btn">暂无项目</span>
-</div>
-</div>
-</div>
-<!-- TickTick -->
-<div class="tool-card" data-category="time" data-name="TickTick">
-<div class="tool-main">
-<div class="tool-icon">⏱️</div>
-<div class="tool-info">
-<div class="tool-name">TickTick</div>
-<div class="tool-desc">任务规划、日历与专注管理效率工具</div>
-</div>
-</div>
-<div class="tool-bottom">
-<div class="tool-tag">时间管理</div>
-<div class="tool-actions">
-<a class="action-btn website-btn" href="https://ticktick.com/" target="_blank" rel="noopener noreferrer">官网地址</a>
-<span class="action-btn disabled-btn">暂无项目</span>
-</div>
-</div>
-</div>
-</div>
+<div class="tools" id="tools"></div>
 
 <!-- 无结果 -->
 
@@ -523,13 +437,12 @@ autocomplete="off"
 
 
 
+<script src="/assets/js/productivity-data.js"></script>
+
 <script>
 
 const searchInput =
 document.getElementById("searchInput");
-
-const toolCards =
-document.querySelectorAll(".tool-card");
 
 const categoryButtons =
 document.querySelectorAll(".category-btn");
@@ -540,84 +453,141 @@ document.getElementById("empty");
 const resourceCount =
 document.getElementById("resourceCount");
 
+const tools =
+document.getElementById("tools");
+
 let currentCategory = "all";
 
 
-/* 搜索 + 分类筛选 */
+/* =========================
+   动态生成资源卡片
+========================= */
 
-function filterTools(){
+function renderTools(){
 
 const keyword =
 searchInput.value
 .trim()
 .toLowerCase();
 
-let visibleCount = 0;
-
-
-toolCards.forEach(card => {
-
-const name =
-card.dataset.name
-.toLowerCase();
-
-const description =
-card.querySelector(".tool-desc")
-.textContent
-.toLowerCase();
-
-const category =
-card.dataset.category;
-
+const filteredTools =
+productivityList.filter(item => {
 
 const matchSearch =
 
-name.includes(keyword) ||
+item.name
+.toLowerCase()
+.includes(keyword) ||
 
-description.includes(keyword);
+item.desc
+.toLowerCase()
+.includes(keyword) ||
+
+item.tag
+.toLowerCase()
+.includes(keyword);
 
 
 const matchCategory =
 
 currentCategory === "all" ||
 
-category === currentCategory;
+item.category === currentCategory;
 
 
-if(matchSearch && matchCategory){
-
-card.style.display = "block";
-
-visibleCount++;
-
-}else{
-
-card.style.display = "none";
-
-}
+return matchSearch && matchCategory;
 
 });
 
 
+tools.innerHTML =
+filteredTools.map(item => {
+
+const projectButton =
+
+item.project
+
+? `<a class="action-btn project-btn" href="${item.project}" target="_blank" rel="noopener noreferrer">项目地址</a>`
+
+: `<span class="action-btn disabled-btn">暂无项目</span>`;
+
+
+return `
+
+<div class="tool-card">
+
+<div class="tool-main">
+
+<div class="tool-icon">
+${item.icon}
+</div>
+
+<div class="tool-info">
+
+<div class="tool-name">
+${item.name}
+</div>
+
+<div class="tool-desc">
+${item.desc}
+</div>
+
+</div>
+
+</div>
+
+
+<div class="tool-bottom">
+
+<div class="tool-tag">
+${item.tag}
+</div>
+
+<div class="tool-actions">
+
+<a
+class="action-btn website-btn"
+href="${item.website}"
+target="_blank"
+rel="noopener noreferrer"
+>
+官网地址
+</a>
+
+${projectButton}
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}).join("");
+
+
 resourceCount.textContent =
-visibleCount + " 个资源";
+filteredTools.length + " 个资源";
 
 
 empty.style.display =
-visibleCount === 0
+filteredTools.length === 0
 ? "block"
 : "none";
 
 }
 
 
+/* 搜索 */
 
 searchInput.addEventListener(
 "input",
-filterTools
+renderTools
 );
 
 
+/* 分类筛选 */
 
 categoryButtons.forEach(button => {
 
@@ -634,12 +604,11 @@ this.classList.add("active");
 currentCategory =
 this.dataset.category;
 
-filterTools();
+renderTools();
 
 });
 
 });
-
 
 
 /* =========================
@@ -676,22 +645,40 @@ window.location.replace("/");
 /* =========================
    禁止右键
 ========================= */
+
 document.oncontextmenu = function(){
+
 return false;
+
 };
+
 
 /* =========================
    禁止常见开发者快捷键
 ========================= */
+
 document.onkeydown = function(e){
+
 if(
+
 e.keyCode === 123 ||
+
 (e.ctrlKey && e.keyCode === 85) ||
+
 (e.ctrlKey && e.shiftKey && e.keyCode === 73)
+
 ){
+
 return false;
+
 }
+
 };
+
+
+/* 初始化 */
+
+renderTools();
 
 </script>
 
