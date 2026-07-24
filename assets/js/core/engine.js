@@ -1,56 +1,77 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * Engine v1.0
+ * Engine v2.0
  * ----------------------------------------------------------
- * 负责：
- * 1. 获取资源数据
- * 2. 调用 Renderer
- * 3. 调用 Filter
- * 4. 调用 Search
+ * 职责：
+ * 1. 提供页面资源
+ * 2. 提供全部资源
+ * 3. 不处理 DOM
+ * 4. 不处理渲染
  * ==========================================================
  */
 
 window.ResourceEngine = {
 
     /**
+     * 页面资源映射
+     */
+    pages: {
+
+        ai: () => window.aiResources || [],
+
+        software: () => window.softwareResources || [],
+
+        productivity: () => window.productivityResources || [],
+
+        website: () => window.websiteResources || [],
+
+        digital: () => window.digitalResources || [],
+
+        solution: () => window.solutionResources || []
+
+    },
+
+    /**
+     * 获取指定页面资源
+     */
+    getPageResources(page) {
+
+        if (!page) return [];
+
+        const getter = this.pages[page];
+
+        return getter ? getter() : [];
+
+    },
+
+    /**
      * 获取全部资源
      */
     getAllResources() {
 
-        return [
-
-            ...(window.aiResources || []),
-
-            ...(window.softwareResources || []),
-
-            ...(window.productivityResources || []),
-
-            ...(window.websiteResources || []),
-
-            ...(window.digitalResources || []),
-
-            ...(window.solutionResources || [])
-
-        ];
+        return Object.values(this.pages)
+            .flatMap(fn => fn());
 
     },
 
     /**
-     * 根据一级分类获取资源
+     * 一级分类（兼容旧代码）
      */
     getCategory(category) {
 
-        return this.getAllResources().filter(item => item.category === category);
+        return this.getAllResources()
+            .filter(item => item.category === category);
 
     },
 
     /**
-     * 根据二级分类获取资源
+     * 二级分类（兼容旧代码）
      */
     getSubCategory(subcategory) {
 
-        return this.getAllResources().filter(item => item.subcategory === subcategory);
+        return this.getAllResources()
+            .filter(item => item.subcategory === subcategory);
 
     }
 
