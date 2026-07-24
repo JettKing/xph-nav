@@ -353,7 +353,7 @@ padding:35px 0 15px;
 </head>
 
 
-<body>
+<body data-page="websites">>
 
 <div class="container">
 
@@ -455,7 +455,7 @@ autocomplete="off"
 
 
 
-<div class="tools" id="tools">
+<div class="tools" id="resource-list">
 
 <!-- 资源卡片由 /assets/js/websites-data.js 自动生成 -->
 
@@ -485,260 +485,9 @@ autocomplete="off"
 
 
 
-<script src="/assets/js/websites-data.js"></script>
+
 
 <script>
-
-/* =========================
-   资源卡片自动生成
-========================= */
-
-const toolsContainer =
-document.getElementById("tools");
-
-
-function escapeHTML(value){
-
-return String(value)
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
-
-}
-
-
-function renderTools(){
-
-if(
-!toolsContainer ||
-!Array.isArray(websitesList)
-){
-
-return;
-
-}
-
-
-toolsContainer.innerHTML =
-websitesList.map(item => {
-
-
-const projectButton = item.project
-
-? `
-
-<a
-class="action-btn project-btn"
-href="${escapeHTML(item.project)}"
-target="_blank"
-rel="noopener noreferrer"
->
-项目地址
-</a>
-
-`
-
-: `
-
-<span
-class="action-btn disabled-btn"
->
-暂无项目
-</span>
-
-`;
-
-
-return `
-
-<div
-class="tool-card"
-data-category="${escapeHTML(item.category)}"
-data-name="${escapeHTML(item.name)}"
->
-
-<div class="tool-main">
-
-<div class="tool-icon">
-${escapeHTML(item.icon)}
-</div>
-
-<div class="tool-info">
-
-<div class="tool-name">
-${escapeHTML(item.name)}
-</div>
-
-<div class="tool-desc">
-${escapeHTML(item.desc)}
-</div>
-
-</div>
-
-</div>
-
-
-<div class="tool-bottom">
-
-<div class="tool-tag">
-${escapeHTML(item.tag)}
-</div>
-
-<div class="tool-actions">
-
-<a
-class="action-btn website-btn"
-href="${escapeHTML(item.website)}"
-target="_blank"
-rel="noopener noreferrer"
->
-官网地址
-</a>
-
-${projectButton}
-
-</div>
-
-</div>
-
-</div>
-
-`;
-
-}).join("");
-
-}
-
-
-renderTools();
-
-
-/* =========================
-   搜索与分类筛选
-========================= */
-
-const searchInput =
-document.getElementById("searchInput");
-
-const toolCards =
-document.querySelectorAll(".tool-card");
-
-const categoryButtons =
-document.querySelectorAll(".category-btn");
-
-const empty =
-document.getElementById("empty");
-
-const resourceCount =
-document.getElementById("resourceCount");
-
-let currentCategory = "all";
-
-
-resourceCount.textContent =
-toolCards.length + " 个资源";
-
-
-
-
-function filterTools(){
-
-const keyword =
-searchInput.value
-.trim()
-.toLowerCase();
-
-let visibleCount = 0;
-
-
-toolCards.forEach(card => {
-
-const name =
-card.dataset.name
-.toLowerCase();
-
-const description =
-card.querySelector(".tool-desc")
-.textContent
-.toLowerCase();
-
-const category =
-card.dataset.category;
-
-
-const matchSearch =
-
-name.includes(keyword) ||
-
-description.includes(keyword);
-
-
-const matchCategory =
-
-currentCategory === "all" ||
-
-category === currentCategory;
-
-
-if(matchSearch && matchCategory){
-
-card.style.display = "block";
-
-visibleCount++;
-
-}else{
-
-card.style.display = "none";
-
-}
-
-});
-
-
-resourceCount.textContent =
-visibleCount + " 个资源";
-
-
-empty.style.display =
-visibleCount === 0
-? "block"
-: "none";
-
-}
-
-
-
-searchInput.addEventListener(
-"input",
-filterTools
-);
-
-
-
-categoryButtons.forEach(button => {
-
-button.addEventListener("click", function(){
-
-categoryButtons.forEach(btn => {
-
-btn.classList.remove("active");
-
-});
-
-this.classList.add("active");
-
-currentCategory =
-this.dataset.category;
-
-filterTools();
-
-});
-
-});
-
-
 
 /* =========================
    原生返回逻辑
@@ -802,6 +551,14 @@ return false;
 
 </script>
 
+
+
+
+<script src="/assets/js/core/templates.js"></script>
+<script src="/assets/js/core/renderer.js"></script>
+<script src="/assets/js/core/engine.js"></script>
+<script src="/assets/js/core/store.js"></script>
+<script src="/assets/js/core/app.js"></script>
 
 </body>
 
