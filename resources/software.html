@@ -7,19 +7,19 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>实用软件 - 徐胖虎资源社</title>
+<title>软件工具 - 徐胖虎资源社</title>
 
-<meta name="description" content="徐胖虎资源社精选优质实用软件，涵盖系统工具、影音工具、下载工具、文件管理和网络工具等实用软件。">
+<meta name="description" content="徐胖虎资源社精选优质软件工具，涵盖系统工具、影音工具、下载工具、文件管理和网络工具等软件工具。">
 
-<meta name="keywords" content="徐胖虎资源社,实用软件,系统工具,影音工具,下载工具,文件管理,网络工具">
+<meta name="keywords" content="徐胖虎资源社,软件工具,系统工具,影音工具,下载工具,文件管理,网络工具">
 <meta name="robots" content="index,follow">
-<meta property="og:title" content="实用软件 - 徐胖虎资源社">
-<meta property="og:description" content="徐胖虎资源社精选优质实用软件，涵盖系统工具、影音工具、下载工具、文件管理和网络工具等实用软件。">
+<meta property="og:title" content="软件工具 - 徐胖虎资源社">
+<meta property="og:description" content="徐胖虎资源社精选优质软件工具，涵盖系统工具、影音工具、下载工具、文件管理和网络工具等软件工具。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xph.asia/resources/software.html">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="实用软件 - 徐胖虎资源社">
-<meta name="twitter:description" content="徐胖虎资源社精选优质实用软件，涵盖系统工具、影音工具、下载工具、文件管理和网络工具等实用软件。">
+<meta name="twitter:title" content="软件工具 - 徐胖虎资源社">
+<meta name="twitter:description" content="徐胖虎资源社精选优质软件工具，涵盖系统工具、影音工具、下载工具、文件管理和网络工具等软件工具。">
 
 <link rel="canonical" href="https://xph.asia/resources/software.html">
 
@@ -372,7 +372,7 @@ aria-label="返回"
 </button>
 
 <div class="header-title">
-实用软件
+软件工具
 </div>
 
 <div class="header-space"></div>
@@ -386,7 +386,7 @@ aria-label="返回"
 <div class="hero">
 
 <p>
-精选优质实用软件，发现真正好用的软件工具。
+精选优质软件工具，发现真正好用的软件工具。
 </p>
 
 </div>
@@ -402,7 +402,7 @@ aria-label="返回"
 <input
 type="text"
 id="searchInput"
-placeholder="搜索实用软件..."
+placeholder="搜索软件工具..."
 autocomplete="off"
 >
 
@@ -469,7 +469,7 @@ autocomplete="off"
 
 <div class="empty" id="empty">
 
-没有找到相关实用软件
+没有找到相关软件工具
 
 </div>
 
@@ -488,7 +488,7 @@ autocomplete="off"
 
 
 
-
+<script src="/assets/js/data/software.js"></script>
 
 <script src="/assets/js/core/templates.js"></script>
 <script src="/assets/js/core/renderer.js"></script>
@@ -497,6 +497,257 @@ autocomplete="off"
 <script src="/assets/js/core/app.js"></script>
 
 <script>
+
+/* =========================
+   资源卡片自动生成
+========================= */
+
+const toolsContainer =
+document.getElementById("resource-list");
+
+
+function escapeHTML(value){
+
+return String(value)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+function renderTools(){
+
+if(
+!toolsContainer ||
+!Array.isArray(softwareList)
+){
+
+return;
+
+}
+
+
+toolsContainer.innerHTML =
+softwareList.map(item => {
+
+
+const projectButton = item.project
+
+? `
+
+<a
+class="action-btn project-btn"
+href="${escapeHTML(item.project)}"
+target="_blank"
+rel="noopener noreferrer"
+>
+项目地址
+</a>
+
+`
+
+: `
+
+<span
+class="action-btn disabled-btn"
+>
+暂无项目
+</span>
+
+`;
+
+
+return `
+
+<div
+class="tool-card"
+data-category="${escapeHTML(item.category)}"
+data-name="${escapeHTML(item.name)}"
+>
+
+<div class="tool-main">
+
+<div class="tool-icon">
+${escapeHTML(item.icon)}
+</div>
+
+<div class="tool-info">
+
+<div class="tool-name">
+${escapeHTML(item.name)}
+</div>
+
+<div class="tool-desc">
+${escapeHTML(item.desc)}
+</div>
+
+</div>
+
+</div>
+
+
+<div class="tool-bottom">
+
+<div class="tool-tag">
+${escapeHTML(item.tag)}
+</div>
+
+<div class="tool-actions">
+
+<a
+class="action-btn website-btn"
+href="${escapeHTML(item.website)}"
+target="_blank"
+rel="noopener noreferrer"
+>
+官网地址
+</a>
+
+${projectButton}
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}).join("");
+
+}
+
+
+renderTools();
+
+
+/* =========================
+   搜索与分类筛选
+========================= */
+
+const searchInput =
+document.getElementById("searchInput");
+
+const toolCards =
+document.querySelectorAll(".tool-card");
+
+const categoryButtons =
+document.querySelectorAll(".category-btn");
+
+const empty =
+document.getElementById("empty");
+
+const resourceCount =
+document.getElementById("resourceCount");
+
+let currentCategory = "all";
+
+
+resourceCount.textContent =
+toolCards.length + " 个资源";
+
+
+
+
+function filterTools(){
+
+const keyword =
+searchInput.value
+.trim()
+.toLowerCase();
+
+let visibleCount = 0;
+
+
+toolCards.forEach(card => {
+
+const name =
+card.dataset.name
+.toLowerCase();
+
+const description =
+card.querySelector(".tool-desc")
+.textContent
+.toLowerCase();
+
+const category =
+card.dataset.category;
+
+
+const matchSearch =
+
+name.includes(keyword) ||
+
+description.includes(keyword);
+
+
+const matchCategory =
+
+currentCategory === "all" ||
+
+category === currentCategory;
+
+
+if(matchSearch && matchCategory){
+
+card.style.display = "block";
+
+visibleCount++;
+
+}else{
+
+card.style.display = "none";
+
+}
+
+});
+
+
+resourceCount.textContent =
+visibleCount + " 个资源";
+
+
+empty.style.display =
+visibleCount === 0
+? "block"
+: "none";
+
+}
+
+
+
+searchInput.addEventListener(
+"input",
+filterTools
+);
+
+
+
+categoryButtons.forEach(button => {
+
+button.addEventListener("click", function(){
+
+categoryButtons.forEach(btn => {
+
+btn.classList.remove("active");
+
+});
+
+this.classList.add("active");
+
+currentCategory =
+this.dataset.category;
+
+filterTools();
+
+});
+
+});
+
+
 
 /* =========================
    原生返回逻辑
