@@ -1,7 +1,7 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * Renderer v1.0
+ * Renderer v2.0
  * ----------------------------------------------------------
  * 职责：
  * 1. 清空容器
@@ -13,40 +13,43 @@
 window.ResourceRenderer = {
 
     /**
-     * 渲染资源列表
-     * @param {Array} resources
-     * @param {String} containerId
+     * 渲染资源
+     * @param {Object} options
+     * @param {String} options.container
+     * @param {Array} options.data
      */
-    renderResources(resources = [], containerId = "resource-list") {
+    render({
+        container = "#resource-list",
+        data = []
+    } = {}) {
 
-        const container = document.getElementById(containerId);
+        const element = document.querySelector(container);
 
-        if (!container) {
-            console.warn(`找不到容器：#${containerId}`);
+        if (!element) {
+            console.warn(`找不到容器：${container}`);
             return;
         }
 
-        this.clear(container);
+        this.clear(element);
 
-        if (!resources.length) {
-            container.innerHTML = ResourceTemplates.empty();
+        if (!data.length) {
+            element.innerHTML = ResourceTemplates.empty();
             return;
         }
 
-        const html = resources
-            .map(resource => ResourceTemplates.card(resource))
+        element.innerHTML = data
+            .map(ResourceTemplates.card)
             .join("");
-
-        container.innerHTML = html;
 
     },
 
     /**
      * 清空容器
+     * @param {HTMLElement} element
      */
-    clear(container) {
+    clear(element) {
 
-        container.innerHTML = "";
+        element.innerHTML = "";
 
     }
 
