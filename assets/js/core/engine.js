@@ -6,8 +6,9 @@
  * 职责：
  * 1. 提供页面资源
  * 2. 提供全部资源
- * 3. 不处理 DOM
- * 4. 不处理渲染
+ * 3. 提供分类资源
+ * 4. 不负责 DOM
+ * 5. 不负责渲染
  * ==========================================================
  */
 
@@ -51,12 +52,12 @@ window.ResourceEngine = {
     getAllResources() {
 
         return Object.values(this.pages)
-            .flatMap(fn => fn());
+            .flatMap(getter => getter());
 
     },
 
     /**
-     * 一级分类（兼容旧代码）
+     * 根据一级分类获取资源
      */
     getCategory(category) {
 
@@ -66,7 +67,7 @@ window.ResourceEngine = {
     },
 
     /**
-     * 二级分类（兼容旧代码）
+     * 根据二级分类获取资源
      */
     getSubCategory(subcategory) {
 
