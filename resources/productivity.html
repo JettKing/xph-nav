@@ -14,12 +14,12 @@
 <meta name="keywords" content="徐胖虎资源社,效率神器,效率工具,时间管理,笔记工具,团队协作,自动化">
 <meta name="robots" content="index,follow">
 <meta property="og:title" content="效率神器 - 徐胖虎资源社">
-<meta property="og:description" content="徐胖虎资源社精选优质效率神器，涵盖时间管理、笔记工具、团队协作和自动化等实用效率工具。">
+<meta property="og:description" content="徐胖虎资源社精选优质效率神器，涵盖时间管理、笔记管理、团队协作和自动化等实用效率工具。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://xph.asia/resources/productivity.html">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="效率神器 - 徐胖虎资源社">
-<meta name="twitter:description" content="徐胖虎资源社精选优质效率神器，涵盖时间管理、笔记工具、团队协作和自动化等实用效率工具。">
+<meta name="twitter:description" content="徐胖虎资源社精选优质效率神器，涵盖时间管理、笔记管理、团队协作和自动化等实用效率工具。">
 
 <link rel="canonical" href="https://xph.asia/resources/productivity.html">
 
@@ -53,7 +53,9 @@ padding:20px;
 }
 
 
-/* 顶部 */
+/* =========================
+   顶部导航
+========================= */
 
 .header{
 display:flex;
@@ -89,7 +91,9 @@ width:50px;
 }
 
 
-/* 页面介绍 */
+/* =========================
+   页面介绍
+========================= */
 
 .hero{
 margin-bottom:25px;
@@ -103,7 +107,9 @@ color:#888;
 }
 
 
-/* 搜索 */
+/* =========================
+   搜索区域
+========================= */
 
 .search-box{
 position:relative;
@@ -132,7 +138,9 @@ font-size:18px;
 }
 
 
-/* 分类 */
+/* =========================
+   分类筛选
+========================= */
 
 .categories{
 display:flex;
@@ -164,7 +172,9 @@ color:#fff;
 }
 
 
-/* 标题 */
+/* =========================
+   资源标题
+========================= */
 
 .section-header{
 display:flex;
@@ -184,7 +194,9 @@ color:#aaa;
 }
 
 
-/* 软件列表 */
+/* =========================
+   资源列表
+========================= */
 
 .tools{
 display:flex;
@@ -237,7 +249,9 @@ text-overflow:ellipsis;
 }
 
 
-/* 卡片底部 */
+/* =========================
+   资源卡片底部
+========================= */
 
 .tool-bottom{
 display:flex;
@@ -256,7 +270,9 @@ white-space:nowrap;
 }
 
 
-/* 按钮区域 */
+/* =========================
+   资源按钮
+========================= */
 
 .tool-actions{
 display:flex;
@@ -278,7 +294,9 @@ white-space:nowrap;
 }
 
 
-/* 官网地址 */
+/* =========================
+   官网地址按钮
+========================= */
 
 .website-btn{
 background:#3478f6;
@@ -286,7 +304,9 @@ color:#fff;
 }
 
 
-/* 项目地址 */
+/* =========================
+   项目地址按钮
+========================= */
 
 .project-btn{
 background:#3478f6;
@@ -294,7 +314,9 @@ color:#fff;
 }
 
 
-/* 暂无项目 */
+/* =========================
+   暂无项目状态
+========================= */
 
 .disabled-btn{
 background:#f5f5f7;
@@ -302,7 +324,9 @@ color:#aaa;
 }
 
 
-/* 无结果 */
+/* =========================
+   空状态
+========================= */
 
 .empty{
 display:none;
@@ -313,7 +337,9 @@ color:#999;
 }
 
 
-/* 底部 */
+/* =========================
+   底部版权
+========================= */
 
 .footer{
 text-align:center;
@@ -360,7 +386,7 @@ aria-label="返回"
 <div class="hero">
 
 <p>
-精选高效实用工具，帮助你节省时间、优化工作流程。
+精选实用效率工具，让工作与生活更加高效。
 </p>
 
 </div>
@@ -387,16 +413,33 @@ autocomplete="off"
 <!-- 分类 -->
 
 <div class="categories">
-<button class="category-btn active" data-category="all">全部</button>
-<button class="category-btn" data-category="time">时间管理</button>
-<button class="category-btn" data-category="notes">笔记工具</button>
-<button class="category-btn" data-category="team">团队协作</button>
-<button class="category-btn" data-category="automation">自动化</button>
+
+<button class="category-btn active" data-category="all">
+全部
+</button>
+
+<button class="category-btn" data-category="time">
+时间管理
+</button>
+
+<button class="category-btn" data-category="notes">
+笔记工具
+</button>
+
+<button class="category-btn" data-category="team">
+团队协作
+</button>
+
+<button class="category-btn" data-category="automation">
+自动化
+</button>
+
+
 </div>
 
 
 
-<!-- 精选工具 -->
+<!-- 精选软件 -->
 
 <div class="section-header">
 
@@ -405,20 +448,25 @@ autocomplete="off"
 </div>
 
 <div class="resource-count" id="resourceCount">
-5 个资源
+0 个资源
 </div>
 
 </div>
 
 
 
-<div class="tools" id="tools"></div>
+<div class="tools" id="tools">
+
+<!-- 资源卡片由 /assets/js/productivity-data.js 自动生成 -->
+
+</div>
+
 
 <!-- 无结果 -->
 
 <div class="empty" id="empty">
 
-没有找到相关工具
+没有找到相关效率工具
 
 </div>
 
@@ -441,95 +489,90 @@ autocomplete="off"
 
 <script>
 
-const searchInput =
-document.getElementById("searchInput");
+/* =========================
+   资源卡片自动生成
+========================= */
 
-const categoryButtons =
-document.querySelectorAll(".category-btn");
-
-const empty =
-document.getElementById("empty");
-
-const resourceCount =
-document.getElementById("resourceCount");
-
-const tools =
+const toolsContainer =
 document.getElementById("tools");
 
-let currentCategory = "all";
 
+function escapeHTML(value){
 
-/* =========================
-   动态生成资源卡片
-========================= */
+return String(value)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
 
 function renderTools(){
 
-const keyword =
-searchInput.value
-.trim()
-.toLowerCase();
+if(
+!toolsContainer ||
+!Array.isArray(productivityList)
+){
 
-const filteredTools =
-productivityList.filter(item => {
+return;
 
-const matchSearch =
-
-item.name
-.toLowerCase()
-.includes(keyword) ||
-
-item.desc
-.toLowerCase()
-.includes(keyword) ||
-
-item.tag
-.toLowerCase()
-.includes(keyword);
+}
 
 
-const matchCategory =
-
-currentCategory === "all" ||
-
-item.category === currentCategory;
+toolsContainer.innerHTML =
+productivityList.map(item => {
 
 
-return matchSearch && matchCategory;
+const projectButton = item.project
 
-});
+? `
 
+<a
+class="action-btn project-btn"
+href="${escapeHTML(item.project)}"
+target="_blank"
+rel="noopener noreferrer"
+>
+项目地址
+</a>
 
-tools.innerHTML =
-filteredTools.map(item => {
+`
 
-const projectButton =
+: `
 
-item.project
+<span
+class="action-btn disabled-btn"
+>
+暂无项目
+</span>
 
-? `<a class="action-btn project-btn" href="${item.project}" target="_blank" rel="noopener noreferrer">项目地址</a>`
-
-: `<span class="action-btn disabled-btn">暂无项目</span>`;
+`;
 
 
 return `
 
-<div class="tool-card">
+<div
+class="tool-card"
+data-category="${escapeHTML(item.category)}"
+data-name="${escapeHTML(item.name)}"
+>
 
 <div class="tool-main">
 
 <div class="tool-icon">
-${item.icon}
+${escapeHTML(item.icon)}
 </div>
 
 <div class="tool-info">
 
 <div class="tool-name">
-${item.name}
+${escapeHTML(item.name)}
 </div>
 
 <div class="tool-desc">
-${item.desc}
+${escapeHTML(item.desc)}
 </div>
 
 </div>
@@ -540,14 +583,14 @@ ${item.desc}
 <div class="tool-bottom">
 
 <div class="tool-tag">
-${item.tag}
+${escapeHTML(item.tag)}
 </div>
 
 <div class="tool-actions">
 
 <a
 class="action-btn website-btn"
-href="${item.website}"
+href="${escapeHTML(item.website)}"
 target="_blank"
 rel="noopener noreferrer"
 >
@@ -566,28 +609,113 @@ ${projectButton}
 
 }).join("");
 
+}
+
+
+renderTools();
+
+
+/* =========================
+   搜索与分类筛选
+========================= */
+
+const searchInput =
+document.getElementById("searchInput");
+
+const toolCards =
+document.querySelectorAll(".tool-card");
+
+const categoryButtons =
+document.querySelectorAll(".category-btn");
+
+const empty =
+document.getElementById("empty");
+
+const resourceCount =
+document.getElementById("resourceCount");
+
+let currentCategory = "all";
+
 
 resourceCount.textContent =
-filteredTools.length + " 个资源";
+toolCards.length + " 个资源";
+
+
+
+
+function filterTools(){
+
+const keyword =
+searchInput.value
+.trim()
+.toLowerCase();
+
+let visibleCount = 0;
+
+
+toolCards.forEach(card => {
+
+const name =
+card.dataset.name
+.toLowerCase();
+
+const description =
+card.querySelector(".tool-desc")
+.textContent
+.toLowerCase();
+
+const category =
+card.dataset.category;
+
+
+const matchSearch =
+
+name.includes(keyword) ||
+
+description.includes(keyword);
+
+
+const matchCategory =
+
+currentCategory === "all" ||
+
+category === currentCategory;
+
+
+if(matchSearch && matchCategory){
+
+card.style.display = "block";
+
+visibleCount++;
+
+}else{
+
+card.style.display = "none";
+
+}
+
+});
+
+
+resourceCount.textContent =
+visibleCount + " 个资源";
 
 
 empty.style.display =
-filteredTools.length === 0
+visibleCount === 0
 ? "block"
 : "none";
 
 }
 
 
-/* 搜索 */
 
 searchInput.addEventListener(
 "input",
-renderTools
+filterTools
 );
 
 
-/* 分类筛选 */
 
 categoryButtons.forEach(button => {
 
@@ -604,11 +732,12 @@ this.classList.add("active");
 currentCategory =
 this.dataset.category;
 
-renderTools();
+filterTools();
 
 });
 
 });
+
 
 
 /* =========================
@@ -660,13 +789,9 @@ return false;
 document.onkeydown = function(e){
 
 if(
-
 e.keyCode === 123 ||
-
 (e.ctrlKey && e.keyCode === 85) ||
-
 (e.ctrlKey && e.shiftKey && e.keyCode === 73)
-
 ){
 
 return false;
@@ -674,11 +799,6 @@ return false;
 }
 
 };
-
-
-/* 初始化 */
-
-renderTools();
 
 </script>
 
