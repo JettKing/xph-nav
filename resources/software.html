@@ -353,7 +353,7 @@ padding:35px 0 15px;
 </head>
 
 
-<body>
+<body data-page="software">
 
 <div class="container">
 
@@ -458,9 +458,9 @@ autocomplete="off"
 
 
 
-<div class="tools" id="tools">
+<div class="tools" id="resource-list">
 
-<!-- 资源卡片由 /assets/js/software-data.js 自动生成 -->
+<!-- 资源卡片由 /assets/js/data/software.js 自动生成 -->
 
 </div>
 
@@ -488,7 +488,13 @@ autocomplete="off"
 
 
 
-<script src="/assets/js/software-data.js"></script>
+<script src="/assets/js/data/software.js"></script>
+
+<script src="/assets/js/core/templates.js"></script>
+<script src="/assets/js/core/renderer.js"></script>
+<script src="/assets/js/core/engine.js"></script>
+<script src="/assets/js/core/store.js"></script>
+<script src="/assets/js/core/app.js"></script>
 
 <script>
 
@@ -497,7 +503,7 @@ autocomplete="off"
 ========================= */
 
 const toolsContainer =
-document.getElementById("tools");
+document.getElementById("resource-list");
 
 
 function escapeHTML(value){
