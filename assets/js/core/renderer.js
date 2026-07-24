@@ -13,7 +13,7 @@
 window.ResourceRenderer = {
 
     /**
-     * 渲染资源
+     * 渲染资源列表
      * @param {Object} options
      * @param {String} options.container
      * @param {Array} options.data
@@ -45,11 +45,11 @@ window.ResourceRenderer = {
 
     /**
      * 清空容器
-     * @param {HTMLElement} element
+     * @param {HTMLElement} container
      */
-    clear(element) {
+    clear(container) {
 
-        element.innerHTML = "";
+        container.innerHTML = "";
 
     }
 
