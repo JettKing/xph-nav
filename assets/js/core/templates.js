@@ -1,7 +1,7 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * Templates v1.0
+ * Templates v2.0
  * ----------------------------------------------------------
  * 所有 HTML 模板统一管理
  * 修改 UI 只修改这里
@@ -11,31 +11,84 @@
 window.ResourceTemplates = {
 
     /**
+     * HTML 转义
+     */
+    escape(value) {
+
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    },
+
+    /**
      * 资源卡片模板
      */
-    card(resource) {
+    card(resource = {}) {
+
+        const {
+
+            name = "未命名资源",
+
+            description = "暂无介绍",
+
+            icon = "📦",
+
+            website = "",
+
+            github = ""
+
+        } = resource;
+
 
         return `
-            <div class="resource-card">
 
-                <div class="resource-icon">
-                    ${resource.icon || "📦"}
-                </div>
+<div class="resource-card">
 
-                <div class="resource-content">
+    <div class="resource-icon">
 
-                    <h3 class="resource-title">
-                        ${resource.name}
-                    </h3>
+        ${this.escape(icon)}
 
-                    <p class="resource-description">
-                        ${resource.description}
-                    </p>
+    </div>
 
-                </div>
+    <div class="resource-content">
 
-            </div>
-        `;
+        <h3 class="resource-title">
+
+            ${this.escape(name)}
+
+        </h3>
+
+        <p class="resource-description">
+
+            ${this.escape(description)}
+
+        </p>
+
+        <div class="resource-actions">
+
+            ${
+                website
+                    ? `<a class="resource-btn website-btn" href="${this.escape(website)}" target="_blank" rel="noopener noreferrer">官网</a>`
+                    : ""
+            }
+
+            ${
+                github
+                    ? `<a class="resource-btn github-btn" href="${this.escape(github)}" target="_blank" rel="noopener noreferrer">GitHub</a>`
+                    : ""
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+`;
 
     },
 
@@ -45,12 +98,14 @@ window.ResourceTemplates = {
     empty(message = "暂无资源") {
 
         return `
-            <div class="resource-empty">
 
-                ${message}
+<div class="resource-empty">
 
-            </div>
-        `;
+    ${this.escape(message)}
+
+</div>
+
+`;
 
     },
 
@@ -60,12 +115,14 @@ window.ResourceTemplates = {
     loading() {
 
         return `
-            <div class="resource-loading">
 
-                加载中...
+<div class="resource-loading">
 
-            </div>
-        `;
+    加载中...
+
+</div>
+
+`;
 
     }
 
