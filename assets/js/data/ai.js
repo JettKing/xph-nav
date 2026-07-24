@@ -1,8 +1,113 @@
-/**
- * 徐胖虎资源社
- * AI工具资源数据
- */
-
 window.aiResources = [
+
+{
+    id:1,
+    name:"ChatGPT",
+    description:"OpenAI 推出的智能 AI 助手",
+    icon:"🤖",
+    thumbnail:"",
+    category:"chat",
+    subcategory:"AI聊天",
+    website:"https://chatgpt.com",
+    github:"",
+    platform:"Web",
+    pricing:"Freemium",
+    language:"多语言",
+    features:["聊天","写作","编程"],
+    audience:"所有用户",
+    official:true,
+    recommend:true,
+    score:9.9,
+    update:"2026-07",
+    status:"active"
+},
+
+{
+    id:2,
+    name:"Claude",
+    description:"Anthropic 推出的 AI 助手",
+    icon:"🧠",
+    thumbnail:"",
+    category:"chat",
+    subcategory:"AI聊天",
+    website:"https://claude.ai",
+    github:"",
+    platform:"Web",
+    pricing:"Freemium",
+    language:"多语言",
+    features:["长文本","分析","写作"],
+    audience:"所有用户",
+    official:true,
+    recommend:true,
+    score:9.8,
+    update:"2026-07",
+    status:"active"
+},
+
+{
+    id:3,
+    name:"Midjourney",
+    description:"AI 图片生成平台",
+    icon:"🎨",
+    thumbnail:"",
+    category:"image",
+    subcategory:"AI绘图",
+    website:"https://www.midjourney.com",
+    github:"",
+    platform:"Discord",
+    pricing:"Paid",
+    language:"英文",
+    features:["AI绘图","艺术创作"],
+    audience:"设计师",
+    official:true,
+    recommend:true,
+    score:9.7,
+    update:"2026-07",
+    status:"active"
+},
+
+{
+    id:4,
+    name:"Cursor",
+    description:"AI 编程编辑器",
+    icon:"💻",
+    thumbnail:"",
+    category:"code",
+    subcategory:"AI编程",
+    website:"https://cursor.com",
+    github:"",
+    platform:"Windows / macOS",
+    pricing:"Freemium",
+    language:"英文",
+    features:["AI编程","自动补全"],
+    audience:"开发者",
+    official:true,
+    recommend:true,
+    score:9.8,
+    update:"2026-07",
+    status:"active"
+},
+
+{
+    id:5,
+    name:"Gamma",
+    description:"AI 演示文稿生成工具",
+    icon:"📊",
+    thumbnail:"",
+    category:"office",
+    subcategory:"AI办公",
+    website:"https://gamma.app",
+    github:"",
+    platform:"Web",
+    pricing:"Freemium",
+    language:"多语言",
+    features:["PPT","文档","演示"],
+    audience:"办公用户",
+    official:true,
+    recommend:true,
+    score:9.5,
+    update:"2026-07",
+    status:"active"
+}
 
 ];
