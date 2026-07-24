@@ -513,7 +513,7 @@ margin:10px 25px 15px;
 
 </head>
 
-<body>
+<body data-page="home">
 
 <div class="container">
 
@@ -541,7 +541,7 @@ margin:10px 25px 15px;
 
 </div>
 
-<div class="card" id="resource">
+<div class="card resource-center" id="resource" data-module="resource-center" data-version="v2">
 
 <div class="fold-title" onclick="toggleBox('resource')">
 
@@ -552,102 +552,6 @@ margin:10px 25px 15px;
 </div>
 
 <div class="content">
-
-<a class="menu-item" href="/resources/ai.html">
-
-<div class="menu-icon">
-
-🤖
-
-</div>
-
-<div class="menu-name">
-
-AI工具
-
-</div>
-
-</a>
-
-<a class="menu-item" href="/resources/software.html">
-
-<div class="menu-icon">
-
-🛠
-
-</div>
-
-<div class="menu-name">
-
-实用软件
-
-</div>
-
-</a>
-
-<a class="menu-item" href="/resources/productivity.html">
-
-<div class="menu-icon">
-
-⚡
-
-</div>
-
-<div class="menu-name">
-
-效率神器
-
-</div>
-
-</a>
-
-<a class="menu-item" href="/resources/websites.html">
-
-<div class="menu-icon">
-
-🌐
-
-</div>
-
-<div class="menu-name">
-
-优质网站
-
-</div>
-
-</a>
-
-<a class="menu-item" href="/resources/digital.html">
-
-<div class="menu-icon">
-
-📚
-
-</div>
-
-<div class="menu-name">
-
-数字资源
-
-</div>
-
-</a>
-
-<a class="menu-item" href="/resources/treasures.html">
-
-<div class="menu-icon">
-
-💎
-
-</div>
-
-<div class="menu-name">
-
-隐藏宝藏
-
-</div>
-
-</a>
 
 </div>
 
@@ -916,7 +820,7 @@ rel="noopener noreferrer"
 
 <div class="tags">
 
-AI工具 | 实用软件 | 效率神器 | 优质网站 | 数字资源
+AI工具 | 实用软件 | 效率神器 | 优质网站 | 数字资源 | 解决方案
 
 </div>
 
@@ -1163,6 +1067,88 @@ return false;
 
 };
 
+</script>
+
+<script type="application/json" id="home-resource-config">
+{
+  "resources": [
+    {
+      "id": "ai",
+      "name": "AI工具",
+      "icon": "🤖",
+      "url": "/resources/ai.html"
+    },
+    {
+      "id": "software",
+      "name": "实用软件",
+      "icon": "🛠",
+      "url": "/resources/software.html"
+    },
+    {
+      "id": "productivity",
+      "name": "效率神器",
+      "icon": "⚡",
+      "url": "/resources/productivity.html"
+    },
+    {
+      "id": "website",
+      "name": "优质网站",
+      "icon": "🌐",
+      "url": "/resources/websites.html"
+    },
+    {
+      "id": "digital",
+      "name": "数字资源",
+      "icon": "📚",
+      "url": "/resources/digital.html"
+    },
+    {
+      "id": "solution",
+      "name": "解决方案",
+      "icon": "💎",
+      "url": "/resources/solution.html"
+    }
+  ]
+}
+</script>
+
+<script id="home-resource-auto-render">
+(function(){
+
+const config=document.getElementById("home-resource-config");
+const container=document.getElementById("home-resource-list");
+
+if(!config || !container) return;
+
+try{
+
+const data=JSON.parse(config.textContent);
+
+container.innerHTML=data.resources.map(item=>`
+
+<a class="menu-item"
+data-resource="${item.id}"
+href="${item.url}">
+
+<div class="menu-icon">
+${item.icon}
+</div>
+
+<div class="menu-name">
+${item.name}
+</div>
+
+</a>
+
+`).join("");
+
+}catch(e){
+
+console.error("首页资源自动渲染失败",e);
+
+}
+
+})();
 </script>
 
 </body>
