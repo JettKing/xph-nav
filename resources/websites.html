@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>优质网站 - 徐胖虎资源社</title>
+
 <meta name="description" content="徐胖虎资源社精选优质网站，涵盖在线工具、学习资源、设计素材和开发工具等实用网站。">
+
 <meta name="keywords" content="徐胖虎资源社,优质网站,在线工具,学习资源,设计素材,开发工具">
 <meta name="robots" content="index,follow">
-<link rel="canonical" href="https://xph.asia/resources/websites.html">
 <meta property="og:title" content="优质网站 - 徐胖虎资源社">
 <meta property="og:description" content="徐胖虎资源社精选优质网站，涵盖在线工具、学习资源、设计素材和开发工具等实用网站。">
 <meta property="og:type" content="website">
@@ -15,60 +20,789 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="优质网站 - 徐胖虎资源社">
 <meta name="twitter:description" content="徐胖虎资源社精选优质网站，涵盖在线工具、学习资源、设计素材和开发工具等实用网站。">
+
+<link rel="canonical" href="https://xph.asia/resources/websites.html">
+
 <link rel="icon" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/favicon.ico">
+
+
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;color:#1d1d1f}.container{max-width:430px;margin:auto;padding:20px;padding-bottom:60px}.header{height:80px;display:flex;align-items:center;justify-content:center;position:relative}.back{position:absolute;left:0;width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:32px;color:#111;box-shadow:0 10px 30px rgba(0,0,0,.06);border:0;padding:0;cursor:pointer;font-family:inherit}.header-title{font-size:20px;font-weight:600}.hero{margin-top:25px}.hero p{font-size:15px;color:#888;line-height:1.7;margin:0}.search-box{height:64px;background:#fff;border-radius:22px;margin-top:25px;display:flex;align-items:center;padding:0 20px;box-shadow:0 10px 30px rgba(0,0,0,.04)}.search-icon{font-size:20px;margin-right:15px}.search-box input{border:none;outline:none;background:transparent;font-size:16px;width:100%;color:#111}.search-box input::placeholder{color:#aaa}.categories{display:flex;gap:10px;margin-top:20px;overflow-x:auto;scrollbar-width:none}.categories::-webkit-scrollbar{display:none}.category-btn{border:none;background:#fff;padding:12px 18px;border-radius:16px;font-size:14px;white-space:nowrap;cursor:pointer;color:#555}.category-btn.active{background:#3478f6;color:#fff}.section-title{display:flex;align-items:center;justify-content:space-between;margin-top:35px;margin-bottom:15px}.section-title h2{font-size:21px;margin:0}.count{font-size:14px;color:#aaa}.tool-card{background:#fff;border-radius:24px;padding:18px;margin-bottom:16px;box-shadow:0 10px 30px rgba(0,0,0,.04)}.tool-main{display:flex;align-items:center}.tool-icon{width:52px;height:52px;border-radius:16px;background:#f3f6ff;display:flex;align-items:center;justify-content:center;font-size:25px;flex-shrink:0}.tool-info{margin-left:15px;min-width:0}.tool-name{font-size:19px;font-weight:600;margin-bottom:6px}.tool-desc{font-size:14px;color:#888;line-height:1.5}.tool-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:18px;gap:12px}.tool-tag{background:#f5f5f7;padding:8px 12px;border-radius:12px;font-size:13px;color:#888;white-space:nowrap}.tool-actions{display:flex;gap:8px}.action-btn{height:38px;min-width:76px;padding:0 12px;border-radius:12px;font-size:13px;display:flex;align-items:center;justify-content:center;text-decoration:none;white-space:nowrap}.website-btn{background:#3478f6;color:#fff}.disabled-btn{background:#e8e8ed;color:#999;cursor:not-allowed}.empty{display:none;text-align:center;padding:50px 20px;color:#999;font-size:15px}
-</style>
-</head>
-<body>
-<div class="container">
-<div class="header"><button class="back" id="backButton" type="button" aria-label="返回">‹</button><div class="header-title">优质网站</div></div>
-<div class="hero"><p>精选值得收藏的优质网站，发现更多实用在线资源。</p></div>
-<div class="search-box"><span class="search-icon">⌕</span><input type="text" id="searchInput" placeholder="搜索优质网站..."></div>
-<div class="categories"><button class="category-btn active" data-category="all">全部</button><button class="category-btn" data-category="online">在线工具</button><button class="category-btn" data-category="learning">学习资源</button><button class="category-btn" data-category="design">设计素材</button><button class="category-btn" data-category="development">开发工具</button></div>
-<div class="section-title"><h2>精选网站</h2><div class="count" id="count">5 个资源</div></div>
-<div class="tools" id="tools"><!-- TinyWow -->
-<div class="tool-card" data-category="online" data-name="TinyWow">
-<div class="tool-main"><div class="tool-icon">🧰</div><div class="tool-info"><div class="tool-name">TinyWow</div><div class="tool-desc">提供大量免费在线文件处理工具</div></div></div>
-<div class="tool-bottom"><div class="tool-tag">在线工具</div><div class="tool-actions"><a class="action-btn website-btn" href="https://tinywow.com/" target="_blank" rel="noopener noreferrer">官网地址</a><span class="action-btn disabled-btn">暂无项目</span></div></div>
-</div>
-<!-- freeCodeCamp -->
-<div class="tool-card" data-category="learning" data-name="freeCodeCamp">
-<div class="tool-main"><div class="tool-icon">💻</div><div class="tool-info"><div class="tool-name">freeCodeCamp</div><div class="tool-desc">免费的编程学习与开发者教育平台</div></div></div>
-<div class="tool-bottom"><div class="tool-tag">学习资源</div><div class="tool-actions"><a class="action-btn website-btn" href="https://www.freecodecamp.org/" target="_blank" rel="noopener noreferrer">官网地址</a><span class="action-btn disabled-btn">暂无项目</span></div></div>
-</div>
-<!-- Unsplash -->
-<div class="tool-card" data-category="design" data-name="Unsplash">
-<div class="tool-main"><div class="tool-icon">🖼️</div><div class="tool-info"><div class="tool-name">Unsplash</div><div class="tool-desc">高质量免费图片与摄影素材网站</div></div></div>
-<div class="tool-bottom"><div class="tool-tag">设计素材</div><div class="tool-actions"><a class="action-btn website-btn" href="https://unsplash.com/" target="_blank" rel="noopener noreferrer">官网地址</a><span class="action-btn disabled-btn">暂无项目</span></div></div>
-</div>
-<!-- GitHub -->
-<div class="tool-card" data-category="development" data-name="GitHub">
-<div class="tool-main"><div class="tool-icon">🐙</div><div class="tool-info"><div class="tool-name">GitHub</div><div class="tool-desc">全球开发者代码托管与开源协作平台</div></div></div>
-<div class="tool-bottom"><div class="tool-tag">开发工具</div><div class="tool-actions"><a class="action-btn website-btn" href="https://github.com/" target="_blank" rel="noopener noreferrer">官网地址</a><span class="action-btn disabled-btn">暂无项目</span></div></div>
-</div>
-<!-- Remove.bg -->
-<div class="tool-card" data-category="online" data-name="Remove.bg">
-<div class="tool-main"><div class="tool-icon">✂️</div><div class="tool-info"><div class="tool-name">Remove.bg</div><div class="tool-desc">快速自动去除图片背景的在线工具</div></div></div>
-<div class="tool-bottom"><div class="tool-tag">在线工具</div><div class="tool-actions"><a class="action-btn website-btn" href="https://www.remove.bg/" target="_blank" rel="noopener noreferrer">官网地址</a><span class="action-btn disabled-btn">暂无项目</span></div></div>
-</div></div>
-<div class="empty" id="empty">没有找到相关网站</div>
-</div>
-<script>
-let currentCategory="all";
-const searchInput=document.getElementById("searchInput");
-const categoryButtons=document.querySelectorAll(".category-btn");
-function filterTools(){
-const keyword=searchInput.value.toLowerCase().trim();const cards=document.querySelectorAll(".tool-card");let visibleCount=0;
-cards.forEach(function(card){const matchSearch=card.dataset.name.toLowerCase().includes(keyword);const matchCategory=currentCategory==="all"||card.dataset.category===currentCategory;if(matchSearch&&matchCategory){card.style.display="block";visibleCount++;}else{card.style.display="none";}});
-document.getElementById("count").textContent=visibleCount+" 个资源";document.getElementById("empty").style.display=visibleCount===0?"block":"none";
+
+*{
+box-sizing:border-box;
 }
-searchInput.addEventListener("input",filterTools);
-categoryButtons.forEach(function(button){button.addEventListener("click",function(){categoryButtons.forEach(function(item){item.classList.remove("active");});this.classList.add("active");currentCategory=this.dataset.category;filterTools();});});
-const backButton=document.getElementById("backButton");if(backButton){backButton.addEventListener("click",function(){if(window.history.length>1){window.history.back();}else{window.location.replace("/");}});}
-document.oncontextmenu=function(){return false;};
-document.onkeydown=function(e){if(e.keyCode===123||(e.ctrlKey&&e.keyCode===85)||(e.ctrlKey&&e.shiftKey&&e.keyCode===73)){return false;}};
+
+body{
+margin:0;
+background:#f5f5f7;
+font-family:
+-apple-system,
+BlinkMacSystemFont,
+"SF Pro Display",
+"Helvetica Neue",
+Arial,
+sans-serif;
+color:#1d1d1f;
+}
+
+.container{
+max-width:430px;
+margin:auto;
+padding:20px;
+}
+
+
+/* =========================
+   顶部导航
+========================= */
+
+.header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:30px;
+}
+
+.back-btn{
+width:50px;
+height:50px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#fff;
+border-radius:50%;
+color:#111;
+font-size:30px;
+box-shadow:0 8px 25px rgba(0,0,0,.06);
+border:0;
+padding:0;
+cursor:pointer;
+font-family:inherit;
+}
+
+.header-title{
+font-size:18px;
+font-weight:600;
+}
+
+.header-space{
+width:50px;
+}
+
+
+/* =========================
+   页面介绍
+========================= */
+
+.hero{
+margin-bottom:25px;
+}
+
+.hero p{
+margin:0;
+font-size:14px;
+line-height:1.7;
+color:#888;
+}
+
+
+/* =========================
+   搜索区域
+========================= */
+
+.search-box{
+position:relative;
+margin-bottom:20px;
+}
+
+.search-box input{
+width:100%;
+height:58px;
+border:none;
+outline:none;
+border-radius:20px;
+background:#fff;
+padding:0 20px 0 50px;
+font-size:15px;
+color:#111;
+box-shadow:0 8px 25px rgba(0,0,0,.04);
+}
+
+.search-icon{
+position:absolute;
+left:19px;
+top:50%;
+transform:translateY(-50%);
+font-size:18px;
+}
+
+
+/* =========================
+   分类筛选
+========================= */
+
+.categories{
+display:flex;
+gap:9px;
+overflow-x:auto;
+padding-bottom:5px;
+margin-bottom:30px;
+scrollbar-width:none;
+}
+
+.categories::-webkit-scrollbar{
+display:none;
+}
+
+.category-btn{
+border:none;
+white-space:nowrap;
+padding:10px 17px;
+border-radius:18px;
+background:#fff;
+color:#555;
+font-size:14px;
+cursor:pointer;
+}
+
+.category-btn.active{
+background:#3478f6;
+color:#fff;
+}
+
+
+/* =========================
+   资源标题
+========================= */
+
+.section-header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:15px;
+}
+
+.section-title{
+font-size:20px;
+font-weight:700;
+}
+
+.resource-count{
+font-size:13px;
+color:#aaa;
+}
+
+
+/* =========================
+   资源列表
+========================= */
+
+.tools{
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+.tool-card{
+background:#fff;
+border-radius:24px;
+padding:17px;
+box-shadow:0 8px 25px rgba(0,0,0,.04);
+}
+
+.tool-main{
+display:flex;
+align-items:center;
+}
+
+.tool-icon{
+width:52px;
+height:52px;
+border-radius:16px;
+background:#f3f6fc;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:25px;
+margin-right:14px;
+flex-shrink:0;
+}
+
+.tool-info{
+flex:1;
+min-width:0;
+}
+
+.tool-name{
+font-size:17px;
+font-weight:600;
+margin-bottom:5px;
+}
+
+.tool-desc{
+font-size:13px;
+color:#888;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+
+/* =========================
+   资源卡片底部
+========================= */
+
+.tool-bottom{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-top:15px;
+}
+
+.tool-tag{
+padding:7px 11px;
+background:#f5f5f7;
+border-radius:12px;
+font-size:12px;
+color:#888;
+white-space:nowrap;
+}
+
+
+/* =========================
+   资源按钮
+========================= */
+
+.tool-actions{
+display:flex;
+align-items:center;
+gap:7px;
+}
+
+.action-btn{
+height:34px;
+padding:0 11px;
+border-radius:11px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:12px;
+font-weight:500;
+text-decoration:none;
+white-space:nowrap;
+}
+
+
+/* =========================
+   官网地址按钮
+========================= */
+
+.website-btn{
+background:#3478f6;
+color:#fff;
+}
+
+
+/* =========================
+   项目地址按钮
+========================= */
+
+.project-btn{
+background:#3478f6;
+color:#fff;
+}
+
+
+/* =========================
+   暂无项目状态
+========================= */
+
+.disabled-btn{
+background:#f5f5f7;
+color:#aaa;
+}
+
+
+/* =========================
+   空状态
+========================= */
+
+.empty{
+display:none;
+text-align:center;
+padding:50px 20px;
+font-size:14px;
+color:#999;
+}
+
+
+/* =========================
+   底部版权
+========================= */
+
+.footer{
+text-align:center;
+font-size:12px;
+color:#aaa;
+padding:35px 0 15px;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+
+<!-- 顶部 -->
+
+<div class="header">
+
+<button
+class="back-btn"
+id="backButton"
+type="button"
+aria-label="返回"
+>
+‹
+</button>
+
+<div class="header-title">
+优质网站
+</div>
+
+<div class="header-space"></div>
+
+</div>
+
+
+
+<!-- 页面介绍 -->
+
+<div class="hero">
+
+<p>
+精选值得收藏的优质网站，发现更多实用在线资源。
+</p>
+
+</div>
+
+
+
+<!-- 搜索 -->
+
+<div class="search-box">
+
+<span class="search-icon">⌕</span>
+
+<input
+type="text"
+id="searchInput"
+placeholder="搜索优质网站..."
+autocomplete="off"
+>
+
+</div>
+
+
+
+<!-- 分类 -->
+
+<div class="categories">
+
+<button class="category-btn active" data-category="all">
+全部
+</button>
+
+<button class="category-btn" data-category="online">
+在线工具
+</button>
+
+<button class="category-btn" data-category="learning">
+学习资源
+</button>
+
+<button class="category-btn" data-category="design">
+设计素材
+</button>
+
+<button class="category-btn" data-category="development">
+开发工具
+</button>
+
+
+</div>
+
+
+
+<!-- 精选软件 -->
+
+<div class="section-header">
+
+<div class="section-title">
+精选网站
+</div>
+
+<div class="resource-count" id="resourceCount">
+0 个资源
+</div>
+
+</div>
+
+
+
+<div class="tools" id="tools">
+
+<!-- 资源卡片由 /assets/js/websites-data.js 自动生成 -->
+
+</div>
+
+
+<!-- 无结果 -->
+
+<div class="empty" id="empty">
+
+没有找到相关网站
+
+</div>
+
+
+
+<!-- 底部 -->
+
+<div class="footer">
+
+©️ 2026 徐胖虎资源社
+
+</div>
+
+
+</div>
+
+
+
+<script src="/assets/js/websites-data.js"></script>
+
+<script>
+
+/* =========================
+   资源卡片自动生成
+========================= */
+
+const toolsContainer =
+document.getElementById("tools");
+
+
+function escapeHTML(value){
+
+return String(value)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+function renderTools(){
+
+if(
+!toolsContainer ||
+!Array.isArray(websitesList)
+){
+
+return;
+
+}
+
+
+toolsContainer.innerHTML =
+websitesList.map(item => {
+
+
+const projectButton = item.project
+
+? `
+
+<a
+class="action-btn project-btn"
+href="${escapeHTML(item.project)}"
+target="_blank"
+rel="noopener noreferrer"
+>
+项目地址
+</a>
+
+`
+
+: `
+
+<span
+class="action-btn disabled-btn"
+>
+暂无项目
+</span>
+
+`;
+
+
+return `
+
+<div
+class="tool-card"
+data-category="${escapeHTML(item.category)}"
+data-name="${escapeHTML(item.name)}"
+>
+
+<div class="tool-main">
+
+<div class="tool-icon">
+${escapeHTML(item.icon)}
+</div>
+
+<div class="tool-info">
+
+<div class="tool-name">
+${escapeHTML(item.name)}
+</div>
+
+<div class="tool-desc">
+${escapeHTML(item.desc)}
+</div>
+
+</div>
+
+</div>
+
+
+<div class="tool-bottom">
+
+<div class="tool-tag">
+${escapeHTML(item.tag)}
+</div>
+
+<div class="tool-actions">
+
+<a
+class="action-btn website-btn"
+href="${escapeHTML(item.website)}"
+target="_blank"
+rel="noopener noreferrer"
+>
+官网地址
+</a>
+
+${projectButton}
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}).join("");
+
+}
+
+
+renderTools();
+
+
+/* =========================
+   搜索与分类筛选
+========================= */
+
+const searchInput =
+document.getElementById("searchInput");
+
+const toolCards =
+document.querySelectorAll(".tool-card");
+
+const categoryButtons =
+document.querySelectorAll(".category-btn");
+
+const empty =
+document.getElementById("empty");
+
+const resourceCount =
+document.getElementById("resourceCount");
+
+let currentCategory = "all";
+
+
+resourceCount.textContent =
+toolCards.length + " 个资源";
+
+
+
+
+function filterTools(){
+
+const keyword =
+searchInput.value
+.trim()
+.toLowerCase();
+
+let visibleCount = 0;
+
+
+toolCards.forEach(card => {
+
+const name =
+card.dataset.name
+.toLowerCase();
+
+const description =
+card.querySelector(".tool-desc")
+.textContent
+.toLowerCase();
+
+const category =
+card.dataset.category;
+
+
+const matchSearch =
+
+name.includes(keyword) ||
+
+description.includes(keyword);
+
+
+const matchCategory =
+
+currentCategory === "all" ||
+
+category === currentCategory;
+
+
+if(matchSearch && matchCategory){
+
+card.style.display = "block";
+
+visibleCount++;
+
+}else{
+
+card.style.display = "none";
+
+}
+
+});
+
+
+resourceCount.textContent =
+visibleCount + " 个资源";
+
+
+empty.style.display =
+visibleCount === 0
+? "block"
+: "none";
+
+}
+
+
+
+searchInput.addEventListener(
+"input",
+filterTools
+);
+
+
+
+categoryButtons.forEach(button => {
+
+button.addEventListener("click", function(){
+
+categoryButtons.forEach(btn => {
+
+btn.classList.remove("active");
+
+});
+
+this.classList.add("active");
+
+currentCategory =
+this.dataset.category;
+
+filterTools();
+
+});
+
+});
+
+
+
+/* =========================
+   原生返回逻辑
+   有历史记录返回上一页
+   无历史记录返回首页
+   不新增历史记录
+========================= */
+
+const backButton =
+document.getElementById("backButton");
+
+if(backButton){
+
+backButton.addEventListener(
+"click",
+function(){
+
+if(window.history.length > 1){
+
+window.history.back();
+
+}else{
+
+window.location.replace("/");
+
+}
+
+});
+
+}
+
+
+/* =========================
+   禁止右键
+========================= */
+
+document.oncontextmenu = function(){
+
+return false;
+
+};
+
+
+/* =========================
+   禁止常见开发者快捷键
+========================= */
+
+document.onkeydown = function(e){
+
+if(
+e.keyCode === 123 ||
+(e.ctrlKey && e.keyCode === 85) ||
+(e.ctrlKey && e.shiftKey && e.keyCode === 73)
+){
+
+return false;
+
+}
+
+};
+
 </script>
+
+
 </body>
+
 </html>
