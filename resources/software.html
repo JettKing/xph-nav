@@ -348,6 +348,32 @@ color:#aaa;
 padding:35px 0 15px;
 }
 
+
+.tool-badges{
+display:flex;
+gap:6px;
+margin-bottom:6px;
+}
+
+.tool-badge{
+font-size:11px;
+padding:3px 8px;
+border-radius:10px;
+background:#fff3cd;
+color:#9a6700;
+}
+
+.tool-badge.recommend{
+background:#e8f1ff;
+color:#3478f6;
+}
+
+.tool-star{
+font-size:12px;
+color:#999;
+margin-top:4px;
+}
+
 </style>
 
 </head>
@@ -524,8 +550,21 @@ return;
 }
 
 
+const sortedList = [...softwareList].sort((a,b)=>{
+
+if(Boolean(b.recommend)!==Boolean(a.recommend))
+return Number(b.recommend)-Number(a.recommend);
+
+if(Boolean(b.hot)!==Boolean(a.hot))
+return Number(b.hot)-Number(a.hot);
+
+return String(b.date||"").localeCompare(String(a.date||""));
+
+});
+
+
 toolsContainer.innerHTML =
-softwareList.map(item => {
+sortedList.map(item => {
 
 
 const projectButton = item.project
@@ -570,6 +609,14 @@ ${escapeHTML(item.icon)}
 
 <div class="tool-info">
 
+<div class="tool-badges">
+
+${item.hot ? '<span class="tool-badge">🔥 热门</span>' : ''}
+
+${item.recommend ? '<span class="tool-badge recommend">⭐ 推荐</span>' : ''}
+
+</div>
+
 <div class="tool-name">
 ${escapeHTML(item.name)}
 </div>
@@ -577,6 +624,8 @@ ${escapeHTML(item.name)}
 <div class="tool-desc">
 ${escapeHTML(item.desc)}
 </div>
+
+${item.star ? `<div class="tool-star">评分 ${escapeHTML(item.star)}/5</div>` : ''}
 
 </div>
 
