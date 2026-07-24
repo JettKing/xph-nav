@@ -1,33 +1,36 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * Templates v2.0
+ * Templates v3.0
  * ----------------------------------------------------------
- * 所有 HTML 模板统一管理
- * 修改 UI 只修改这里
+ * 所有资源 HTML 模板统一管理
+ * UI 结构唯一来源
  * ==========================================================
  */
 
 window.ResourceTemplates = {
 
+
     /**
      * HTML 转义
      */
-    escape(value) {
+    escape(value){
 
         return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+            .replace(/&/g,"&amp;")
+            .replace(/</g,"&lt;")
+            .replace(/>/g,"&gt;")
+            .replace(/"/g,"&quot;")
+            .replace(/'/g,"&#039;");
 
     },
+
 
     /**
      * 资源卡片模板
      */
-    card(resource = {}) {
+    card(resource = {}){
+
 
         const {
 
@@ -37,6 +40,8 @@ window.ResourceTemplates = {
 
             icon = "📦",
 
+            subcategory = "资源",
+
             website = "",
 
             github = ""
@@ -44,62 +49,142 @@ window.ResourceTemplates = {
         } = resource;
 
 
+
+        const projectButton = github
+
+        ? `
+
+<a
+class="action-btn project-btn"
+href="${this.escape(github)}"
+target="_blank"
+rel="noopener noreferrer"
+>
+项目地址
+</a>
+
+`
+
+        :
+
+        `
+
+<span
+class="action-btn disabled-btn"
+>
+暂无项目
+</span>
+
+`;
+
+
+
         return `
 
-<div class="resource-card">
 
-    <div class="resource-icon">
+<div class="tool-card">
 
-        ${this.escape(icon)}
 
-    </div>
+    <div class="tool-main">
 
-    <div class="resource-content">
 
-        <h3 class="resource-title">
+        <div class="tool-icon">
 
-            ${this.escape(name)}
-
-        </h3>
-
-        <p class="resource-description">
-
-            ${this.escape(description)}
-
-        </p>
-
-        <div class="resource-actions">
-
-            ${
-                website
-                    ? `<a class="resource-btn website-btn" href="${this.escape(website)}" target="_blank" rel="noopener noreferrer">官网</a>`
-                    : ""
-            }
-
-            ${
-                github
-                    ? `<a class="resource-btn github-btn" href="${this.escape(github)}" target="_blank" rel="noopener noreferrer">GitHub</a>`
-                    : ""
-            }
+            ${this.escape(icon)}
 
         </div>
 
+
+
+        <div class="tool-info">
+
+
+            <div class="tool-name">
+
+                ${this.escape(name)}
+
+            </div>
+
+
+
+            <div class="tool-desc">
+
+                ${this.escape(description)}
+
+            </div>
+
+
+        </div>
+
+
     </div>
 
+
+
+    <div class="tool-bottom">
+
+
+        <div class="tool-tag">
+
+            ${this.escape(subcategory)}
+
+        </div>
+
+
+
+        <div class="tool-actions">
+
+
+            ${
+                website
+
+                ?
+
+                `
+<a
+class="action-btn website-btn"
+href="${this.escape(website)}"
+target="_blank"
+rel="noopener noreferrer"
+>
+官网地址
+</a>
+`
+
+                :
+
+                ""
+
+            }
+
+
+            ${projectButton}
+
+
+        </div>
+
+
+    </div>
+
+
 </div>
+
 
 `;
 
     },
 
+
+
     /**
-     * 空状态模板
+     * 空状态
      */
-    empty(message = "暂无资源") {
+    empty(message="暂无资源"){
+
 
         return `
 
-<div class="resource-empty">
+<div class="empty">
 
     ${this.escape(message)}
 
@@ -109,14 +194,17 @@ window.ResourceTemplates = {
 
     },
 
+
+
     /**
-     * 加载状态模板
+     * 加载状态
      */
-    loading() {
+    loading(){
+
 
         return `
 
-<div class="resource-loading">
+<div class="loading">
 
     加载中...
 
@@ -125,5 +213,6 @@ window.ResourceTemplates = {
 `;
 
     }
+
 
 };
