@@ -16,6 +16,7 @@
 <meta property="og:title" content="数字资源 - 徐胖虎资源社">
 <meta property="og:description" content="徐胖虎资源社精选优质数字资源，涵盖电子书、学习资料、模板素材、提示词和设计资源等实用内容。">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://xph.asia/favicon.ico">
 <meta property="og:url" content="https://xph.asia/resources/digital.html">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="数字资源 - 徐胖虎资源社">
@@ -350,10 +351,11 @@ padding:35px 0 15px;
 
 </style>
 
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","name":"数字资源","url":"https://xph.asia/resources/digital.html"}</script>
 </head>
 
 
-<body data-page="digital">>
+<body data-page="digital">
 
 <div class="container">
 
@@ -402,7 +404,7 @@ aria-label="返回"
 <input
 type="text"
 id="searchInput"
-placeholder="搜索数字资源..."
+placeholder="搜索资源名称..."
 autocomplete="off"
 >
 
@@ -418,23 +420,23 @@ autocomplete="off"
 全部
 </button>
 
-<button class="category-btn" data-category="ebook">
+<button class="category-btn" data-category="电子书">
 电子书
 </button>
 
-<button class="category-btn" data-category="learning">
+<button class="category-btn" data-category="课程教程">
 学习资料
 </button>
 
-<button class="category-btn" data-category="template">
+<button class="category-btn" data-category="模板素材">
 模板素材
 </button>
 
-<button class="category-btn" data-category="prompt">
+<button class="category-btn" data-category="提示词">
 提示词
 </button>
 
-<button class="category-btn" data-category="design">
+<button class="category-btn" data-category="设计资源">
 设计资源
 </button>
 
@@ -460,7 +462,7 @@ autocomplete="off"
 
 <div class="tools" id="resource-list">
 
-<!-- 资源卡片由 /assets/js/digital-data.js 自动生成 -->
+<!-- 资源卡片由 V2 Core 自动渲染 -->
 
 </div>
 
@@ -557,6 +559,7 @@ return false;
 
 
 
+<script src="/assets/js/data/digital.js"></script>
 <script src="/assets/js/core/templates.js"></script>
 <script src="/assets/js/core/renderer.js"></script>
 <script src="/assets/js/core/engine.js"></script>
