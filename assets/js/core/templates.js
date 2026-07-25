@@ -1,19 +1,22 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * Templates v3.0
+ * Templates v3.1
  * ----------------------------------------------------------
  * 所有资源 HTML 模板统一管理
  * UI 结构唯一来源
  * ==========================================================
  */
 
+
 window.ResourceTemplates = {
+
 
 
     /**
      * HTML 转义
      */
+
     escape(value){
 
         return String(value ?? "")
@@ -26,27 +29,50 @@ window.ResourceTemplates = {
     },
 
 
+
+
     /**
      * 资源卡片模板
      */
+
     card(resource = {}){
 
 
-        const {
+        const name =
+            resource.name || "未命名资源";
 
-            name = "未命名资源",
 
-            description = "暂无介绍",
+        const description =
+            resource.description ||
+            resource.desc ||
+            "暂无介绍";
 
-            icon = "📦",
 
-            subcategory = "资源",
+        const icon =
+            resource.icon ||
+            "📦";
 
-            website = "",
 
-            github = ""
+        const subcategory =
+            resource.subcategory ||
+            resource.category ||
+            "资源";
 
-        } = resource;
+
+
+        const website =
+            resource.website ||
+            resource.url ||
+            "";
+
+
+
+        const github =
+            resource.github ||
+            resource.project ||
+            "";
+
+
 
 
 
@@ -76,6 +102,32 @@ class="action-btn disabled-btn"
 </span>
 
 `;
+
+
+
+
+
+
+        const websiteButton = website
+
+        ? `
+
+<a
+class="action-btn website-btn"
+href="${this.escape(website)}"
+target="_blank"
+rel="noopener noreferrer"
+>
+官网地址
+</a>
+
+`
+
+        :
+
+        "";
+
+
 
 
 
@@ -135,27 +187,7 @@ class="action-btn disabled-btn"
         <div class="tool-actions">
 
 
-            ${
-                website
-
-                ?
-
-                `
-<a
-class="action-btn website-btn"
-href="${this.escape(website)}"
-target="_blank"
-rel="noopener noreferrer"
->
-官网地址
-</a>
-`
-
-                :
-
-                ""
-
-            }
+            ${websiteButton}
 
 
             ${projectButton}
@@ -176,9 +208,12 @@ rel="noopener noreferrer"
 
 
 
+
+
     /**
      * 空状态
      */
+
     empty(message="暂无资源"){
 
 
@@ -196,9 +231,12 @@ rel="noopener noreferrer"
 
 
 
+
+
     /**
      * 加载状态
      */
+
     loading(){
 
 
@@ -213,6 +251,7 @@ rel="noopener noreferrer"
 `;
 
     }
+
 
 
 };
