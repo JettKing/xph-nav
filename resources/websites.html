@@ -16,6 +16,7 @@
 <meta property="og:title" content="网页导航 - 徐胖虎资源社">
 <meta property="og:description" content="徐胖虎资源社精选网页导航，涵盖在线工具、学习资源、设计素材和开发工具等实用网站。">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://xph.asia/favicon.ico">
 <meta property="og:url" content="https://xph.asia/resources/websites.html">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="网页导航 - 徐胖虎资源社">
@@ -350,6 +351,14 @@ padding:35px 0 15px;
 
 </style>
 
+<script type="application/ld+json">
+{
+ "@context":"https://schema.org",
+ "@type":"CollectionPage",
+ "name":"网页导航",
+ "url":"https://xph.asia/resources/websites.html"
+}
+</script>
 </head>
 
 
@@ -402,7 +411,7 @@ aria-label="返回"
 <input
 type="text"
 id="searchInput"
-placeholder="搜索网页导航..."
+placeholder="搜索资源名称..."
 autocomplete="off"
 >
 
@@ -488,318 +497,14 @@ autocomplete="off"
 <script src="/assets/js/data/website.js"></script>
 
 <script>
-
-/* =========================
-   资源卡片自动生成
-========================= */
-
-const toolsContainer =
-document.getElementById("resource-list");
-
-
-function escapeHTML(value){
-
-return String(value)
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
-
-}
-
-
-function renderTools(){
-
-if(
-!toolsContainer ||
-!Array.isArray(websitesList)
-){
-
-return;
-
-}
-
-
-toolsContainer.innerHTML =
-websitesList.map(item => {
-
-
-const projectButton = item.project
-
-? `
-
-<a
-class="action-btn project-btn"
-href="${escapeHTML(item.project)}"
-target="_blank"
-rel="noopener noreferrer"
->
-项目地址
-</a>
-
-`
-
-: `
-
-<span
-class="action-btn disabled-btn"
->
-暂无项目
-</span>
-
-`;
-
-
-return `
-
-<div
-class="tool-card"
-data-category="${escapeHTML(item.category)}"
-data-name="${escapeHTML(item.name)}"
->
-
-<div class="tool-main">
-
-<div class="tool-icon">
-${escapeHTML(item.icon)}
-</div>
-
-<div class="tool-info">
-
-<div class="tool-name">
-${escapeHTML(item.name)}
-</div>
-
-<div class="tool-desc">
-${escapeHTML(item.desc)}
-</div>
-
-</div>
-
-</div>
-
-
-<div class="tool-bottom">
-
-<div class="tool-tag">
-${escapeHTML(item.tag)}
-</div>
-
-<div class="tool-actions">
-
-<a
-class="action-btn website-btn"
-href="${escapeHTML(item.website)}"
-target="_blank"
-rel="noopener noreferrer"
->
-官网地址
-</a>
-
-${projectButton}
-
-</div>
-
-</div>
-
-</div>
-
-`;
-
-}).join("");
-
-}
-
-
-renderTools();
-
-
-/* =========================
-   搜索与分类筛选
-========================= */
-
-const searchInput =
-document.getElementById("searchInput");
-
-const toolCards =
-document.querySelectorAll(".tool-card");
-
-const categoryButtons =
-document.querySelectorAll(".category-btn");
-
-const empty =
-document.getElementById("empty");
-
-const resourceCount =
-document.getElementById("resourceCount");
-
-let currentCategory = "all";
-
-
-resourceCount.textContent =
-toolCards.length + " 个资源";
-
-
-
-
-function filterTools(){
-
-const keyword =
-searchInput.value
-.trim()
-.toLowerCase();
-
-let visibleCount = 0;
-
-
-toolCards.forEach(card => {
-
-const name =
-card.dataset.name
-.toLowerCase();
-
-const description =
-card.querySelector(".tool-desc")
-.textContent
-.toLowerCase();
-
-const category =
-card.dataset.category;
-
-
-const matchSearch =
-
-name.includes(keyword) ||
-
-description.includes(keyword);
-
-
-const matchCategory =
-
-currentCategory === "all" ||
-
-category === currentCategory;
-
-
-if(matchSearch && matchCategory){
-
-card.style.display = "block";
-
-visibleCount++;
-
-}else{
-
-card.style.display = "none";
-
-}
-
-});
-
-
-resourceCount.textContent =
-visibleCount + " 个资源";
-
-
-empty.style.display =
-visibleCount === 0
-? "block"
-: "none";
-
-}
-
-
-
-searchInput.addEventListener(
-"input",
-filterTools
-);
-
-
-
-categoryButtons.forEach(button => {
-
-button.addEventListener("click", function(){
-
-categoryButtons.forEach(btn => {
-
-btn.classList.remove("active");
-
-});
-
-this.classList.add("active");
-
-currentCategory =
-this.dataset.category;
-
-filterTools();
-
-});
-
-});
-
-
-
-/* =========================
-   原生返回逻辑
-   有历史记录返回上一页
-   无历史记录返回首页
-   不新增历史记录
-========================= */
-
-const backButton =
-document.getElementById("backButton");
-
+const backButton=document.getElementById("backButton");
 if(backButton){
-
-backButton.addEventListener(
-"click",
-function(){
-
-if(window.history.length > 1){
-
-window.history.back();
-
-}else{
-
-window.location.replace("/");
-
+    backButton.onclick=()=>{
+        history.length>1?history.back():location.replace("/");
+    };
 }
-
-});
-
-}
-
-
-/* =========================
-   禁止右键
-========================= */
-
-document.oncontextmenu = function(){
-
-return false;
-
-};
-
-
-/* =========================
-   禁止常见开发者快捷键
-========================= */
-
-document.onkeydown = function(e){
-
-if(
-e.keyCode === 123 ||
-(e.ctrlKey && e.keyCode === 85) ||
-(e.ctrlKey && e.shiftKey && e.keyCode === 73)
-){
-
-return false;
-
-}
-
-};
-
+document.oncontextmenu=()=>false;
+document.onkeydown=e=>!(e.keyCode===123||(e.ctrlKey&&e.keyCode===85)||(e.ctrlKey&&e.shiftKey&&e.keyCode===73));
 </script>
 
 
