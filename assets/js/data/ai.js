@@ -127,4 +127,4 @@ window.aiResources = [
     status:"active"
 }
 
-];
+]; 
