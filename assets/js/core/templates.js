@@ -8,14 +8,8 @@
  * ==========================================================
  */
 
-
 window.ResourceTemplates = {
 
-
-
-    /**
-     * HTML 转义
-     */
 
     escape(value){
 
@@ -30,49 +24,27 @@ window.ResourceTemplates = {
 
 
 
-
-    /**
-     * 资源卡片模板
-     */
-
     card(resource = {}){
 
 
-        const name =
-            resource.name || "未命名资源";
+        const {
+
+            name = "未命名资源",
+
+            description = resource.desc || "暂无介绍",
+
+            icon = "📦",
+
+            category = "all",
+
+            subcategory = "资源",
+
+            website = "",
+
+            github = resource.project || ""
 
 
-        const description =
-            resource.description ||
-            resource.desc ||
-            "暂无介绍";
-
-
-        const icon =
-            resource.icon ||
-            "📦";
-
-
-        const subcategory =
-            resource.subcategory ||
-            resource.category ||
-            "资源";
-
-
-
-        const website =
-            resource.website ||
-            resource.url ||
-            "";
-
-
-
-        const github =
-            resource.github ||
-            resource.project ||
-            "";
-
-
+        } = resource;
 
 
 
@@ -95,9 +67,7 @@ rel="noopener noreferrer"
 
         `
 
-<span
-class="action-btn disabled-btn"
->
+<span class="action-btn disabled-btn">
 暂无项目
 </span>
 
@@ -105,13 +75,72 @@ class="action-btn disabled-btn"
 
 
 
+        return `
+
+
+<div
+class="tool-card"
+data-name="${this.escape(name)}"
+data-category="${this.escape(category)}"
+data-subcategory="${this.escape(subcategory)}"
+>
+
+
+<div class="tool-main">
+
+
+<div class="tool-icon">
+
+${this.escape(icon)}
+
+</div>
 
 
 
-        const websiteButton = website
+<div class="tool-info">
 
-        ? `
 
+<div class="tool-name">
+
+${this.escape(name)}
+
+</div>
+
+
+
+<div class="tool-desc">
+
+${this.escape(description)}
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="tool-bottom">
+
+
+<div class="tool-tag">
+
+${this.escape(subcategory)}
+
+</div>
+
+
+
+<div class="tool-actions">
+
+
+${
+website
+?
+
+`
 <a
 class="action-btn website-btn"
 href="${this.escape(website)}"
@@ -120,83 +149,22 @@ rel="noopener noreferrer"
 >
 官网地址
 </a>
-
 `
 
-        :
+:
 
-        "";
+""
 
-
-
-
-
-        return `
+}
 
 
-<div class="tool-card">
+${projectButton}
 
 
-    <div class="tool-main">
+</div>
 
 
-        <div class="tool-icon">
-
-            ${this.escape(icon)}
-
-        </div>
-
-
-
-        <div class="tool-info">
-
-
-            <div class="tool-name">
-
-                ${this.escape(name)}
-
-            </div>
-
-
-
-            <div class="tool-desc">
-
-                ${this.escape(description)}
-
-            </div>
-
-
-        </div>
-
-
-    </div>
-
-
-
-    <div class="tool-bottom">
-
-
-        <div class="tool-tag">
-
-            ${this.escape(subcategory)}
-
-        </div>
-
-
-
-        <div class="tool-actions">
-
-
-            ${websiteButton}
-
-
-            ${projectButton}
-
-
-        </div>
-
-
-    </div>
+</div>
 
 
 </div>
@@ -207,12 +175,6 @@ rel="noopener noreferrer"
     },
 
 
-
-
-
-    /**
-     * 空状态
-     */
 
     empty(message="暂无资源"){
 
@@ -221,7 +183,7 @@ rel="noopener noreferrer"
 
 <div class="empty">
 
-    ${this.escape(message)}
+${this.escape(message)}
 
 </div>
 
@@ -231,12 +193,6 @@ rel="noopener noreferrer"
 
 
 
-
-
-    /**
-     * 加载状态
-     */
-
     loading(){
 
 
@@ -244,14 +200,13 @@ rel="noopener noreferrer"
 
 <div class="loading">
 
-    加载中...
+加载中...
 
 </div>
 
 `;
 
     }
-
 
 
 };
