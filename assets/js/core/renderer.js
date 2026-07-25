@@ -7,138 +7,54 @@
  * 1. 清空容器
  * 2. 渲染资源列表
  * 3. 调用 Templates
- * 4. 处理异常保护
+ * 4. 通知交互层刷新
  * ==========================================================
  */
 
-
 window.ResourceRenderer = {
 
-
-    /**
-     * 渲染资源列表
-     * @param {Object} options
-     * @param {String} options.container
-     * @param {Array} options.data
-     */
-
     render({
-
         container = "#resource-list",
-
         data = []
-
     } = {}) {
-
 
         const element = document.querySelector(container);
 
-
-        if(!element){
-
-            console.warn(
-                `找不到资源容器：${container}`
-            );
-
+        if (!element) {
+            console.warn(`找不到容器：${container}`);
             return;
-
         }
-
-
 
         this.clear(element);
 
+        if (!data.length) {
+            element.innerHTML = ResourceTemplates.empty();
 
-
-        if(
-            !Array.isArray(data) ||
-            data.length === 0
-        ){
-
-
-            if(
-                window.ResourceTemplates &&
-                typeof ResourceTemplates.empty === "function"
-            ){
-
-                element.innerHTML =
-                    ResourceTemplates.empty();
-
-            }else{
-
-                element.innerHTML =
-                    `
-                    <div class="empty">
-                    暂无资源
-                    </div>
-                    `;
-
+            if (typeof window.ResourceAppRefresh === "function") {
+                window.ResourceAppRefresh();
             }
 
-
             return;
-
         }
-
-
-
-
-        if(
-            !window.ResourceTemplates ||
-            typeof ResourceTemplates.card !== "function"
-        ){
-
-
-            console.warn(
-                "ResourceTemplates 未加载"
-            );
-
-
-            return;
-
-        }
-
-
 
 
         element.innerHTML = data
-
-            .map(item=>{
-
-                return ResourceTemplates.card(item);
-
-            })
-
+            .map(ResourceTemplates.card)
             .join("");
 
 
+        // ⭐ 动态渲染完成后通知交互层
+        if (typeof window.ResourceAppRefresh === "function") {
+            window.ResourceAppRefresh();
+        }
 
     },
 
 
-
-
-    /**
-     * 清空容器
-     * @param {HTMLElement} container
-     */
-
-
-    clear(container){
-
-
-        if(!container){
-
-            return;
-
-        }
-
+    clear(container) {
 
         container.innerHTML = "";
 
-
     }
-
-
 
 };
