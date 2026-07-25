@@ -1,19 +1,27 @@
 /**
+ * ==========================================================
  * 徐胖虎资源社
- * 全站分类配置
- *
+ * 全站分类配置 v2.1
+ * ----------------------------------------------------------
  * 用途：
  * 1. 控制资源一级分类
  * 2. 控制二级分类显示名称
  * 3. 给搜索、筛选、导航使用
+ * ==========================================================
  */
+
 
 window.categories = {
 
+
     // 🤖 AI工具
+
     ai: {
+
         name: "AI工具",
+
         icon: "🤖",
+
 
         children: {
 
@@ -33,13 +41,20 @@ window.categories = {
             ai_prompt: "AI提示词"
 
         }
+
     },
 
 
+
+
     // 💻 软件工具
+
     software: {
+
         name: "软件工具",
+
         icon: "💻",
+
 
         children: {
 
@@ -60,13 +75,20 @@ window.categories = {
             software_dev: "开发工具"
 
         }
+
     },
 
 
+
+
     // ⚡ 效率工具
+
     productivity: {
+
         name: "效率工具",
+
         icon: "⚡",
+
 
         children: {
 
@@ -82,13 +104,20 @@ window.categories = {
             productivity_automation: "自动化工具"
 
         }
+
     },
 
 
-    // 🌐 网站导航
+
+
+    // 🌐 网页导航
+
     website: {
-        name: "网站导航",
+
+        name: "网页导航",
+
         icon: "🌐",
+
 
         children: {
 
@@ -103,13 +132,20 @@ window.categories = {
             website_api: "API平台"
 
         }
+
     },
 
 
-    // 📦 数字资源
+
+
+    // 📚 数字资源
+
     digital: {
+
         name: "数字资源",
-        icon: "📦",
+
+        icon: "📚",
+
 
         children: {
 
@@ -125,13 +161,20 @@ window.categories = {
             digital_dataset: "数据集"
 
         }
+
     },
 
 
-    // 🚀 解决方案
+
+
+    // 💎 解决方案
+
     solution: {
+
         name: "解决方案",
-        icon: "🚀",
+
+        icon: "💎",
+
 
         children: {
 
@@ -144,6 +187,8 @@ window.categories = {
             solution_automation: "自动化方案"
 
         }
+
     }
+
 
 };
