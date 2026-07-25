@@ -1,7 +1,7 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * Engine v2.0
+ * Engine v2.1
  * ----------------------------------------------------------
  * 职责：
  * 1. 提供页面资源
@@ -12,68 +12,198 @@
  * ==========================================================
  */
 
+
 window.ResourceEngine = {
+
 
     /**
      * 页面资源映射
      */
+
     pages: {
 
-        ai: () => window.aiResources || [],
 
-        software: () => window.softwareResources || [],
+        ai: () => 
+            Array.isArray(window.aiResources)
+            ? window.aiResources
+            : [],
 
-        productivity: () => window.productivityResources || [],
 
-        website: () => window.websiteResources || [],
+        software: () =>
+            Array.isArray(window.softwareResources)
+            ? window.softwareResources
+            : [],
 
-        digital: () => window.digitalResources || [],
 
-        solution: () => window.solutionResources || []
+        productivity: () =>
+            Array.isArray(window.productivityResources)
+            ? window.productivityResources
+            : [],
+
+
+        website: () =>
+            Array.isArray(window.websiteResources)
+            ? window.websiteResources
+            : [],
+
+
+        digital: () =>
+            Array.isArray(window.digitalResources)
+            ? window.digitalResources
+            : [],
+
+
+        solution: () =>
+            Array.isArray(window.solutionResources)
+            ? window.solutionResources
+            : []
 
     },
+
+
+
+
 
     /**
      * 获取指定页面资源
      */
+
     getPageResources(page) {
 
-        if (!page) return [];
 
-        const getter = this.pages[page];
+        if(!page){
 
-        return getter ? getter() : [];
+            return [];
+
+        }
+
+
+        const getter =
+            this.pages[page];
+
+
+        if(
+            typeof getter !== "function"
+        ){
+
+            return [];
+
+        }
+
+
+        return getter();
+
 
     },
+
+
+
+
 
     /**
      * 获取全部资源
      */
+
     getAllResources() {
 
+
         return Object.values(this.pages)
-            .flatMap(getter => getter());
+
+            .flatMap(getter=>{
+
+
+                try{
+
+
+                    const data =
+                        getter();
+
+
+                    return Array.isArray(data)
+                        ? data
+                        : [];
+
+
+                }catch(error){
+
+
+                    console.warn(
+                        "资源读取失败",
+                        error
+                    );
+
+
+                    return [];
+
+
+                }
+
+
+            });
+
 
     },
+
+
+
+
 
     /**
      * 根据一级分类获取资源
      */
+
     getCategory(category) {
 
+
+        if(!category){
+
+            return [];
+
+        }
+
+
         return this.getAllResources()
-            .filter(item => item.category === category);
+
+            .filter(item=>{
+
+                return item &&
+                    item.category === category;
+
+            });
+
 
     },
+
+
+
+
 
     /**
      * 根据二级分类获取资源
      */
+
     getSubCategory(subcategory) {
 
+
+        if(!subcategory){
+
+            return [];
+
+        }
+
+
         return this.getAllResources()
-            .filter(item => item.subcategory === subcategory);
+
+            .filter(item=>{
+
+                return item &&
+                    item.subcategory === subcategory;
+
+            });
+
 
     }
+
+
 
 };
