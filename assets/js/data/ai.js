@@ -6,7 +6,7 @@ window.aiResources = [
     description:"OpenAI 推出的智能 AI 助手",
     icon:"🤖",
     thumbnail:"",
-    category:"chat",
+    category:"ai",
     subcategory:"AI聊天",
     website:"https://chatgpt.com",
     github:"",
@@ -14,6 +14,7 @@ window.aiResources = [
     pricing:"Freemium",
     language:"多语言",
     features:["聊天","写作","编程"],
+    tags:["AI聊天","AI助手"],
     audience:"所有用户",
     official:true,
     recommend:true,
@@ -22,13 +23,14 @@ window.aiResources = [
     status:"active"
 },
 
+
 {
     id:2,
     name:"Claude",
     description:"Anthropic 推出的 AI 助手",
     icon:"🧠",
     thumbnail:"",
-    category:"chat",
+    category:"ai",
     subcategory:"AI聊天",
     website:"https://claude.ai",
     github:"",
@@ -36,6 +38,7 @@ window.aiResources = [
     pricing:"Freemium",
     language:"多语言",
     features:["长文本","分析","写作"],
+    tags:["AI聊天","AI助手"],
     audience:"所有用户",
     official:true,
     recommend:true,
@@ -44,13 +47,14 @@ window.aiResources = [
     status:"active"
 },
 
+
 {
     id:3,
     name:"Midjourney",
     description:"AI 图片生成平台",
     icon:"🎨",
     thumbnail:"",
-    category:"image",
+    category:"ai",
     subcategory:"AI绘图",
     website:"https://www.midjourney.com",
     github:"",
@@ -58,6 +62,7 @@ window.aiResources = [
     pricing:"Paid",
     language:"英文",
     features:["AI绘图","艺术创作"],
+    tags:["AI绘图","图片生成"],
     audience:"设计师",
     official:true,
     recommend:true,
@@ -66,13 +71,14 @@ window.aiResources = [
     status:"active"
 },
 
+
 {
     id:4,
     name:"Cursor",
     description:"AI 编程编辑器",
     icon:"💻",
     thumbnail:"",
-    category:"code",
+    category:"ai",
     subcategory:"AI编程",
     website:"https://cursor.com",
     github:"",
@@ -80,6 +86,7 @@ window.aiResources = [
     pricing:"Freemium",
     language:"英文",
     features:["AI编程","自动补全"],
+    tags:["AI编程","代码助手"],
     audience:"开发者",
     official:true,
     recommend:true,
@@ -88,13 +95,14 @@ window.aiResources = [
     status:"active"
 },
 
+
 {
     id:5,
     name:"Gamma",
     description:"AI 演示文稿生成工具",
     icon:"📊",
     thumbnail:"",
-    category:"office",
+    category:"ai",
     subcategory:"AI办公",
     website:"https://gamma.app",
     github:"",
@@ -102,6 +110,7 @@ window.aiResources = [
     pricing:"Freemium",
     language:"多语言",
     features:["PPT","文档","演示"],
+    tags:["AI办公","演示生成"],
     audience:"办公用户",
     official:true,
     recommend:true,
