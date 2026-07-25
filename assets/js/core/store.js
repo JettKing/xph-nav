@@ -13,65 +13,37 @@
 window.ResourceStore = {
 
 
-    page: "",
+    page:"",
 
 
-    resources: [],
+    resources:[],
 
 
-    keyword: "",
+    keyword:"",
 
 
-    category: "all",
+    category:"all",
 
 
-    sort: "recommend",
+    sort:"recommend",
 
 
 
-
-    init(page) {
-
-
-        this.page = page || "";
+    init(page){
 
 
-        if(
-            window.ResourceEngine &&
-            typeof ResourceEngine.getPageResources === "function"
-        ){
-
-            const data =
-                ResourceEngine.getPageResources(page);
+        this.page = page;
 
 
-            this.resources =
-                Array.isArray(data)
-                ? data
-                : [];
-
-
-        }else{
-
-
-            console.warn(
-                "ResourceEngine 未加载"
-            );
-
-
-            this.resources = [];
-
-
-        }
+        this.resources =
+            ResourceEngine.getPageResources(page);
 
 
     },
 
 
 
-
-
-    setKeyword(keyword) {
+    setKeyword(keyword){
 
 
         this.keyword =
@@ -82,9 +54,7 @@ window.ResourceStore = {
 
 
 
-
-
-    setCategory(category) {
+    setCategory(category){
 
 
         this.category =
@@ -95,9 +65,7 @@ window.ResourceStore = {
 
 
 
-
-
-    setSort(sort) {
+    setSort(sort){
 
 
         this.sort =
@@ -108,53 +76,35 @@ window.ResourceStore = {
 
 
 
+    getData(){
 
 
-    getData() {
-
-
-        let data =
-            Array.isArray(this.resources)
-            ? [...this.resources]
-            : [];
+        let data = [
+            ...this.resources
+        ];
 
 
 
-
-        // Search
-
+        // V2.1统一过滤入口
         if(
-            window.ResourceSearch &&
-            typeof ResourceSearch.search === "function"
+            window.ResourceEngine &&
+            typeof ResourceEngine.filter === "function"
         ){
 
-            data =
-                ResourceSearch.search(
-                    data,
-                    this.keyword
-                ) || [];
-
-        }
-
-
-
-
-
-        // Filter
-
-        if(
-            window.ResourceFilter &&
-            typeof ResourceFilter.byCategory === "function"
-        ){
 
             data =
-                ResourceFilter.byCategory(
+                ResourceEngine.filter({
+
                     data,
-                    this.category
-                ) || [];
+
+                    keyword:this.keyword,
+
+                    category:this.category
+
+                });
+
 
         }
-
 
 
 
@@ -165,21 +115,16 @@ window.ResourceStore = {
 
 
 
+    reset(){
 
 
-    reset() {
+        this.keyword="";
 
 
-        this.keyword = "";
+        this.category="all";
 
 
-        this.category = "all";
-
-
-        this.sort = "recommend";
-
-
-        this.resources = [];
+        this.sort="recommend";
 
 
     }
