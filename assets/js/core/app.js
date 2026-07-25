@@ -1,25 +1,26 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * App v2.0
+ * App v2.1
  * ----------------------------------------------------------
  * 页面生命周期
  * 事件绑定
+ * 搜索
+ * 分类
+ * 渲染刷新
  * ==========================================================
  */
 
 window.ResourceApp = {
 
-    /**
-     * 初始化
-     */
-    init() {
+
+    init(){
 
         const page =
             document.body.dataset.page;
 
 
-        if (!page) {
+        if(!page){
 
             console.warn(
                 "未设置 data-page"
@@ -30,7 +31,7 @@ window.ResourceApp = {
         }
 
 
-        if (!window.ResourceStore) {
+        if(!window.ResourceStore){
 
             console.warn(
                 "ResourceStore 未加载"
@@ -49,13 +50,12 @@ window.ResourceApp = {
 
         this.bindEvents();
 
+
     },
 
 
-    /**
-     * 页面渲染
-     */
-    render() {
+    render(){
+
 
         ResourceRenderer.render({
 
@@ -65,13 +65,61 @@ window.ResourceApp = {
 
         });
 
+
+        this.refresh();
+
+
     },
 
 
-    /**
-     * 事件绑定
-     */
-    bindEvents() {
+    refresh(){
+
+
+        const count =
+            document.getElementById(
+                "resourceCount"
+            );
+
+
+        const empty =
+            document.getElementById(
+                "empty"
+            );
+
+
+        const list =
+            document.querySelectorAll(
+                ".tool-card"
+            );
+
+
+        if(count){
+
+            count.textContent =
+                list.length + " 个资源";
+
+        }
+
+
+        if(empty){
+
+            empty.style.display =
+                list.length === 0
+                ? "block"
+                : "none";
+
+        }
+
+
+        // 提供给 Renderer 调用
+        window.ResourceAppRefresh =
+            ()=>this.refresh();
+
+
+    },
+
+
+    bindEvents(){
 
 
         const searchInput =
@@ -82,9 +130,11 @@ window.ResourceApp = {
 
         if(searchInput){
 
+
             searchInput.addEventListener(
                 "input",
                 function(){
+
 
                     ResourceStore.setKeyword(
                         this.value
@@ -92,6 +142,7 @@ window.ResourceApp = {
 
 
                     ResourceApp.render();
+
 
                 }
             );
@@ -121,6 +172,7 @@ window.ResourceApp = {
                         );
 
                     });
+
 
 
                     this.classList.add(
