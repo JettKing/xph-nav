@@ -7,203 +7,165 @@
  * 1. 提供页面资源
  * 2. 提供全部资源
  * 3. 提供分类资源
- * 4. 不负责 DOM
- * 5. 不负责渲染
+ * 4. 提供搜索过滤
+ * 5. 提供统一查询
+ * 6. 不负责 DOM
+ * 7. 不负责渲染
  * ==========================================================
  */
 
-
 window.ResourceEngine = {
-
-
-    /**
-     * 页面资源映射
-     */
 
     pages: {
 
+        ai: () => window.aiResources || [],
 
-        ai: () => 
-            Array.isArray(window.aiResources)
-            ? window.aiResources
-            : [],
+        software: () => window.softwareResources || [],
 
+        productivity: () => window.productivityResources || [],
 
-        software: () =>
-            Array.isArray(window.softwareResources)
-            ? window.softwareResources
-            : [],
+        website: () => window.websiteResources || [],
 
+        digital: () => window.digitalResources || [],
 
-        productivity: () =>
-            Array.isArray(window.productivityResources)
-            ? window.productivityResources
-            : [],
-
-
-        website: () =>
-            Array.isArray(window.websiteResources)
-            ? window.websiteResources
-            : [],
-
-
-        digital: () =>
-            Array.isArray(window.digitalResources)
-            ? window.digitalResources
-            : [],
-
-
-        solution: () =>
-            Array.isArray(window.solutionResources)
-            ? window.solutionResources
-            : []
+        solution: () => window.solutionResources || []
 
     },
 
-
-
-
-
-    /**
-     * 获取指定页面资源
-     */
 
     getPageResources(page) {
 
+        if (!page) return [];
 
-        if(!page){
+        const getter = this.pages[page];
 
-            return [];
-
-        }
-
-
-        const getter =
-            this.pages[page];
-
-
-        if(
-            typeof getter !== "function"
-        ){
-
-            return [];
-
-        }
-
-
-        return getter();
-
+        return getter ? getter() : [];
 
     },
 
-
-
-
-
-    /**
-     * 获取全部资源
-     */
 
     getAllResources() {
 
-
         return Object.values(this.pages)
-
-            .flatMap(getter=>{
-
-
-                try{
-
-
-                    const data =
-                        getter();
-
-
-                    return Array.isArray(data)
-                        ? data
-                        : [];
-
-
-                }catch(error){
-
-
-                    console.warn(
-                        "资源读取失败",
-                        error
-                    );
-
-
-                    return [];
-
-
-                }
-
-
-            });
-
+            .flatMap(getter => getter());
 
     },
 
-
-
-
-
-    /**
-     * 根据一级分类获取资源
-     */
 
     getCategory(category) {
 
-
-        if(!category){
-
-            return [];
-
-        }
-
-
         return this.getAllResources()
-
-            .filter(item=>{
-
-                return item &&
-                    item.category === category;
-
-            });
-
+            .filter(item => item.category === category);
 
     },
 
 
+    getSubCategory(subcategory) {
 
+        return this.getAllResources()
+            .filter(item => item.subcategory === subcategory);
+
+    },
 
 
     /**
-     * 根据二级分类获取资源
+     * 搜索资源
      */
+    search(keyword, data = []) {
 
-    getSubCategory(subcategory) {
+        if (!keyword) return data;
 
 
-        if(!subcategory){
+        const key = keyword
+            .toLowerCase()
+            .trim();
 
-            return [];
+
+        return data.filter(item => {
+
+
+            const text = [
+
+                item.name,
+
+                item.description,
+
+                item.desc,
+
+                item.tag,
+
+                item.category,
+
+                item.subcategory,
+
+                ...(item.tags || [])
+
+            ]
+            .join(" ")
+            .toLowerCase();
+
+
+
+            return text.includes(key);
+
+
+        });
+
+    },
+
+
+    /**
+     * 统一过滤
+     */
+    filter({
+
+        data = [],
+
+        keyword = "",
+
+        category = "all",
+
+        subcategory = "all"
+
+    } = {}) {
+
+
+        let result = [...data];
+
+
+        if(category !== "all"){
+
+            result = result.filter(
+                item =>
+                item.category === category
+            );
 
         }
 
 
-        return this.getAllResources()
+        if(subcategory !== "all"){
 
-            .filter(item=>{
+            result = result.filter(
+                item =>
+                item.subcategory === subcategory
+            );
 
-                return item &&
-                    item.subcategory === subcategory;
+        }
 
-            });
 
+        if(keyword){
+
+            result = this.search(
+                keyword,
+                result
+            );
+
+        }
+
+
+        return result;
 
     }
-
 
 
 };
