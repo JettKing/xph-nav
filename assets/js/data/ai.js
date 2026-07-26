@@ -1,163 +1,239 @@
 /**
  * ==========================================================
- * 徐胖虎资源社
- * AI工具资源数据 v2.1
- * UTF-8
+ * 徐胖虎资源社 Resource Center
+ * App v2.1
+ * ----------------------------------------------------------
+ * 页面生命周期
+ * 事件绑定
+ * 搜索
+ * 分类
+ * 渲染刷新
  * ==========================================================
  */
 
-window.aiResources = [
+window.ResourceApp = {
 
-    {
-        id: 1,
-        name: "ChatGPT",
-        description: "OpenAI 推出的智能 AI 助手",
-        icon: "🤖",
-        thumbnail: "",
-        category: "ai",
-        subcategory: "AI聊天",
-        website: "https://chatgpt.com",
-        github: "",
-        platform: "Web",
-        pricing: "Freemium",
-        language: "多语言",
-        features: [
-            "聊天",
-            "写作",
-            "编程"
-        ],
-        tags: [
-            "AI聊天",
-            "AI助手"
-        ],
-        audience: "所有用户",
-        official: true,
-        recommend: true,
-        score: 9.9,
-        update: "2026-07",
-        status: "active"
+
+    init(){
+
+        const page =
+            document.body.dataset.page;
+
+
+        if(!page){
+
+            console.warn(
+                "未设置 data-page"
+            );
+
+            return;
+
+        }
+
+
+        if(
+            !window.ResourceStore ||
+            !window.ResourceEngine ||
+            !window.ResourceRenderer ||
+            !window.ResourceTemplates
+        ){
+
+            console.error(
+                "Core 模块加载不完整",
+                {
+                    Store: !!window.ResourceStore,
+                    Engine: !!window.ResourceEngine,
+                    Renderer: !!window.ResourceRenderer,
+                    Templates: !!window.ResourceTemplates
+                }
+            );
+
+            return;
+
+        }
+
+
+        ResourceStore.init(page);
+
+
+        this.render();
+
+
+        this.bindEvents();
+
+
     },
 
 
-    {
-        id: 2,
-        name: "Claude",
-        description: "Anthropic 推出的 AI 助手",
-        icon: "🧠",
-        thumbnail: "",
-        category: "ai",
-        subcategory: "AI聊天",
-        website: "https://claude.ai",
-        github: "",
-        platform: "Web",
-        pricing: "Freemium",
-        language: "多语言",
-        features: [
-            "长文本",
-            "分析",
-            "写作"
-        ],
-        tags: [
-            "AI聊天",
-            "AI助手"
-        ],
-        audience: "所有用户",
-        official: true,
-        recommend: true,
-        score: 9.8,
-        update: "2026-07",
-        status: "active"
+    render(){
+
+
+        const container =
+            document.querySelector(
+                "#resource-list"
+            );
+
+        if(!container){
+
+            console.warn(
+                "当前页面不存在 resource-list 容器"
+            );
+
+            return;
+
+        }
+
+
+        ResourceRenderer.render({
+
+            container:"#resource-list",
+
+            data:ResourceStore.getData()
+
+        });
+
+
+        this.refresh();
+
+
     },
 
 
-    {
-        id: 3,
-        name: "Midjourney",
-        description: "AI 图片生成平台",
-        icon: "🎨",
-        thumbnail: "",
-        category: "ai",
-        subcategory: "AI绘图",
-        website: "https://www.midjourney.com",
-        github: "",
-        platform: "Discord",
-        pricing: "Paid",
-        language: "英文",
-        features: [
-            "AI绘图",
-            "艺术创作"
-        ],
-        tags: [
-            "AI绘图",
-            "图片生成"
-        ],
-        audience: "设计师",
-        official: true,
-        recommend: true,
-        score: 9.7,
-        update: "2026-07",
-        status: "active"
+    refresh(){
+
+
+        const count =
+            document.getElementById(
+                "resourceCount"
+            );
+
+
+        const empty =
+            document.getElementById(
+                "empty"
+            );
+
+
+        const list =
+            document.querySelectorAll(
+                ".tool-card"
+            );
+
+
+        if(count){
+
+            count.textContent =
+                list.length + " 个资源";
+
+        }
+
+
+        if(empty){
+
+            empty.style.display =
+                list.length === 0
+                ? "block"
+                : "none";
+
+        }
+
+
+        // 提供给 Renderer 调用
+        window.ResourceAppRefresh =
+            ()=>this.refresh();
+
+
     },
 
 
-    {
-        id: 4,
-        name: "Cursor",
-        description: "AI 编程编辑器",
-        icon: "💻",
-        thumbnail: "",
-        category: "ai",
-        subcategory: "AI编程",
-        website: "https://cursor.com",
-        github: "",
-        platform: "Windows / macOS",
-        pricing: "Freemium",
-        language: "英文",
-        features: [
-            "AI编程",
-            "自动补全"
-        ],
-        tags: [
-            "AI编程",
-            "代码助手"
-        ],
-        audience: "开发者",
-        official: true,
-        recommend: true,
-        score: 9.8,
-        update: "2026-07",
-        status: "active"
-    },
+    bindEvents(){
 
 
-    {
-        id: 5,
-        name: "Gamma",
-        description: "AI 演示文稿生成工具",
-        icon: "📊",
-        thumbnail: "",
-        category: "ai",
-        subcategory: "AI办公",
-        website: "https://gamma.app",
-        github: "",
-        platform: "Web",
-        pricing: "Freemium",
-        language: "多语言",
-        features: [
-            "PPT",
-            "文档",
-            "演示"
-        ],
-        tags: [
-            "AI办公",
-            "演示生成"
-        ],
-        audience: "办公用户",
-        official: true,
-        recommend: true,
-        score: 9.5,
-        update: "2026-07",
-        status: "active"
+        const searchInput =
+            document.getElementById(
+                "searchInput"
+            );
+
+
+        if(searchInput){
+
+
+            searchInput.addEventListener(
+                "input",
+                function(){
+
+
+                    ResourceStore.setKeyword(
+                        this.value
+                    );
+
+
+                    ResourceApp.render();
+
+
+                }
+            );
+
+        }
+
+
+
+        const categoryButtons =
+            document.querySelectorAll(
+                ".category-btn"
+            );
+
+
+        categoryButtons.forEach(button=>{
+
+
+            button.addEventListener(
+                "click",
+                function(){
+
+
+                    categoryButtons.forEach(btn=>{
+
+                        btn.classList.remove(
+                            "active"
+                        );
+
+                    });
+
+
+
+                    this.classList.add(
+                        "active"
+                    );
+
+
+                    ResourceStore.setCategory(
+                        this.dataset.category
+                    );
+
+
+                    ResourceApp.render();
+
+
+                }
+            );
+
+
+        });
+
+
     }
 
-];
+
+};
+
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    ()=>{
+
+        ResourceApp.init();
+
+    }
+);
