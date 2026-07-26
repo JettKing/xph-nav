@@ -1,67 +1,148 @@
 /**
  * ==========================================================
- * 徐胖虎资源社 Resource Center
- * Renderer v2.1
+ * Renderer v2.2
  * ----------------------------------------------------------
- * 职责：
- * 1. 清空容器
- * 2. 渲染资源列表
- * 3. 调用 Templates
- * 4. 通知交互层刷新
+ * Renderer 统一渲染中心
  * ==========================================================
  */
 
 window.ResourceRenderer = {
 
     render({
+
         container = "#resource-list",
+
         data = []
+
     } = {}) {
 
         const element = document.querySelector(container);
 
         if (!element) {
-            console.warn(`找不到容器：${container}`);
+
+            console.warn("找不到容器：" + container);
+
             return;
+
         }
 
         this.clear(element);
 
-        // 统一保证 data 为数组
         const list = Array.isArray(data)
+
             ? data
+
             : [];
 
         if (list.length === 0) {
 
             element.innerHTML = ResourceTemplates.empty();
 
-            if (typeof window.ResourceAppRefresh === "function") {
-                window.ResourceAppRefresh();
-            }
+            this.refresh();
 
             return;
 
         }
 
         element.innerHTML = list
+
             .map(item => ResourceTemplates.card(item))
+
             .join("");
 
-        // 动态渲染完成后通知交互层刷新
-        if (typeof window.ResourceAppRefresh === "function") {
-            window.ResourceAppRefresh();
-        }
+        this.refresh();
+
+    },
+
+    loading(container = "#resource-list") {
+
+        const element = document.querySelector(container);
+
+        if (!element) return;
+
+        element.innerHTML = ResourceTemplates.loading();
+
+    },
+
+    skeleton(container = "#resource-list", count = 6) {
+
+        const element = document.querySelector(container);
+
+        if (!element) return;
+
+        element.innerHTML = ResourceTemplates.skeleton(count);
+
+    },
+
+    append({
+
+        container = "#resource-list",
+
+        data = []
+
+    } = {}) {
+
+        const element = document.querySelector(container);
+
+        if (!element) return;
+
+        if (!Array.isArray(data)) return;
+
+        element.insertAdjacentHTML(
+
+            "beforeend",
+
+            data
+
+                .map(item => ResourceTemplates.card(item))
+
+                .join("")
+
+        );
+
+        this.refresh();
+
+    },
+
+    replace({
+
+        container = "#resource-list",
+
+        html = ""
+
+    } = {}) {
+
+        const element = document.querySelector(container);
+
+        if (!element) return;
+
+        element.innerHTML = html;
+
+        this.refresh();
 
     },
 
     clear(container) {
 
-        if (!container) {
-            return;
-        }
+        if (!container) return;
 
         container.innerHTML = "";
+
+    },
+
+    refresh() {
+
+        if (
+
+            typeof window.ResourceAppRefresh ===
+
+            "function"
+
+        ) {
+
+            window.ResourceAppRefresh();
+
+        }
 
     }
 
