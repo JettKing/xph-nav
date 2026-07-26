@@ -27,7 +27,13 @@ window.ResourceRenderer = {
 
         this.clear(element);
 
-        if (!data.length) {
+        // 统一保证 data 为数组
+        const list = Array.isArray(data)
+            ? data
+            : [];
+
+        if (list.length === 0) {
+
             element.innerHTML = ResourceTemplates.empty();
 
             if (typeof window.ResourceAppRefresh === "function") {
@@ -35,23 +41,25 @@ window.ResourceRenderer = {
             }
 
             return;
+
         }
 
-
-        element.innerHTML = data
+        element.innerHTML = list
             .map(item => ResourceTemplates.card(item))
             .join("");
 
-
-        // ⭐ 动态渲染完成后通知交互层
+        // 动态渲染完成后通知交互层刷新
         if (typeof window.ResourceAppRefresh === "function") {
             window.ResourceAppRefresh();
         }
 
     },
 
-
     clear(container) {
+
+        if (!container) {
+            return;
+        }
 
         container.innerHTML = "";
 
