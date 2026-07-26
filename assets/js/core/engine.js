@@ -1,59 +1,179 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * Renderer v2.1
+ * Engine v2.1
  * ----------------------------------------------------------
  * 职责：
- * 1. 清空容器
- * 2. 渲染资源列表
- * 3. 调用 Templates
- * 4. 通知交互层刷新
+ * 1. 提供页面资源
+ * 2. 提供全部资源
+ * 3. 提供分类资源
+ * 4. 提供搜索过滤
+ * 5. 提供统一查询
+ * 6. 不负责 DOM
+ * 7. 不负责渲染
  * ==========================================================
  */
 
-window.ResourceRenderer = {
+window.ResourceEngine = {
 
-    render({
-        container = "#resource-list",
-        data = []
-    } = {}) {
+    pages: {
 
-        const element = document.querySelector(container);
+        ai: () => window.aiResources || [],
 
-        if (!element) {
-            console.warn(`找不到容器：${container}`);
-            return;
-        }
+        software: () => window.softwareResources || [],
 
-        this.clear(element);
+        productivity: () => window.productivityResources || [],
 
-        if (!data.length) {
-            element.innerHTML = ResourceTemplates.empty();
+        website: () => window.websiteResources || [],
 
-            if (typeof window.ResourceAppRefresh === "function") {
-                window.ResourceAppRefresh();
-            }
+        digital: () => window.digitalResources || [],
 
-            return;
-        }
-
-
-        element.innerHTML = data
-            .map(ResourceTemplates.card)
-            .join("");
-
-
-        // ⭐ 动态渲染完成后通知交互层
-        if (typeof window.ResourceAppRefresh === "function") {
-            window.ResourceAppRefresh();
-        }
+        solution: () => window.solutionResources || []
 
     },
 
 
-    clear(container) {
+    getPageResources(page) {
 
-        container.innerHTML = "";
+        if (!page) return [];
+
+        const getter = this.pages[page];
+
+        return typeof getter === "function"
+            ? getter()
+            : [];
+
+    },
+
+
+    getAllResources() {
+
+        return Object.values(this.pages)
+            .flatMap(getter =>
+                typeof getter === "function"
+                    ? getter()
+                    : []
+            );
+
+    },
+
+
+    getCategory(category) {
+
+        if (!category || category === "all") {
+            return this.getAllResources();
+        }
+
+        return this.getAllResources()
+            .filter(item => item.category === category);
+
+    },
+
+
+    getSubCategory(subcategory) {
+
+        if (!subcategory || subcategory === "all") {
+            return this.getAllResources();
+        }
+
+        return this.getAllResources()
+            .filter(item => item.subcategory === subcategory);
+
+    },
+
+
+    /**
+     * 搜索资源
+     */
+    search(keyword, data = []) {
+
+        if (!Array.isArray(data) || data.length === 0) {
+            return [];
+        }
+
+        if (!keyword) {
+            return data;
+        }
+
+        const key = String(keyword)
+            .toLowerCase()
+            .trim();
+
+        return data.filter(item => {
+
+            const text = [
+
+                item?.name,
+
+                item?.description,
+
+                item?.desc,
+
+                item?.tag,
+
+                item?.category,
+
+                item?.subcategory,
+
+                ...(Array.isArray(item?.tags) ? item.tags : [])
+
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+            return text.includes(key);
+
+        });
+
+    },
+
+
+    /**
+     * 统一过滤
+     */
+    filter({
+
+        data = [],
+
+        keyword = "",
+
+        category = "all",
+
+        subcategory = "all"
+
+    } = {}) {
+
+        let result = Array.isArray(data)
+            ? [...data]
+            : [];
+
+        if (category !== "all") {
+
+            result = result.filter(
+                item => item.category === category
+            );
+
+        }
+
+        if (subcategory !== "all") {
+
+            result = result.filter(
+                item => item.subcategory === subcategory
+            );
+
+        }
+
+        if (keyword) {
+
+            result = this.search(
+                keyword,
+                result
+            );
+
+        }
+
+        return result;
 
     }
 
