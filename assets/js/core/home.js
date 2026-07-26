@@ -1,48 +1,29 @@
 /**
  * ==========================================================
- * 徐胖虎资源社 Resource Center
- * Home v2.3.1
+ * 徐胖虎资源社
+ * Home v2.1 Stable
  * ----------------------------------------------------------
- * 职责：
- * 1. 首页资源入口渲染
- * 2. 读取 home-resource-config
- * 3. 渲染首页资源导航
- * 4. 不负责资源查询
- * 5. 不负责 Store
- * 6. 不负责搜索
- * 7. 支持延迟加载配置
+ * 首页资源入口渲染
+ * 不接入 ResourceEngine
+ * 不接入 Store
+ * 不接入 Renderer
  * ==========================================================
  */
 
 window.ResourceHome = {
 
-    config: [],
 
-    initialized: false,
-
-    retryCount: 0,
-
-    maxRetry: 5,
-
-
-    init() {
-
-        if (this.initialized) {
-
-            return;
-
-        }
-
+    init(){
 
         const container = document.getElementById(
             "home-resource-list"
         );
 
 
-        if (!container) {
+        if(!container){
 
             console.warn(
-                "home-resource-list 未找到"
+                "home-resource-list 不存在"
             );
 
             return;
@@ -50,153 +31,76 @@ window.ResourceHome = {
         }
 
 
-        this.container = container;
-
-
-        this.loadConfig();
-
-
-    },
-
-
-    loadConfig() {
-
-
-        const script = document.getElementById(
-            "home-resource-config"
-        );
-
-
-        if (!script) {
-
-
-            if (this.retryCount < this.maxRetry) {
-
-
-                this.retryCount++;
-
-
-                setTimeout(() => {
-
-                    this.loadConfig();
-
-                }, 100);
-
-
-                return;
-
-            }
-
-
-
-            console.warn(
-                "home-resource-config 未找到"
+        const config =
+            document.getElementById(
+                "home-resource-config"
             );
 
 
-            this.config = [];
+        if(!config){
 
-
-            this.render();
-
+            console.warn(
+                "home-resource-config 不存在"
+            );
 
             return;
-
 
         }
 
 
 
-        try {
+        let data=[];
 
 
-            const json = JSON.parse(
-
-                script.textContent || "{}"
-
-            );
+        try{
 
 
+            const json =
+                JSON.parse(
+                    config.textContent
+                );
 
-            this.config = Array.isArray(
+
+            data =
+                Array.isArray(json.resources)
+                ?
                 json.resources
-            )
-
-                ? json.resources
-
-                : [];
+                :
+                [];
 
 
-
-            this.render();
-
-
-
-            this.initialized = true;
-
-
-
-        } catch (error) {
+        }catch(error){
 
 
             console.error(
-
-                "home-resource-config 解析失败",
-
+                "首页资源配置解析失败",
                 error
-
             );
 
 
-            this.config = [];
-
-
-            this.render();
-
+            return;
 
         }
+
+
+
+        this.render(
+            container,
+            data
+        );
 
 
     },
 
 
-    render() {
+
+    render(container,data){
 
 
-        const container = this.container;
+        container.innerHTML="";
 
 
-        if (!container) {
-
-
-            return;
-
-
-        }
-
-
-
-        container.innerHTML = "";
-
-
-
-        if (!this.config.length) {
-
-
-            container.innerHTML = `
-
-<div style="
-padding:20px;
-text-align:center;
-color:#999;
-font-size:14px;
-">
-
-暂无资源
-
-</div>
-
-`;
+        if(!data.length){
 
 
             return;
@@ -206,16 +110,12 @@ font-size:14px;
 
 
 
-        const fragment = document.createDocumentFragment();
+        data.forEach(item=>{
 
 
+            container.appendChild(
 
-        this.config.forEach(item => {
-
-
-            fragment.appendChild(
-
-                this.createCard(item)
+                this.createItem(item)
 
             );
 
@@ -224,29 +124,30 @@ font-size:14px;
 
 
 
-        container.appendChild(fragment);
-
-
     },
 
 
 
-    createCard(item = {}) {
+    createItem(item){
 
 
-        const link = document.createElement(
-            "a"
-        );
+        const link =
+            document.createElement(
+                "a"
+            );
 
 
-        link.className = "menu-item";
+        link.className =
+            "menu-item";
 
 
-        link.href = item.url || "#";
+        link.href =
+            item.url || "#";
 
 
 
         link.innerHTML = `
+
 
 <div class="menu-icon">
 
@@ -260,6 +161,7 @@ ${item.icon || "📦"}
 ${item.name || ""}
 
 </div>
+
 
 `;
 
