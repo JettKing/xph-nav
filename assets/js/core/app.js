@@ -31,10 +31,21 @@ window.ResourceApp = {
         }
 
 
-        if(!window.ResourceStore){
+        if(
+            !window.ResourceStore ||
+            !window.ResourceEngine ||
+            !window.ResourceRenderer ||
+            !window.ResourceTemplates
+        ){
 
-            console.warn(
-                "ResourceStore 未加载"
+            console.error(
+                "Core 模块加载不完整",
+                {
+                    Store: !!window.ResourceStore,
+                    Engine: !!window.ResourceEngine,
+                    Renderer: !!window.ResourceRenderer,
+                    Templates: !!window.ResourceTemplates
+                }
             );
 
             return;
@@ -55,6 +66,22 @@ window.ResourceApp = {
 
 
     render(){
+
+
+        const container =
+            document.querySelector(
+                "#resource-list"
+            );
+
+        if(!container){
+
+            console.warn(
+                "当前页面不存在 resource-list 容器"
+            );
+
+            return;
+
+        }
 
 
         ResourceRenderer.render({
