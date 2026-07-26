@@ -1,148 +1,213 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * App v2.3
+ * App v2.1 Stable
  * ----------------------------------------------------------
  * 职责：
- * 1. 页面生命周期
- * 2. 首页初始化
- * 3. 资源页初始化
- * 4. 事件绑定
- * 5. 页面刷新
+ * 1. 页面初始化
+ * 2. 判断页面类型
+ * 3. 调用首页模块
+ * 4. 调用资源页模块
+ * 5. 绑定资源页事件
+ *
+ * 不负责：
+ * 数据处理
+ * DOM模板生成
+ * 搜索逻辑
  * ==========================================================
  */
 
+
 window.ResourceApp = {
 
-    init() {
 
-        const page = document.body.dataset.page;
+    init(){
 
-        if (!page) {
 
-            console.warn("未设置 data-page");
+        const page =
+            document.body.dataset.page;
+
+
+
+        if(!page){
+
+
+            console.warn(
+                "未检测到 data-page"
+            );
+
 
             return;
 
+
         }
 
-        /* =========================
-           首页
-        ========================= */
 
-        if (page === "home") {
 
-            if (!window.ResourceHome) {
+        /*
+        ==========================
+        首页
+        ==========================
+        */
 
-                console.warn("ResourceHome 未加载");
 
-                return;
+        if(page === "home"){
+
+
+            if(
+                window.ResourceHome
+            ){
+
+
+                ResourceHome.init();
+
+
+            }else{
+
+
+                console.warn(
+                    "ResourceHome 未加载"
+                );
+
 
             }
 
-            ResourceHome.init();
 
             return;
 
+
         }
 
-        /* =========================
-           ResourceStore
-        ========================= */
 
-        if (!window.ResourceStore) {
 
-            console.warn("ResourceStore 未加载");
+
+        /*
+        ==========================
+        资源页面
+        ==========================
+        */
+
+
+        if(
+            !window.ResourceStore
+        ){
+
+
+            console.warn(
+                "ResourceStore 未加载"
+            );
+
 
             return;
 
+
         }
 
-        /* =========================
-           ResourceRenderer
-        ========================= */
 
-        if (!window.ResourceRenderer) {
 
-            console.warn("ResourceRenderer 未加载");
+        if(
+            !window.ResourceRenderer
+        ){
+
+
+            console.warn(
+                "ResourceRenderer 未加载"
+            );
+
 
             return;
 
+
         }
 
-        ResourceStore.init(page);
 
-        window.ResourceAppRefresh = () => this.refresh();
+
+
+        ResourceStore.init(
+            page
+        );
+
+
 
         this.render();
 
+
+
         this.bindEvents();
+
+
 
     },
 
-    render() {
+
+
+
+
+
+    render(){
+
+
 
         ResourceRenderer.render({
 
-            container: "#resource-list",
 
-            data: ResourceStore.getData()
+            container:
+                "#resource-list",
+
+
+            data:
+                ResourceStore.getData()
+
+
 
         });
 
-        this.refresh();
+
 
     },
 
-    refresh() {
 
-        const count = document.getElementById("resourceCount");
 
-        const empty = document.getElementById("empty");
 
-        const list = document.querySelectorAll(".tool-card");
 
-        if (count) {
 
-            count.textContent = list.length + " 个资源";
 
-        }
+    bindEvents(){
 
-        if (empty) {
 
-            empty.style.display =
 
-                list.length === 0
+        /*
+        ==========================
+        搜索
+        ==========================
+        */
 
-                    ? "block"
-
-                    : "none";
-
-        }
-
-    },
-
-    bindEvents() {
 
         const searchInput =
+            document.getElementById(
+                "searchInput"
+            );
 
-            document.getElementById("searchInput");
 
-        if (
 
-            searchInput &&
-
+        if(
+            searchInput
+            &&
             !searchInput.dataset.bound
+        ){
 
-        ) {
 
-            searchInput.dataset.bound = "true";
+            searchInput.dataset.bound =
+                "true";
+
+
 
             searchInput.addEventListener(
 
                 "input",
 
-                function () {
+                function(){
+
 
                     ResourceStore.setKeyword(
 
@@ -150,39 +215,70 @@ window.ResourceApp = {
 
                     );
 
+
                     ResourceApp.render();
+
 
                 }
 
+
             );
+
 
         }
 
-        const categoryButtons =
 
+
+
+
+
+
+        /*
+        ==========================
+        分类筛选
+        ==========================
+        */
+
+
+        const categoryButtons =
             document.querySelectorAll(
 
-                ".category-btn"
+                "[data-category]"
 
             );
 
-        categoryButtons.forEach(button => {
 
-            if (button.dataset.bound) {
+
+        categoryButtons.forEach(button=>{
+
+
+            if(
+                button.dataset.bound
+            ){
+
 
                 return;
 
+
             }
 
-            button.dataset.bound = "true";
+
+
+            button.dataset.bound =
+                "true";
+
+
 
             button.addEventListener(
 
                 "click",
 
-                function () {
+                function(){
 
-                    categoryButtons.forEach(btn => {
+
+
+                    categoryButtons.forEach(btn=>{
+
 
                         btn.classList.remove(
 
@@ -190,7 +286,11 @@ window.ResourceApp = {
 
                         );
 
+
                     });
+
+
+
 
                     this.classList.add(
 
@@ -198,32 +298,64 @@ window.ResourceApp = {
 
                     );
 
+
+
                     ResourceStore.setCategory(
 
                         this.dataset.category
 
                     );
 
+
+
                     ResourceApp.render();
+
+
 
                 }
 
+
             );
+
+
 
         });
 
+
+
+
+
     }
 
+
+
+
+
 };
+
+
+
+
+
+
+/*
+==========================================================
+页面加载
+==========================================================
+*/
+
 
 document.addEventListener(
 
     "DOMContentLoaded",
 
-    () => {
+    function(){
+
 
         ResourceApp.init();
 
+
     }
+
 
 );
