@@ -9,123 +9,119 @@
  * ==========================================================
  */
 
-
 window.ResourceStore = {
 
+    page: "",
 
-    page:"",
+    resources: [],
 
+    keyword: "",
 
-    resources:[],
+    category: "all",
 
-
-    keyword:"",
-
-
-    category:"all",
+    sort: "recommend",
 
 
-    sort:"recommend",
+    init(page) {
 
+        this.page = page || "";
 
+        if (
+            window.ResourceEngine &&
+            typeof ResourceEngine.getPageResources === "function"
+        ) {
 
-    init(page){
+            this.resources =
+                ResourceEngine.getPageResources(this.page);
 
+        } else {
 
-        this.page = page;
+            this.resources = [];
 
+            console.warn(
+                "ResourceEngine 未加载，无法获取资源"
+            );
 
-        this.resources =
-            ResourceEngine.getPageResources(page);
-
+        }
 
     },
 
 
-
-    setKeyword(keyword){
-
+    setKeyword(keyword) {
 
         this.keyword =
             keyword || "";
 
-
     },
 
 
-
-    setCategory(category){
-
+    setCategory(category) {
 
         this.category =
             category || "all";
 
-
     },
 
 
-
-    setSort(sort){
-
+    setSort(sort) {
 
         this.sort =
             sort || "recommend";
 
-
     },
 
 
-
-    getData(){
-
+    getData() {
 
         let data = [
             ...this.resources
         ];
 
 
-
         // V2.1统一过滤入口
-        if(
+        if (
             window.ResourceEngine &&
             typeof ResourceEngine.filter === "function"
-        ){
-
+        ) {
 
             data =
                 ResourceEngine.filter({
 
                     data,
 
-                    keyword:this.keyword,
+                    keyword: this.keyword,
 
-                    category:this.category
+                    category: this.category
 
                 });
-
 
         }
 
 
+        // 保留排序扩展接口
+        if (
+            this.sort &&
+            this.sort !== "recommend"
+        ) {
+
+            // 当前版本暂无排序逻辑
+            // 后续统一由 Engine 扩展
+
+        }
+
 
         return data;
-
 
     },
 
 
+    reset() {
 
-    reset(){
+        this.keyword = "";
 
+        this.category = "all";
 
-        this.keyword="";
-
-
-        this.category="all";
-
-
-        this.sort="recommend";
-
+        this.sort = "recommend";
 
     }
 
