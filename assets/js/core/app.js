@@ -13,186 +13,132 @@
 
 window.ResourceApp = {
 
+    init() {
 
-    init(){
+        const page = document.body.dataset.page;
 
-        const page =
-            document.body.dataset.page;
+        if (!page) {
 
-
-        if(!page){
-
-            console.warn(
-                "未设置 data-page"
-            );
-
+            console.warn("未设置 data-page");
             return;
 
         }
 
+        if (!window.ResourceStore) {
 
-        if(
-            !window.ResourceStore ||
-            !window.ResourceEngine ||
-            !window.ResourceRenderer ||
-            !window.ResourceTemplates
-        ){
-
-            console.error(
-                "Core 模块加载不完整",
-                {
-                    Store: !!window.ResourceStore,
-                    Engine: !!window.ResourceEngine,
-                    Renderer: !!window.ResourceRenderer,
-                    Templates: !!window.ResourceTemplates
-                }
-            );
-
+            console.warn("ResourceStore 未加载");
             return;
 
         }
 
+        if (!window.ResourceRenderer) {
+
+            console.warn("ResourceRenderer 未加载");
+            return;
+
+        }
 
         ResourceStore.init(page);
 
+        // 全局刷新接口仅注册一次
+        window.ResourceAppRefresh = () => this.refresh();
 
         this.render();
 
-
         this.bindEvents();
-
 
     },
 
+    render() {
 
-    render(){
+        const page = document.body.dataset.page;
 
-
+        // 首页与资源页使用统一规则自动选择容器
         const container =
-            document.querySelector(
-                "#resource-list"
-            );
-
-        if(!container){
-
-            console.warn(
-                "当前页面不存在 resource-list 容器"
-            );
-
-            return;
-
-        }
-
+            page === "home"
+                ? "#home-resource-list"
+                : "#resource-list";
 
         ResourceRenderer.render({
 
-            container:"#resource-list",
-
-            data:ResourceStore.getData()
+            container,
+            data: ResourceStore.getData()
 
         });
 
-
         this.refresh();
-
 
     },
 
-
-    refresh(){
-
+    refresh() {
 
         const count =
-            document.getElementById(
-                "resourceCount"
-            );
-
+            document.getElementById("resourceCount");
 
         const empty =
-            document.getElementById(
-                "empty"
-            );
-
+            document.getElementById("empty");
 
         const list =
-            document.querySelectorAll(
-                ".tool-card"
-            );
+            document.querySelectorAll(".tool-card");
 
-
-        if(count){
+        if (count) {
 
             count.textContent =
                 list.length + " 个资源";
 
         }
 
-
-        if(empty){
+        if (empty) {
 
             empty.style.display =
                 list.length === 0
-                ? "block"
-                : "none";
+                    ? "block"
+                    : "none";
 
         }
 
-
-        // 提供给 Renderer 调用
-        window.ResourceAppRefresh =
-            ()=>this.refresh();
-
-
     },
 
-
-    bindEvents(){
-
+    bindEvents() {
 
         const searchInput =
-            document.getElementById(
-                "searchInput"
-            );
+            document.getElementById("searchInput");
 
+        if (searchInput && !searchInput.dataset.bound) {
 
-        if(searchInput){
-
+            searchInput.dataset.bound = "true";
 
             searchInput.addEventListener(
                 "input",
-                function(){
-
+                function () {
 
                     ResourceStore.setKeyword(
                         this.value
                     );
 
-
                     ResourceApp.render();
-
 
                 }
             );
 
         }
 
-
-
         const categoryButtons =
-            document.querySelectorAll(
-                ".category-btn"
-            );
+            document.querySelectorAll(".category-btn");
 
+        categoryButtons.forEach(button => {
 
-        categoryButtons.forEach(button=>{
+            if (button.dataset.bound) {
+                return;
+            }
 
+            button.dataset.bound = "true";
 
             button.addEventListener(
                 "click",
-                function(){
+                function () {
 
-
-                    categoryButtons.forEach(btn=>{
+                    categoryButtons.forEach(btn => {
 
                         btn.classList.remove(
                             "active"
@@ -200,38 +146,28 @@ window.ResourceApp = {
 
                     });
 
-
-
                     this.classList.add(
                         "active"
                     );
-
 
                     ResourceStore.setCategory(
                         this.dataset.category
                     );
 
-
                     ResourceApp.render();
-
 
                 }
             );
 
-
         });
-
 
     }
 
-
 };
-
-
 
 document.addEventListener(
     "DOMContentLoaded",
-    ()=>{
+    () => {
 
         ResourceApp.init();
 
