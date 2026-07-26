@@ -1,7 +1,6 @@
 /**
  * ==========================================================
- * 徐胖虎资源社 Resource Center
- * Store v2.1
+ * Store v2.2
  * ----------------------------------------------------------
  * 页面状态管理
  * 不负责 DOM
@@ -15,12 +14,19 @@ window.ResourceStore = {
 
     resources: [],
 
-    keyword: "",
+    state: {
 
-    category: "all",
+        keyword: "",
 
-    sort: "recommend",
+        category: "all",
 
+        subcategory: "all",
+
+        tag: "all",
+
+        sort: "recommend"
+
+    },
 
     init(page) {
 
@@ -31,99 +37,157 @@ window.ResourceStore = {
             typeof ResourceEngine.getPageResources === "function"
         ) {
 
-            this.resources =
-                ResourceEngine.getPageResources(this.page);
+            this.resources = ResourceEngine.getPageResources(this.page);
 
         } else {
 
             this.resources = [];
 
-            console.warn(
-                "ResourceEngine 未加载，无法获取资源"
-            );
+            console.warn("ResourceEngine 未加载，无法获取资源");
 
         }
 
-    },
+        this.reset();
 
+    },
 
     setKeyword(keyword) {
 
-        this.keyword =
-            keyword || "";
+        this.state.keyword = keyword || "";
 
     },
-
 
     setCategory(category) {
 
-        this.category =
-            category || "all";
+        this.state.category = category || "all";
 
     },
 
+    setSubCategory(subcategory) {
+
+        this.state.subcategory = subcategory || "all";
+
+    },
+
+    setTag(tag) {
+
+        this.state.tag = tag || "all";
+
+    },
 
     setSort(sort) {
 
-        this.sort =
-            sort || "recommend";
+        this.state.sort = sort || "recommend";
 
     },
 
+    getState() {
+
+        return { ...this.state };
+
+    },
 
     getData() {
 
-        let data = [
-            ...this.resources
-        ];
+        let data = Array.isArray(this.resources)
 
+            ? [...this.resources]
 
-        // V2.1统一过滤入口
+            : [];
+
         if (
             window.ResourceEngine &&
             typeof ResourceEngine.filter === "function"
         ) {
 
-            data =
-                ResourceEngine.filter({
+            data = ResourceEngine.filter({
 
-                    data,
+                data,
 
-                    keyword: this.keyword,
+                keyword: this.state.keyword,
 
-                    category: this.category
+                category: this.state.category,
 
-                });
+                subcategory: this.state.subcategory
+
+            });
 
         }
 
-
-        // 保留排序扩展接口
         if (
-            this.sort &&
-            this.sort !== "recommend"
+            this.state.tag !== "all"
         ) {
 
-            // 当前版本暂无排序逻辑
-            // 后续统一由 Engine 扩展
+            data = data.filter(item => {
+
+                if (item.tag === this.state.tag) return true;
+
+                if (
+                    Array.isArray(item.tags) &&
+                    item.tags.includes(this.state.tag)
+                ) {
+
+                    return true;
+
+                }
+
+                return false;
+
+            });
 
         }
 
+        if (
+            this.state.sort &&
+            this.state.sort !== "recommend"
+        ) {
+
+            switch (this.state.sort) {
+
+                case "name":
+
+                    data.sort((a, b) =>
+                        (a.name || "").localeCompare(b.name || "")
+                    );
+
+                    break;
+
+                case "score":
+
+                    data.sort((a, b) =>
+                        (b.score || 0) - (a.score || 0)
+                    );
+
+                    break;
+
+                default:
+
+                    break;
+
+            }
+
+        }
 
         return data;
 
     },
 
-
     reset() {
 
-        this.keyword = "";
+        this.state = {
 
-        this.category = "all";
+            keyword: "",
 
-        this.sort = "recommend";
+            category: "all",
+
+            subcategory: "all",
+
+            tag: "all",
+
+            sort: "recommend"
+
+        };
 
     }
-
 
 };
