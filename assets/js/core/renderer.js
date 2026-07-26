@@ -39,7 +39,7 @@ window.ResourceRenderer = {
 
 
         element.innerHTML = data
-            .map(ResourceTemplates.card)
+            .map(item => ResourceTemplates.card(item))
             .join("");
 
 
