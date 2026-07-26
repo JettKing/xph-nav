@@ -31,7 +31,7 @@ window.ResourceTemplates = {
 
             name = "未命名资源",
 
-            description = resource.desc || "暂无介绍",
+            description = resource.description || resource.desc || "暂无介绍",
 
             icon = "📦",
 
@@ -41,7 +41,7 @@ window.ResourceTemplates = {
 
             website = "",
 
-            github = resource.project || ""
+            github = resource.github || resource.project || ""
 
 
         } = resource;
