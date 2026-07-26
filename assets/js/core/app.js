@@ -1,12 +1,14 @@
 /**
  * ==========================================================
- * App v2.2
+ * 徐胖虎资源社 Resource Center
+ * App v2.3
  * ----------------------------------------------------------
- * 页面生命周期
- * 事件绑定
- * 搜索
- * 分类
- * 渲染刷新
+ * 职责：
+ * 1. 页面生命周期
+ * 2. 首页初始化
+ * 3. 资源页初始化
+ * 4. 事件绑定
+ * 5. 页面刷新
  * ==========================================================
  */
 
@@ -24,6 +26,30 @@ window.ResourceApp = {
 
         }
 
+        /* =========================
+           首页
+        ========================= */
+
+        if (page === "home") {
+
+            if (!window.ResourceHome) {
+
+                console.warn("ResourceHome 未加载");
+
+                return;
+
+            }
+
+            ResourceHome.init();
+
+            return;
+
+        }
+
+        /* =========================
+           ResourceStore
+        ========================= */
+
         if (!window.ResourceStore) {
 
             console.warn("ResourceStore 未加载");
@@ -31,6 +57,10 @@ window.ResourceApp = {
             return;
 
         }
+
+        /* =========================
+           ResourceRenderer
+        ========================= */
 
         if (!window.ResourceRenderer) {
 
@@ -52,23 +82,15 @@ window.ResourceApp = {
 
     render() {
 
-        const page = document.body.dataset.page;
-
-        const container =
-
-            page === "home"
-
-                ? "#home-resource-list"
-
-                : "#resource-list";
-
         ResourceRenderer.render({
 
-            container,
+            container: "#resource-list",
 
             data: ResourceStore.getData()
 
         });
+
+        this.refresh();
 
     },
 
@@ -102,82 +124,106 @@ window.ResourceApp = {
 
     bindEvents() {
 
-        const searchInput = document.getElementById("searchInput");
+        const searchInput =
 
-        if (searchInput && !searchInput.dataset.bound) {
+            document.getElementById("searchInput");
+
+        if (
+
+            searchInput &&
+
+            !searchInput.dataset.bound
+
+        ) {
 
             searchInput.dataset.bound = "true";
 
-            searchInput.addEventListener("input", function () {
+            searchInput.addEventListener(
 
-                ResourceStore.setKeyword(this.value);
+                "input",
 
-                ResourceApp.render();
+                function () {
 
-            });
+                    ResourceStore.setKeyword(
+
+                        this.value
+
+                    );
+
+                    ResourceApp.render();
+
+                }
+
+            );
 
         }
 
-        document.querySelectorAll("[data-category]").forEach(button => {
+        const categoryButtons =
 
-            if (button.dataset.bound) return;
+            document.querySelectorAll(
 
-            button.dataset.bound = "true";
+                ".category-btn"
 
-            button.addEventListener("click", function () {
+            );
 
-                document
-                    .querySelectorAll("[data-category]")
-                    .forEach(btn => btn.classList.remove("active"));
+        categoryButtons.forEach(button => {
 
-                this.classList.add("active");
+            if (button.dataset.bound) {
 
-                ResourceStore.setCategory(
-                    this.dataset.category || "all"
-                );
+                return;
 
-                ResourceApp.render();
-
-            });
-
-        });
-
-        document.querySelectorAll("[data-subcategory]").forEach(button => {
-
-            if (button.dataset.bound) return;
+            }
 
             button.dataset.bound = "true";
 
-            button.addEventListener("click", function () {
+            button.addEventListener(
 
-                ResourceStore.setSubCategory(
-                    this.dataset.subcategory || "all"
-                );
+                "click",
 
-                ResourceApp.render();
+                function () {
 
-            });
+                    categoryButtons.forEach(btn => {
 
-        });
+                        btn.classList.remove(
 
-        document.querySelectorAll("[data-tag]").forEach(button => {
+                            "active"
 
-            if (button.dataset.bound) return;
+                        );
 
-            button.dataset.bound = "true";
+                    });
 
-            button.addEventListener("click", function () {
+                    this.classList.add(
 
-                ResourceStore.setTag(
-                    this.dataset.tag || "all"
-                );
+                        "active"
 
-                ResourceApp.render();
+                    );
 
-            });
+                    ResourceStore.setCategory(
+
+                        this.dataset.category
+
+                    );
+
+                    ResourceApp.render();
+
+                }
+
+            );
 
         });
 
     }
 
 };
+
+document.addEventListener(
+
+    "DOMContentLoaded",
+
+    () => {
+
+        ResourceApp.init();
+
+    }
+
+);
