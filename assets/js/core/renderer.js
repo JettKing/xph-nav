@@ -1,26 +1,29 @@
 /**
  * ==========================================================
- * Renderer v2.2
+ * 徐胖虎资源社 Resource Center
+ * Renderer v2.3
  * ----------------------------------------------------------
- * Renderer 统一渲染中心
+ * 职责：
+ * 1. 清空容器
+ * 2. 渲染资源列表
+ * 3. 调用 Templates
+ * 4. 通知交互层刷新
+ * 5. 提供统一刷新接口
  * ==========================================================
  */
 
 window.ResourceRenderer = {
 
     render({
-
         container = "#resource-list",
-
         data = []
-
     } = {}) {
 
         const element = document.querySelector(container);
 
         if (!element) {
 
-            console.warn("找不到容器：" + container);
+            console.warn(`找不到容器：${container}`);
 
             return;
 
@@ -29,14 +32,13 @@ window.ResourceRenderer = {
         this.clear(element);
 
         const list = Array.isArray(data)
-
             ? data
-
             : [];
 
         if (list.length === 0) {
 
-            element.innerHTML = ResourceTemplates.empty();
+            element.innerHTML =
+                ResourceTemplates.empty();
 
             this.refresh();
 
@@ -45,10 +47,51 @@ window.ResourceRenderer = {
         }
 
         element.innerHTML = list
-
-            .map(item => ResourceTemplates.card(item))
-
+            .map(item =>
+                ResourceTemplates.card(item)
+            )
             .join("");
+
+        this.refresh();
+
+    },
+
+    append({
+        container = "#resource-list",
+        data = []
+    } = {}) {
+
+        const element = document.querySelector(container);
+
+        if (!element) {
+
+            console.warn(`找不到容器：${container}`);
+
+            return;
+
+        }
+
+        const list = Array.isArray(data)
+            ? data
+            : [];
+
+        if (!list.length) {
+
+            return;
+
+        }
+
+        element.insertAdjacentHTML(
+
+            "beforeend",
+
+            list
+                .map(item =>
+                    ResourceTemplates.card(item)
+                )
+                .join("")
+
+        );
 
         this.refresh();
 
@@ -58,65 +101,32 @@ window.ResourceRenderer = {
 
         const element = document.querySelector(container);
 
-        if (!element) return;
+        if (!element) {
 
-        element.innerHTML = ResourceTemplates.loading();
+            return;
 
-    },
+        }
 
-    skeleton(container = "#resource-list", count = 6) {
-
-        const element = document.querySelector(container);
-
-        if (!element) return;
-
-        element.innerHTML = ResourceTemplates.skeleton(count);
+        element.innerHTML =
+            ResourceTemplates.loading();
 
     },
 
-    append({
-
+    empty(
         container = "#resource-list",
-
-        data = []
-
-    } = {}) {
+        message = "暂无资源"
+    ) {
 
         const element = document.querySelector(container);
 
-        if (!element) return;
+        if (!element) {
 
-        if (!Array.isArray(data)) return;
+            return;
 
-        element.insertAdjacentHTML(
+        }
 
-            "beforeend",
-
-            data
-
-                .map(item => ResourceTemplates.card(item))
-
-                .join("")
-
-        );
-
-        this.refresh();
-
-    },
-
-    replace({
-
-        container = "#resource-list",
-
-        html = ""
-
-    } = {}) {
-
-        const element = document.querySelector(container);
-
-        if (!element) return;
-
-        element.innerHTML = html;
+        element.innerHTML =
+            ResourceTemplates.empty(message);
 
         this.refresh();
 
@@ -124,7 +134,11 @@ window.ResourceRenderer = {
 
     clear(container) {
 
-        if (!container) return;
+        if (!container) {
+
+            return;
+
+        }
 
         container.innerHTML = "";
 
