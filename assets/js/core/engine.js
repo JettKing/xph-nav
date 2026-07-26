@@ -18,6 +18,8 @@ window.ResourceEngine = {
 
     pages: {
 
+        home: () => this.getAllResources(),
+
         ai: () => window.aiResources || [],
 
         software: () => window.softwareResources || [],
@@ -37,6 +39,13 @@ window.ResourceEngine = {
 
         if (!page) return [];
 
+        if (page === "home") {
+
+            return this.getAllResources();
+
+        }
+
+
         const getter = this.pages[page];
 
         return typeof getter === "function"
@@ -49,11 +58,8 @@ window.ResourceEngine = {
     getAllResources() {
 
         return Object.values(this.pages)
-            .flatMap(getter =>
-                typeof getter === "function"
-                    ? getter()
-                    : []
-            );
+            .filter(getter => typeof getter === "function")
+            .flatMap(getter => getter());
 
     },
 
@@ -61,8 +67,11 @@ window.ResourceEngine = {
     getCategory(category) {
 
         if (!category || category === "all") {
+
             return this.getAllResources();
+
         }
+
 
         return this.getAllResources()
             .filter(item => item.category === category);
@@ -73,8 +82,11 @@ window.ResourceEngine = {
     getSubCategory(subcategory) {
 
         if (!subcategory || subcategory === "all") {
+
             return this.getAllResources();
+
         }
+
 
         return this.getAllResources()
             .filter(item => item.subcategory === subcategory);
@@ -88,16 +100,23 @@ window.ResourceEngine = {
     search(keyword, data = []) {
 
         if (!Array.isArray(data) || data.length === 0) {
+
             return [];
+
         }
 
+
         if (!keyword) {
+
             return data;
+
         }
+
 
         const key = String(keyword)
             .toLowerCase()
             .trim();
+
 
         return data.filter(item => {
 
@@ -122,6 +141,7 @@ window.ResourceEngine = {
                 .join(" ")
                 .toLowerCase();
 
+
             return text.includes(key);
 
         });
@@ -144,37 +164,62 @@ window.ResourceEngine = {
 
     } = {}) {
 
+
         let result = Array.isArray(data)
+
             ? [...data]
+
             : [];
+
+
 
         if (category !== "all") {
 
-            result = result.filter(
-                item => item.category === category
+
+            result = result.filter(item =>
+
+                item.category === category
+
             );
 
+
         }
+
+
 
         if (subcategory !== "all") {
 
-            result = result.filter(
-                item => item.subcategory === subcategory
+
+            result = result.filter(item =>
+
+                item.subcategory === subcategory
+
             );
 
+
         }
+
+
 
         if (keyword) {
 
+
             result = this.search(
+
                 keyword,
+
                 result
+
             );
+
 
         }
 
+
         return result;
 
+
     }
+
 
 };
