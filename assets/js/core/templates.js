@@ -1,7 +1,7 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * Templates v3.1
+ * Templates v2.1
  * ----------------------------------------------------------
  * 所有资源 HTML 模板统一管理
  * UI 结构唯一来源
@@ -11,20 +11,19 @@
 window.ResourceTemplates = {
 
 
-    escape(value){
+    escape(value) {
 
         return String(value ?? "")
-            .replace(/&/g,"&amp;")
-            .replace(/</g,"&lt;")
-            .replace(/>/g,"&gt;")
-            .replace(/"/g,"&quot;")
-            .replace(/'/g,"&#039;");
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
 
     },
 
 
-
-    card(resource = {}){
+    card(resource = {}) {
 
 
         const {
@@ -43,14 +42,13 @@ window.ResourceTemplates = {
 
             github = resource.github || resource.project || ""
 
-
         } = resource;
 
 
 
         const projectButton = github
 
-        ? `
+            ? `
 
 <a
 class="action-btn project-btn"
@@ -63,9 +61,9 @@ rel="noopener noreferrer"
 
 `
 
-        :
+            :
 
-        `
+            `
 
 <span class="action-btn disabled-btn">
 暂无项目
@@ -137,8 +135,8 @@ ${this.escape(subcategory)}
 
 
 ${
-website
-?
+    website
+        ?
 
 `
 <a
@@ -151,9 +149,9 @@ rel="noopener noreferrer"
 </a>
 `
 
-:
+        :
 
-""
+        ""
 
 }
 
@@ -176,7 +174,7 @@ ${projectButton}
 
 
 
-    empty(message="暂无资源"){
+    empty(message = "暂无资源") {
 
 
         return `
@@ -193,7 +191,7 @@ ${this.escape(message)}
 
 
 
-    loading(){
+    loading() {
 
 
         return `
