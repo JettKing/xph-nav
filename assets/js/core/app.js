@@ -57,21 +57,9 @@ window.ResourceApp = {
     render(){
 
 
-        const page =
-            document.body.dataset.page;
-
-
-        const container =
-            page === "home"
-            ?
-            "#home-resource-list"
-            :
-            "#resource-list";
-
-
         ResourceRenderer.render({
 
-            container,
+            container:"#resource-list",
 
             data:ResourceStore.getData()
 
@@ -121,6 +109,11 @@ window.ResourceApp = {
                 : "none";
 
         }
+
+
+        // 提供给 Renderer 调用
+        window.ResourceAppRefresh =
+            ()=>this.refresh();
 
 
     },
