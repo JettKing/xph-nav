@@ -172,4 +172,4 @@ document.addEventListener(
         ResourceApp.init();
 
     }
-);
+); 
