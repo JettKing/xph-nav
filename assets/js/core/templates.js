@@ -1,15 +1,9 @@
 /**
  * ==========================================================
- * Templates v2.2
+ * Templates v3.0
  * ----------------------------------------------------------
- * 所有资源 HTML 模板统一管理
- * UI 组件唯一来源
- * 支持：
- * Card
- * Empty
- * Loading
- * Skeleton
- * Badge
+ * 徐胖虎资源社
+ * 全站唯一资源模板
  * ==========================================================
  */
 
@@ -44,7 +38,7 @@ ${this.escape(text)}
 
             return `
 <span class="action-btn disabled-btn">
-${this.escape(text)}
+暂无项目
 </span>
 `;
 
@@ -68,7 +62,7 @@ ${this.escape(text)}
 
             name = "未命名资源",
 
-            description = resource.desc || "暂无介绍",
+            description = resource.description || resource.desc || "暂无介绍",
 
             icon = "📦",
 
@@ -78,15 +72,7 @@ ${this.escape(text)}
 
             website = "",
 
-            github = resource.project || "",
-
-            recommend = false,
-
-            official = false,
-
-            score = "",
-
-            update = ""
+            github = resource.github || resource.project || ""
 
         } = resource;
 
@@ -98,55 +84,51 @@ data-name="${this.escape(name)}"
 data-category="${this.escape(category)}"
 data-subcategory="${this.escape(subcategory)}">
 
-<div class="tool-main">
+    <div class="tool-main">
 
-<div class="tool-icon">
-${this.escape(icon)}
-</div>
+        <div class="tool-icon">
+            ${this.escape(icon)}
+        </div>
 
-<div class="tool-info">
+        <div class="tool-info">
 
-<div class="tool-name">
+            <div class="tool-name">
+                ${this.escape(name)}
+            </div>
 
-${this.escape(name)}
+            <div class="tool-desc">
+                ${this.escape(description)}
+            </div>
 
-${recommend ? '<span class="recommend-badge">⭐ 推荐</span>' : ""}
+            <div class="tool-bottom">
 
-${official ? '<span class="official-badge">✔ 官方</span>' : ""}
+                <div class="tool-tag-wrap">
 
-</div>
+                    ${subcategory ? this.badge(subcategory) : ""}
 
-<div class="tool-desc">
+                </div>
 
-${this.escape(description)}
+                <div class="tool-actions">
 
-</div>
+                    ${this.button(
+                        "官网地址",
+                        website,
+                        "website-btn"
+                    )}
 
-<div class="tool-meta">
+                    ${this.button(
+                        "项目地址",
+                        github,
+                        "project-btn"
+                    )}
 
-${this.badge(subcategory)}
+                </div>
 
-${score ? this.badge("评分 " + score) : ""}
+            </div>
 
-${update ? this.badge(update) : ""}
+        </div>
 
-</div>
-
-</div>
-
-</div>
-
-<div class="tool-bottom">
-
-<div class="tool-actions">
-
-${this.button("官网地址", website, "website-btn")}
-
-${this.button("项目地址", github, "project-btn")}
-
-</div>
-
-</div>
+    </div>
 
 </div>
 
@@ -164,19 +146,19 @@ ${this.button("项目地址", github, "project-btn")}
 
 <div class="tool-card skeleton-card">
 
-<div class="tool-main">
+    <div class="tool-main">
 
-<div class="tool-icon skeleton"></div>
+        <div class="tool-icon skeleton"></div>
 
-<div class="tool-info">
+        <div class="tool-info">
 
-<div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-title"></div>
 
-<div class="skeleton skeleton-desc"></div>
+            <div class="skeleton skeleton-desc"></div>
 
-</div>
+        </div>
 
-</div>
+    </div>
 
 </div>
 
@@ -190,17 +172,13 @@ ${this.button("项目地址", github, "project-btn")}
 
 <div class="empty">
 
-<div class="empty-icon">
+    <div class="empty-icon">
+        📂
+    </div>
 
-📂
-
-</div>
-
-<div class="empty-text">
-
-${this.escape(message)}
-
-</div>
+    <div class="empty-text">
+        ${this.escape(message)}
+    </div>
 
 </div>
 
@@ -214,13 +192,11 @@ ${this.escape(message)}
 
 <div class="loading">
 
-<div class="loading-spinner"></div>
+    <div class="loading-spinner"></div>
 
-<div class="loading-text">
-
-资源加载中...
-
-</div>
+    <div class="loading-text">
+        资源加载中...
+    </div>
 
 </div>
 
