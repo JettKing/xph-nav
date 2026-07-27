@@ -1,6 +1,6 @@
 /**
  * ==========================================================
- * Store v2.2
+ * Store v3.0
  * ----------------------------------------------------------
  * 页面状态管理
  * 不负责 DOM
@@ -32,12 +32,24 @@ window.ResourceStore = {
 
         this.page = page || "";
 
+        this.refresh();
+
+        this.reset();
+
+    },
+
+    refresh() {
+
         if (
             window.ResourceEngine &&
             typeof ResourceEngine.getPageResources === "function"
         ) {
 
-            this.resources = ResourceEngine.getPageResources(this.page);
+            const data = ResourceEngine.getPageResources(this.page);
+
+            this.resources = Array.isArray(data)
+                ? data
+                : [];
 
         } else {
 
@@ -46,8 +58,6 @@ window.ResourceStore = {
             console.warn("ResourceEngine 未加载，无法获取资源");
 
         }
-
-        this.reset();
 
     },
 
@@ -83,21 +93,23 @@ window.ResourceStore = {
 
     getState() {
 
-        return { ...this.state };
+        return {
+
+            ...this.state
+
+        };
 
     },
 
     getData() {
 
-        let data = Array.isArray(this.resources)
-
-            ? [...this.resources]
-
-            : [];
+        let data = [...this.resources];
 
         if (
+
             window.ResourceEngine &&
             typeof ResourceEngine.filter === "function"
+
         ) {
 
             data = ResourceEngine.filter({
@@ -114,61 +126,52 @@ window.ResourceStore = {
 
         }
 
-        if (
-            this.state.tag !== "all"
-        ) {
+        if (this.state.tag !== "all") {
 
-            data = data.filter(item => {
+            data = data.filter(item =>
 
-                if (item.tag === this.state.tag) return true;
+                item.tag === this.state.tag ||
 
-                if (
-                    Array.isArray(item.tags) &&
-                    item.tags.includes(this.state.tag)
-                ) {
+                (Array.isArray(item.tags) &&
+                    item.tags.includes(this.state.tag))
 
-                    return true;
-
-                }
-
-                return false;
-
-            });
+            );
 
         }
 
-        if (
-            this.state.sort &&
-            this.state.sort !== "recommend"
-        ) {
+        switch (this.state.sort) {
 
-            switch (this.state.sort) {
+            case "name":
 
-                case "name":
+                data.sort((a, b) =>
 
-                    data.sort((a, b) =>
-                        (a.name || "").localeCompare(b.name || "")
-                    );
+                    (a.name || "")
+                        .localeCompare(b.name || "")
 
-                    break;
+                );
 
-                case "score":
+                break;
 
-                    data.sort((a, b) =>
-                        (b.score || 0) - (a.score || 0)
-                    );
+            case "score":
 
-                    break;
+                data.sort((a, b) =>
 
-                default:
+                    (b.score || 0) -
+                    (a.score || 0)
 
-                    break;
+                );
 
-            }
+                break;
 
         }
 
         return data;
+
+    },
+
+    getCount() {
+
+        return this.getData().length;
 
     },
 
