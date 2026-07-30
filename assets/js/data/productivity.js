@@ -1,7 +1,7 @@
 /**
  * ==========================================================
  * 徐胖虎资源社
- * 效率工具资源数据 v2.1
+ * 效率工具资源数据 v3.1
  * ==========================================================
  */
 
@@ -10,7 +10,7 @@ window.productivityResources = [
 {
     id:1,
     name:"Notion",
-    description:"集笔记、数据库和项目管理于一体的效率平台",
+    description:"知识笔记数据库项目管理协作工具型",
     icon:"📒",
     thumbnail:"",
     category:"productivity",
@@ -21,12 +21,16 @@ window.productivityResources = [
     pricing:"Freemium",
     language:"多语言",
     features:["笔记","数据库","团队协作"],
+    capabilities:[
+        "知识管理",
+        "笔记管理",
+        "文档处理",
+        "项目管理"
+    ],
     tags:["知识管理","笔记工具"],
     audience:"学生",
     official:true,
     recommend:true,
-    score:9.7,
-    update:"2026-07",
     status:"active"
 },
 
@@ -34,7 +38,7 @@ window.productivityResources = [
 {
     id:2,
     name:"Todoist",
-    description:"简单高效的任务管理工具",
+    description:"任务管理清单规划提醒执行工具协作",
     icon:"✅",
     thumbnail:"",
     category:"productivity",
@@ -45,12 +49,15 @@ window.productivityResources = [
     pricing:"Freemium",
     language:"多语言",
     features:["待办事项","任务规划","提醒"],
+    capabilities:[
+        "任务管理",
+        "自动化",
+        "效率提升"
+    ],
     tags:["任务管理","效率工具"],
     audience:"所有用户",
     official:true,
     recommend:true,
-    score:9.4,
-    update:"2026-07",
     status:"active"
 },
 
@@ -58,7 +65,7 @@ window.productivityResources = [
 {
     id:3,
     name:"Obsidian",
-    description:"基于 Markdown 的本地知识管理工具",
+    description:"本地知识库笔记链接管理工具应用端",
     icon:"🧠",
     thumbnail:"",
     category:"productivity",
@@ -69,12 +76,15 @@ window.productivityResources = [
     pricing:"免费+付费",
     language:"多语言",
     features:["双向链接","知识库","Markdown"],
+    capabilities:[
+        "知识管理",
+        "笔记管理",
+        "文档处理"
+    ],
     tags:["知识管理","笔记工具"],
     audience:"学生",
     official:true,
     recommend:true,
-    score:9.5,
-    update:"2026-07",
     status:"active"
 },
 
@@ -82,7 +92,7 @@ window.productivityResources = [
 {
     id:4,
     name:"Zapier",
-    description:"连接不同应用的自动化工作平台",
+    description:"应用自动连接工作流程自动化工具型",
     icon:"⚡",
     thumbnail:"",
     category:"productivity",
@@ -93,12 +103,15 @@ window.productivityResources = [
     pricing:"Freemium",
     language:"英文",
     features:["自动化","工作流","应用连接"],
+    capabilities:[
+        "自动化",
+        "工作流",
+        "API"
+    ],
     tags:["自动化工具","工作流"],
     audience:"企业",
     official:true,
     recommend:true,
-    score:9.2,
-    update:"2026-07",
     status:"active"
 },
 
@@ -106,7 +119,7 @@ window.productivityResources = [
 {
     id:5,
     name:"Trello",
-    description:"基于看板的团队任务协作工具",
+    description:"看板任务协作项目管理工具平台应用",
     icon:"📋",
     thumbnail:"",
     category:"productivity",
@@ -117,12 +130,15 @@ window.productivityResources = [
     pricing:"Freemium",
     language:"多语言",
     features:["看板","任务协作","项目管理"],
+    capabilities:[
+        "项目管理",
+        "协同办公",
+        "任务管理"
+    ],
     tags:["团队协作","项目管理"],
     audience:"企业",
     official:true,
     recommend:true,
-    score:9.1,
-    update:"2026-07",
     status:"active"
 }
 
