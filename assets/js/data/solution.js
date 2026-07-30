@@ -1,7 +1,7 @@
 /**
  * ==========================================================
  * 徐胖虎资源社
- * 解决方案数据 v2.1
+ * 解决方案数据 v3.1
  * ==========================================================
  */
 
@@ -10,7 +10,7 @@ window.solutionResources = [
 {
     id:1,
     name:"AI办公自动化方案",
-    description:"利用 AI 提升文档处理、信息整理与办公效率",
+    description:"办公自动化方案提升文档处理高效率",
     icon:"💼",
     thumbnail:"",
     category:"solution",
@@ -21,12 +21,16 @@ window.solutionResources = [
     pricing:"免费+付费",
     language:"多语言",
     features:["AI写作","文档处理","办公自动化"],
+    capabilities:[
+        "文本生成",
+        "文档处理",
+        "自动化",
+        "工作流"
+    ],
     tags:["AI办公","效率提升"],
     audience:"企业",
     official:false,
     recommend:true,
-    score:9.5,
-    update:"2026-07",
     status:"active"
 },
 
@@ -34,7 +38,7 @@ window.solutionResources = [
 {
     id:2,
     name:"AI自媒体创作方案",
-    description:"结合 AI 工具完成内容生产与运营流程",
+    description:"自媒体创作方案结合智能内容生产流",
     icon:"🎬",
     thumbnail:"",
     category:"solution",
@@ -45,12 +49,16 @@ window.solutionResources = [
     pricing:"免费+付费",
     language:"多语言",
     features:["内容创作","图片生成","视频制作"],
+    capabilities:[
+        "文本生成",
+        "图片生成",
+        "视频生成",
+        "自动化"
+    ],
     tags:["AI创作","自媒体"],
     audience:"自媒体",
     official:true,
     recommend:true,
-    score:9.4,
-    update:"2026-07",
     status:"active"
 },
 
@@ -58,7 +66,7 @@ window.solutionResources = [
 {
     id:3,
     name:"AI设计工作流方案",
-    description:"面向设计师的 AI 图片与创意生产流程",
+    description:"设计工作流方案辅助图片创意生成力",
     icon:"🎨",
     thumbnail:"",
     category:"solution",
@@ -69,12 +77,16 @@ window.solutionResources = [
     pricing:"Paid",
     language:"英文",
     features:["AI绘图","设计辅助","创意生成"],
+    capabilities:[
+        "图片生成",
+        "图片编辑",
+        "设计创作",
+        "工作流"
+    ],
     tags:["AI设计","图片生成"],
     audience:"设计师",
     official:true,
     recommend:true,
-    score:9.3,
-    update:"2026-07",
     status:"active"
 },
 
@@ -82,7 +94,7 @@ window.solutionResources = [
 {
     id:4,
     name:"AI视频制作方案",
-    description:"使用 AI 完成视频生成、剪辑与发布流程",
+    description:"视频制作方案完成生成剪辑发布流程",
     icon:"🎥",
     thumbnail:"",
     category:"solution",
@@ -93,12 +105,15 @@ window.solutionResources = [
     pricing:"Freemium",
     language:"多语言",
     features:["视频生成","智能剪辑","内容制作"],
+    capabilities:[
+        "视频生成",
+        "视频剪辑",
+        "自动化"
+    ],
     tags:["AI视频","视频工具"],
     audience:"创作者",
     official:true,
     recommend:true,
-    score:9.2,
-    update:"2026-07",
     status:"active"
 },
 
@@ -106,7 +121,7 @@ window.solutionResources = [
 {
     id:5,
     name:"Telegram频道运营方案",
-    description:"帮助频道完成内容管理、增长与商业化运营",
+    description:"频道运营方案完成内容管理用户增长",
     icon:"✈️",
     thumbnail:"",
     category:"solution",
@@ -117,12 +132,16 @@ window.solutionResources = [
     pricing:"免费",
     language:"多语言",
     features:["频道运营","内容管理","用户增长"],
+    capabilities:[
+        "内容管理",
+        "自动化",
+        "数据分析",
+        "工作流"
+    ],
     tags:["Telegram","运营方案"],
     audience:"运营",
     official:true,
     recommend:true,
-    score:9.6,
-    update:"2026-07",
     status:"active"
 }
 
