@@ -5,12 +5,13 @@
  * ==========================================================
  */
 
+
 window.softwareResources = [
 
 {
     id:1,
     name:"Visual Studio Code",
-    description:"代码编辑工具支持开发扩展插件管理",
+    description:"代码编辑器支持开发调试插件扩展用",
     icon:"💻",
     thumbnail:"",
     category:"software",
@@ -20,90 +21,126 @@ window.softwareResources = [
     platform:"Windows / macOS / Linux",
     pricing:"免费",
     language:"多语言",
-    features:[
-        "代码编辑",
-        "插件扩展",
-        "开发调试"
-    ],
+    features:["代码编辑","插件扩展","开发调试"],
     capabilities:[
-        "代码编辑",
+        "代码生成",
         "代码补全",
-        "开发调试",
-        "插件扩展"
+        "代码解释",
+        "Bug修复",
+        "API"
     ],
-    tags:[
-        "开源",
-        "免费",
-        "开发工具"
-    ],
+    tags:["开发工具","代码编辑器"],
     audience:"程序员",
     official:true,
+    recommend:true,
     status:"active"
 },
 
 
 {
     id:2,
-    name:"Obsidian",
-    description:"知识管理软件支持笔记关联内容整理",
-    icon:"📝",
+    name:"7-Zip",
+    description:"压缩工具支持文件压缩解压高效存储",
+    icon:"📦",
     thumbnail:"",
     category:"software",
-    subcategory:"效率工具",
-    website:"https://obsidian.md",
+    subcategory:"压缩解压",
+    website:"https://www.7-zip.org",
     github:"",
-    platform:"Windows / macOS / Linux",
+    platform:"Windows",
     pricing:"免费",
     language:"多语言",
-    features:[
-        "双向链接",
-        "知识库",
-        "笔记管理"
-    ],
+    features:["文件压缩","文件解压","高压缩率"],
     capabilities:[
-        "知识管理",
-        "笔记管理",
-        "文档处理"
+        "批量处理",
+        "文件管理"
     ],
-    tags:[
-        "免费",
-        "跨平台"
-    ],
+    tags:["压缩工具","开源软件"],
     audience:"所有用户",
     official:true,
+    recommend:true,
     status:"active"
 },
 
 
 {
     id:3,
-    name:"Notion",
-    description:"综合工作空间支持笔记项目团队协作",
-    icon:"📒",
+    name:"Everything",
+    description:"文件搜索工具快速定位本地资料内容",
+    icon:"🔍",
     thumbnail:"",
     category:"software",
-    subcategory:"效率工具",
-    website:"https://www.notion.so",
+    subcategory:"文件管理",
+    website:"https://www.voidtools.com",
     github:"",
-    platform:"Web",
-    pricing:"Freemium",
+    platform:"Windows",
+    pricing:"免费",
     language:"多语言",
-    features:[
-        "笔记",
-        "数据库",
-        "协作"
-    ],
+    features:["快速搜索","文件索引"],
     capabilities:[
-        "知识管理",
-        "项目管理",
-        "协同办公",
-        "文档处理"
+        "搜索",
+        "文件管理",
+        "效率提升"
     ],
-    tags:[
-        "效率工具",
-        "在线服务"
-    ],
-    audience:"团队用户",
+    tags:["搜索工具","效率工具"],
+    audience:"所有用户",
     official:true,
+    recommend:true,
     status:"active"
 },
+
+
+{
+    id:4,
+    name:"Obsidian",
+    description:"知识笔记工具管理信息构建知识体系",
+    icon:"📝",
+    thumbnail:"",
+    category:"software",
+    subcategory:"笔记工具",
+    website:"https://obsidian.md",
+    github:"",
+    platform:"Windows / macOS / Linux / Mobile",
+    pricing:"免费+付费",
+    language:"多语言",
+    features:["双向链接","知识库","Markdown"],
+    capabilities:[
+        "知识管理",
+        "文档处理",
+        "笔记管理"
+    ],
+    tags:["笔记工具","知识管理"],
+    audience:"学生",
+    official:true,
+    recommend:true,
+    status:"active"
+},
+
+
+{
+    id:5,
+    name:"ShareX",
+    description:"截图录屏工具捕获分享屏幕内容资料",
+    icon:"📸",
+    thumbnail:"",
+    category:"software",
+    subcategory:"录屏截图",
+    website:"https://getsharex.com",
+    github:"https://github.com/ShareX/ShareX",
+    platform:"Windows",
+    pricing:"免费",
+    language:"多语言",
+    features:["截图","录屏","自动上传"],
+    capabilities:[
+        "图片编辑",
+        "视频剪辑",
+        "自动化"
+    ],
+    tags:["截图工具","开源软件"],
+    audience:"所有用户",
+    official:true,
+    recommend:true,
+    status:"active"
+}
+
+];
