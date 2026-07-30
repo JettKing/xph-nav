@@ -1,7 +1,7 @@
 /**
  * ==========================================================
  * 徐胖虎资源社
- * 软件工具资源数据 v2.1
+ * 软件工具资源数据 v3.1
  * ==========================================================
  */
 
@@ -22,12 +22,18 @@ window.softwareResources = [
     pricing:"免费",
     language:"多语言",
     features:["代码编辑","插件扩展","开发调试"],
+
+    capabilities:[
+        "代码生成",
+        "代码补全",
+        "代码解释",
+        "开发调试"
+    ],
+
     tags:["开发工具","代码编辑器"],
     audience:"程序员",
     official:true,
     recommend:true,
-    score:9.8,
-    update:"2026-07",
     status:"active"
 },
 
@@ -46,12 +52,16 @@ window.softwareResources = [
     pricing:"免费",
     language:"多语言",
     features:["文件压缩","文件解压","高压缩率"],
+
+    capabilities:[
+        "批量处理",
+        "文件管理"
+    ],
+
     tags:["压缩工具","开源软件"],
     audience:"所有用户",
     official:true,
     recommend:true,
-    score:9.5,
-    update:"2026-07",
     status:"active"
 },
 
@@ -70,12 +80,17 @@ window.softwareResources = [
     pricing:"免费",
     language:"多语言",
     features:["快速搜索","文件索引"],
+
+    capabilities:[
+        "搜索",
+        "效率提升",
+        "文件管理"
+    ],
+
     tags:["搜索工具","效率工具"],
     audience:"所有用户",
     official:true,
     recommend:true,
-    score:9.6,
-    update:"2026-07",
     status:"active"
 },
 
@@ -94,12 +109,17 @@ window.softwareResources = [
     pricing:"免费+付费",
     language:"多语言",
     features:["双向链接","知识库","Markdown"],
+
+    capabilities:[
+        "知识管理",
+        "笔记管理",
+        "文档处理"
+    ],
+
     tags:["笔记工具","知识管理"],
     audience:"学生",
     official:true,
     recommend:true,
-    score:9.4,
-    update:"2026-07",
     status:"active"
 },
 
@@ -118,12 +138,18 @@ window.softwareResources = [
     pricing:"免费",
     language:"多语言",
     features:["截图","录屏","自动上传"],
+
+    capabilities:[
+        "图片编辑",
+        "视频剪辑",
+        "自动化",
+        "批量处理"
+    ],
+
     tags:["截图工具","开源软件"],
     audience:"所有用户",
     official:true,
     recommend:true,
-    score:9.3,
-    update:"2026-07",
     status:"active"
 }
 
