@@ -10,7 +10,7 @@ window.aiResources = [
 {
     id:1,
     name:"ChatGPT",
-    description:"OpenAI 推出的智能 AI 助手",
+    description:"智能对话助手支持文本生成编程辅助",
     icon:"🤖",
     thumbnail:"",
     category:"ai",
@@ -21,15 +21,7 @@ window.aiResources = [
     pricing:"Freemium",
     language:"多语言",
     features:["聊天","写作","编程"],
-
-    capabilities:[
-        "文本生成",
-        "搜索",
-        "代码生成",
-        "翻译",
-        "数据分析"
-    ],
-
+    capabilities:["文本生成","代码生成","翻译","搜索","数据分析","办公处理"],
     tags:["AI聊天","AI助手"],
     audience:"所有用户",
     official:true,
@@ -41,7 +33,7 @@ window.aiResources = [
 {
     id:2,
     name:"Claude",
-    description:"Anthropic 推出的 AI 助手",
+    description:"长文本分析助手支持理解写作创作力",
     icon:"🧠",
     thumbnail:"",
     category:"ai",
@@ -52,15 +44,7 @@ window.aiResources = [
     pricing:"Freemium",
     language:"多语言",
     features:["长文本","分析","写作"],
-
-    capabilities:[
-        "文本生成",
-        "文档处理",
-        "知识管理",
-        "数据分析",
-        "翻译"
-    ],
-
+    capabilities:["文本生成","文档处理","数据分析","知识管理","翻译"],
     tags:["AI聊天","AI助手"],
     audience:"所有用户",
     official:true,
@@ -72,7 +56,7 @@ window.aiResources = [
 {
     id:3,
     name:"Midjourney",
-    description:"AI 图片生成平台",
+    description:"图片生成平台支持艺术创作视觉设计",
     icon:"🎨",
     thumbnail:"",
     category:"ai",
@@ -83,13 +67,7 @@ window.aiResources = [
     pricing:"Paid",
     language:"英文",
     features:["AI绘图","艺术创作"],
-
-    capabilities:[
-        "图片生成",
-        "图片编辑",
-        "创意设计"
-    ],
-
+    capabilities:["图片生成","图片编辑","设计创作"],
     tags:["AI绘图","图片生成"],
     audience:"设计师",
     official:true,
@@ -101,7 +79,7 @@ window.aiResources = [
 {
     id:4,
     name:"Cursor",
-    description:"AI 编程编辑器",
+    description:"智能编程编辑器支持代码生成开发辅助",
     icon:"💻",
     thumbnail:"",
     category:"ai",
@@ -112,14 +90,7 @@ window.aiResources = [
     pricing:"Freemium",
     language:"英文",
     features:["AI编程","自动补全"],
-
-    capabilities:[
-        "代码生成",
-        "代码补全",
-        "代码解释",
-        "Bug修复"
-    ],
-
+    capabilities:["代码生成","代码补全","Bug修复","API"],
     tags:["AI编程","代码助手"],
     audience:"开发者",
     official:true,
@@ -131,7 +102,7 @@ window.aiResources = [
 {
     id:5,
     name:"Gamma",
-    description:"AI 演示文稿生成工具",
+    description:"演示文稿生成工具支持办公内容制作",
     icon:"📊",
     thumbnail:"",
     category:"ai",
@@ -142,14 +113,7 @@ window.aiResources = [
     pricing:"Freemium",
     language:"多语言",
     features:["PPT","文档","演示"],
-
-    capabilities:[
-        "PPT制作",
-        "文档处理",
-        "文本生成",
-        "自动化"
-    ],
-
+    capabilities:["PPT制作","文档处理","文本生成"],
     tags:["AI办公","演示生成"],
     audience:"办公用户",
     official:true,
