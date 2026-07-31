@@ -1,7 +1,7 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * Renderer v3.1
+ * Renderer v3.0
  * ----------------------------------------------------------
  * 职责：
  * 1. 清空容器
@@ -9,76 +9,10 @@
  * 3. 调用 Templates
  * 4. 更新资源数量
  * 5. 通知交互层刷新
- *
- * V3.1:
- * 支持 capabilities 能力标签数据传递
- * 保留 tags 标签体系兼容
  * ==========================================================
  */
 
 window.ResourceRenderer = {
-
-
-    normalizeItem(item = {}) {
-
-
-        return {
-
-
-            ...item,
-
-
-            // 保留旧标签
-
-            tags: Array.isArray(item.tags)
-
-                ? item.tags
-
-                : (item.tag ? [item.tag] : []),
-
-
-
-            // V3.1 能力标签
-
-            capabilities:
-
-                Array.isArray(item.capabilities)
-
-                    ? item.capabilities
-
-                    : (item.capability
-
-                        ? [item.capability]
-
-                        : [])
-
-
-        };
-
-
-    },
-
-
-
-    normalizeList(data = []) {
-
-
-        if (!Array.isArray(data)) {
-
-            return [];
-
-        }
-
-
-        return data.map(item =>
-
-            this.normalizeItem(item)
-
-        );
-
-
-    },
-
 
 
     render({
@@ -90,7 +24,8 @@ window.ResourceRenderer = {
     } = {}) {
 
 
-        const element = document.querySelector(container);
+        const element =
+            document.querySelector(container);
 
 
 
@@ -98,9 +33,7 @@ window.ResourceRenderer = {
 
 
             console.warn(
-
                 `找不到容器：${container}`
-
             );
 
 
@@ -111,19 +44,14 @@ window.ResourceRenderer = {
 
 
 
-        const list = this.normalizeList(data);
-
-
-
         this.clear(element);
 
 
 
-        if (!list.length) {
+        if (!Array.isArray(data) || !data.length) {
 
 
             element.innerHTML =
-
                 ResourceTemplates.empty();
 
 
@@ -141,7 +69,7 @@ window.ResourceRenderer = {
 
 
 
-        element.innerHTML = list
+        element.innerHTML = data
 
             .map(item =>
 
@@ -153,7 +81,9 @@ window.ResourceRenderer = {
 
 
 
-        this.updateCount(list.length);
+        this.updateCount(
+            data.length
+        );
 
 
 
@@ -162,6 +92,7 @@ window.ResourceRenderer = {
 
 
     },
+
 
 
 
@@ -175,7 +106,8 @@ window.ResourceRenderer = {
 
 
 
-        const element = document.querySelector(container);
+        const element =
+            document.querySelector(container);
 
 
 
@@ -189,11 +121,7 @@ window.ResourceRenderer = {
 
 
 
-        const list = this.normalizeList(data);
-
-
-
-        if (!list.length) {
+        if (!Array.isArray(data) || !data.length) {
 
 
             return;
@@ -207,7 +135,7 @@ window.ResourceRenderer = {
 
             "beforeend",
 
-            list
+            data
 
                 .map(item =>
 
@@ -224,9 +152,7 @@ window.ResourceRenderer = {
         this.updateCount(
 
             element.querySelectorAll(
-
                 ".tool-card"
-
             ).length
 
         );
@@ -241,11 +167,12 @@ window.ResourceRenderer = {
 
 
 
+
     loading(container = "#resource-list") {
 
 
-
-        const element = document.querySelector(container);
+        const element =
+            document.querySelector(container);
 
 
 
@@ -260,12 +187,12 @@ window.ResourceRenderer = {
 
 
         element.innerHTML =
-
             ResourceTemplates.loading();
 
 
 
     },
+
 
 
 
@@ -278,8 +205,8 @@ window.ResourceRenderer = {
     ) {
 
 
-
-        const element = document.querySelector(container);
+        const element =
+            document.querySelector(container);
 
 
 
@@ -294,7 +221,6 @@ window.ResourceRenderer = {
 
 
         element.innerHTML =
-
             ResourceTemplates.empty(message);
 
 
@@ -311,8 +237,8 @@ window.ResourceRenderer = {
 
 
 
-    clear(container) {
 
+    clear(container) {
 
 
         if (!container) {
@@ -333,15 +259,14 @@ window.ResourceRenderer = {
 
 
 
+
     updateCount(count) {
 
 
-
-        const counter = document.getElementById(
-
-            "resourceCount"
-
-        );
+        const counter =
+            document.getElementById(
+                "resourceCount"
+            );
 
 
 
@@ -356,7 +281,6 @@ window.ResourceRenderer = {
 
 
         counter.textContent =
-
             `${count} 个资源`;
 
 
@@ -365,30 +289,23 @@ window.ResourceRenderer = {
 
 
 
+
     refresh() {
 
 
-
         if (
-
             typeof window.ResourceAppRefresh ===
-
             "function"
-
         ) {
-
 
 
             window.ResourceAppRefresh();
 
 
-
         }
 
 
-
     }
-
 
 
 };
