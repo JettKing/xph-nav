@@ -1,78 +1,207 @@
 /**
- * V3.1 能力展示
- *
- * 分类标签和能力标签分离
- *
- * 移动端最多展示2个能力
+ * ==========================================================
+ * Templates v3.0
+ * ----------------------------------------------------------
+ * 徐胖虎资源社
+ * 全站唯一资源模板
+ * ==========================================================
  */
 
-capabilityBadges(resource = {}) {
+window.ResourceTemplates = {
 
+    escape(value) {
 
-    let list = [];
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
 
+    },
 
-    if (Array.isArray(resource.capabilities)) {
+    badge(text) {
 
-        list = resource.capabilities;
+        if (!text) return "";
 
-    }
+        return `
+<span class="tool-tag">
+${this.escape(text)}
+</span>
+`;
 
+    },
 
-    if (
-        resource.capability &&
-        !list.includes(resource.capability)
-    ) {
+    button(text, href, className = "") {
 
-        list.push(resource.capability);
+        if (!href) {
 
-    }
+            return `
+<span class="action-btn disabled-btn">
+暂无项目
+</span>
+`;
 
+        }
 
-    if (!list.length) {
+        return `
+<a
+class="action-btn ${className}"
+href="${this.escape(href)}"
+target="_blank"
+rel="noopener noreferrer">
+${this.escape(text)}
+</a>
+`;
 
-        return "";
+    },
 
-    }
+    card(resource = {}) {
 
+        const {
 
+            name = "未命名资源",
 
-    // 移动端稳定展示
+            description = resource.description || resource.desc || "暂无介绍",
 
-    const show = list.slice(0, 2);
+            icon = "📦",
 
+            category = "all",
 
+            subcategory = "",
 
-    let html = show
+            website = "",
 
-        .map(item =>
-            this.capabilityBadge(item)
-        )
+            github = resource.github || resource.project || ""
 
-        .join("");
+        } = resource;
 
+        return `
 
+<div
+class="tool-card"
+data-name="${this.escape(name)}"
+data-category="${this.escape(category)}"
+data-subcategory="${this.escape(subcategory)}">
 
-    if (list.length > 2) {
+    <div class="tool-main">
 
+        <div class="tool-icon">
+            ${this.escape(icon)}
+        </div>
 
-        html += this.capabilityBadge(
-            "+" + (list.length - 2)
-        );
+        <div class="tool-info">
 
+            <div class="tool-name">
+                ${this.escape(name)}
+            </div>
 
-    }
+            <div class="tool-desc">
+                ${this.escape(description)}
+            </div>
 
+            <div class="tool-bottom">
 
+                <div class="tool-tag-wrap">
 
-    return `
+                    ${subcategory ? this.badge(subcategory) : ""}
 
-<div class="tool-capabilities">
+                </div>
 
-${html}
+                <div class="tool-actions">
+
+                    ${this.button(
+                        "官网地址",
+                        website,
+                        "website-btn"
+                    )}
+
+                    ${this.button(
+                        "项目地址",
+                        github,
+                        "project-btn"
+                    )}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
 `;
 
-}
+    },
+
+    skeleton(count = 6) {
+
+        return Array.from({
+
+            length: count
+
+        }).map(() => `
+
+<div class="tool-card skeleton-card">
+
+    <div class="tool-main">
+
+        <div class="tool-icon skeleton"></div>
+
+        <div class="tool-info">
+
+            <div class="skeleton skeleton-title"></div>
+
+            <div class="skeleton skeleton-desc"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+`).join("");
+
+    },
+
+    empty(message = "暂无资源") {
+
+        return `
+
+<div class="empty">
+
+    <div class="empty-icon">
+        📂
+    </div>
+
+    <div class="empty-text">
+        ${this.escape(message)}
+    </div>
+
+</div>
+
+`;
+
+    },
+
+    loading() {
+
+        return `
+
+<div class="loading">
+
+    <div class="loading-spinner"></div>
+
+    <div class="loading-text">
+        资源加载中...
+    </div>
+
+</div>
+
+`;
+
+    }
+
+};
