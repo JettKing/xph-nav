@@ -79,7 +79,7 @@ window.aiResources = [
 {
     id:4,
     name:"Cursor",
-    description:"智能编程编辑器支持代码生成开发辅助",
+    description:"description:"description:"智能编程编辑器支持代码生成开发",
     icon:"💻",
     thumbnail:"",
     category:"ai",
