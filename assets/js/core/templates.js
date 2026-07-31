@@ -1,9 +1,12 @@
 /**
  * ==========================================================
- * Templates v3.0
+ * Templates v3.1
  * ----------------------------------------------------------
  * 徐胖虎资源社
  * 全站唯一资源模板
+ *
+ * V3.1:
+ * 支持 capabilities 能力标签展示
  * ==========================================================
  */
 
@@ -20,6 +23,7 @@ window.ResourceTemplates = {
 
     },
 
+
     badge(text) {
 
         if (!text) return "";
@@ -31,6 +35,7 @@ ${this.escape(text)}
 `;
 
     },
+
 
     button(text, href, className = "") {
 
@@ -56,7 +61,49 @@ ${this.escape(text)}
 
     },
 
+
+    /**
+     * V3.1
+     * 统一处理能力标签
+     *
+     * 支持：
+     * capability
+     * capabilities[]
+     */
+
+    capabilityBadges(resource = {}) {
+
+        let list = [];
+
+
+        if (Array.isArray(resource.capabilities)) {
+
+            list = resource.capabilities;
+
+        }
+
+
+        if (
+            resource.capability &&
+            !list.includes(resource.capability)
+        ) {
+
+            list.push(resource.capability);
+
+        }
+
+
+        return list
+
+            .map(item => this.badge(item))
+
+            .join("");
+
+    },
+
+
     card(resource = {}) {
+
 
         const {
 
@@ -74,7 +121,10 @@ ${this.escape(text)}
 
             github = resource.github || resource.project || ""
 
+
         } = resource;
+
+
 
         return `
 
@@ -84,31 +134,53 @@ data-name="${this.escape(name)}"
 data-category="${this.escape(category)}"
 data-subcategory="${this.escape(subcategory)}">
 
+
     <div class="tool-main">
 
+
         <div class="tool-icon">
+
             ${this.escape(icon)}
+
         </div>
+
 
         <div class="tool-info">
 
+
             <div class="tool-name">
+
                 ${this.escape(name)}
+
             </div>
 
+
             <div class="tool-desc">
+
                 ${this.escape(description)}
+
             </div>
+
+
 
             <div class="tool-bottom">
 
+
                 <div class="tool-tag-wrap">
+
 
                     ${subcategory ? this.badge(subcategory) : ""}
 
+
+                    ${this.capabilityBadges(resource)}
+
+
                 </div>
 
+
+
                 <div class="tool-actions">
+
 
                     ${this.button(
                         "官网地址",
@@ -116,25 +188,32 @@ data-subcategory="${this.escape(subcategory)}">
                         "website-btn"
                     )}
 
+
                     ${this.button(
                         "项目地址",
                         github,
                         "project-btn"
                     )}
 
+
                 </div>
+
 
             </div>
 
+
         </div>
 
+
     </div>
+
 
 </div>
 
 `;
 
     },
+
 
     skeleton(count = 6) {
 
@@ -166,6 +245,7 @@ data-subcategory="${this.escape(subcategory)}">
 
     },
 
+
     empty(message = "暂无资源") {
 
         return `
@@ -185,6 +265,7 @@ data-subcategory="${this.escape(subcategory)}">
 `;
 
     },
+
 
     loading() {
 
