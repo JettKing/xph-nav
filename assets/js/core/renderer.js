@@ -1,7 +1,7 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * Renderer v3.0
+ * Renderer v3.1
  * ----------------------------------------------------------
  * 职责：
  * 1. 清空容器
@@ -9,10 +9,77 @@
  * 3. 调用 Templates
  * 4. 更新资源数量
  * 5. 通知交互层刷新
+ *
+ * V3.1:
+ * 支持 capabilities 能力标签数据传递
+ * 保留 tags 标签体系兼容
  * ==========================================================
  */
 
 window.ResourceRenderer = {
+
+
+    normalizeItem(item = {}) {
+
+
+        return {
+
+
+            ...item,
+
+
+            // 保留旧标签
+
+            tags: Array.isArray(item.tags)
+
+                ? item.tags
+
+                : (item.tag ? [item.tag] : []),
+
+
+
+            // V3.1 能力标签
+
+            capabilities:
+
+                Array.isArray(item.capabilities)
+
+                    ? item.capabilities
+
+                    : (item.capability
+
+                        ? [item.capability]
+
+                        : [])
+
+
+        };
+
+
+    },
+
+
+
+    normalizeList(data = []) {
+
+
+        if (!Array.isArray(data)) {
+
+            return [];
+
+        }
+
+
+        return data.map(item =>
+
+            this.normalizeItem(item)
+
+        );
+
+
+    },
+
+
 
     render({
 
@@ -22,35 +89,57 @@ window.ResourceRenderer = {
 
     } = {}) {
 
+
         const element = document.querySelector(container);
+
+
 
         if (!element) {
 
-            console.warn(`找不到容器：${container}`);
+
+            console.warn(
+
+                `找不到容器：${container}`
+
+            );
+
 
             return;
 
+
         }
 
-        const list = Array.isArray(data)
-            ? data
-            : [];
+
+
+        const list = this.normalizeList(data);
+
+
 
         this.clear(element);
 
+
+
         if (!list.length) {
+
 
             element.innerHTML =
 
                 ResourceTemplates.empty();
 
+
+
             this.updateCount(0);
+
 
             this.refresh();
 
+
             return;
 
+
         }
+
+
 
         element.innerHTML = list
 
@@ -62,11 +151,19 @@ window.ResourceRenderer = {
 
             .join("");
 
+
+
         this.updateCount(list.length);
+
+
 
         this.refresh();
 
+
+
     },
+
+
 
     append({
 
@@ -76,25 +173,35 @@ window.ResourceRenderer = {
 
     } = {}) {
 
+
+
         const element = document.querySelector(container);
+
+
 
         if (!element) {
 
+
             return;
+
 
         }
 
-        const list = Array.isArray(data)
 
-            ? data
 
-            : [];
+        const list = this.normalizeList(data);
+
+
 
         if (!list.length) {
 
+
             return;
 
+
         }
+
+
 
         element.insertAdjacentHTML(
 
@@ -112,31 +219,55 @@ window.ResourceRenderer = {
 
         );
 
+
+
         this.updateCount(
 
-            element.querySelectorAll(".tool-card").length
+            element.querySelectorAll(
+
+                ".tool-card"
+
+            ).length
 
         );
 
+
+
         this.refresh();
+
+
 
     },
 
+
+
     loading(container = "#resource-list") {
+
+
 
         const element = document.querySelector(container);
 
+
+
         if (!element) {
+
 
             return;
 
+
         }
+
+
 
         element.innerHTML =
 
             ResourceTemplates.loading();
 
+
+
     },
+
+
 
     empty(
 
@@ -146,37 +277,65 @@ window.ResourceRenderer = {
 
     ) {
 
+
+
         const element = document.querySelector(container);
+
+
 
         if (!element) {
 
+
             return;
 
+
         }
+
+
 
         element.innerHTML =
 
             ResourceTemplates.empty(message);
 
+
+
         this.updateCount(0);
+
+
 
         this.refresh();
 
+
+
     },
+
+
 
     clear(container) {
 
+
+
         if (!container) {
+
 
             return;
 
+
         }
+
+
 
         container.innerHTML = "";
 
+
+
     },
 
+
+
     updateCount(count) {
+
+
 
         const counter = document.getElementById(
 
@@ -184,19 +343,31 @@ window.ResourceRenderer = {
 
         );
 
+
+
         if (!counter) {
+
 
             return;
 
+
         }
+
+
 
         counter.textContent =
 
             `${count} 个资源`;
 
+
+
     },
 
+
+
     refresh() {
+
+
 
         if (
 
@@ -206,10 +377,18 @@ window.ResourceRenderer = {
 
         ) {
 
+
+
             window.ResourceAppRefresh();
+
+
 
         }
 
+
+
     }
+
+
 
 };
