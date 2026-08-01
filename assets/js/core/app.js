@@ -1,7 +1,7 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * App v3.0
+ * App v3.1
  * ----------------------------------------------------------
  * 职责：
  * 1. 页面初始化
@@ -9,6 +9,10 @@
  * 3. 调用首页模块
  * 4. 调用资源页模块
  * 5. 绑定资源页事件
+ *
+ * V3.1:
+ * 增加 capability 能力筛选支持
+ * 保留 tag/category/search
  * ==========================================================
  */
 
@@ -232,6 +236,83 @@ window.ResourceApp = {
                     ResourceStore.setCategory(
                         this.dataset.category
                     );
+
+
+
+                    ResourceApp.render();
+
+
+
+                }
+            );
+
+
+
+        });
+
+
+
+
+        /* ==========================
+           V3.1 能力筛选
+        ========================== */
+
+
+        const capabilityButtons =
+            document.querySelectorAll(
+                "[data-capability]"
+            );
+
+
+
+        capabilityButtons.forEach(button => {
+
+
+
+            if (button.dataset.bound) return;
+
+
+
+            button.dataset.bound = "true";
+
+
+
+            button.addEventListener(
+                "click",
+                function () {
+
+
+
+                    capabilityButtons.forEach(btn => {
+
+
+                        btn.classList.remove(
+                            "active"
+                        );
+
+
+                    });
+
+
+
+                    this.classList.add(
+                        "active"
+                    );
+
+
+
+                    if (
+                        window.ResourceStore &&
+                        typeof ResourceStore.setCapability === "function"
+                    ) {
+
+
+                        ResourceStore.setCapability(
+                            this.dataset.capability
+                        );
+
+
+                    }
 
 
 
