@@ -3,15 +3,11 @@
  * 徐胖虎资源社 Resource Center
  * Engine v3.1
  * ----------------------------------------------------------
- * 职责：
- * 1. 提供页面资源
- * 2. 提供全部资源
- * 3. 提供分类资源
- * 4. 提供搜索过滤
- * 5. 提供统一查询
- * 6. 支持能力标签筛选
- * 7. 不负责 DOM
- * 8. 不负责渲染
+ * 支持：
+ * tag
+ * tags
+ * capability
+ * capabilities
  * ==========================================================
  */
 
@@ -36,49 +32,36 @@ window.ResourceEngine = {
 
     aliases: {
 
-        all: "all",
+        all:"all",
 
-        chat: "AI聊天",
-        drawing: "AI绘图",
-        coding: "AI编程",
-        office: "AI办公",
+        chat:"AI聊天",
+        drawing:"AI绘图",
+        coding:"AI编程",
+        office:"AI办公",
 
-        system: "系统工具",
-        media: "影音工具",
-        download: "下载工具",
-        file: "文件管理",
-        network: "网络工具",
+        note:"知识管理",
+        notes:"知识管理",
+        task:"任务管理",
+        automation:"自动化",
+        teamwork:"团队协作",
 
-        note: "知识管理",
-        notes: "知识管理",
-        task: "任务管理",
-        automation: "自动化工具",
-        teamwork: "团队协作",
+        online:"在线工具",
+        learning:"学习网站",
+        design:"设计网站",
+        development:"开发网站",
 
-        online: "在线工具",
-        learning: "学习网站",
-        design: "设计网站",
-        development: "开发网站",
-        search: "搜索引擎",
-
-        ebook: "电子书",
-        course: "课程教程",
-        template: "模板素材",
-        prompt: "提示词",
-        workflow: "工作流",
-
-        tools: "AI办公方案",
-        creation: "AI自媒体方案",
-        designflow: "AI设计方案",
-        video: "AI视频方案",
-        telegram: "Telegram运营方案"
+        ebook:"电子书",
+        course:"课程教程",
+        template:"模板素材",
+        prompt:"提示词",
+        workflow:"工作流"
 
     },
 
 
-    normalize(value) {
+    normalize(value){
 
-        if (!value) return "";
+        if(!value) return "";
 
         const key = String(value)
             .trim()
@@ -89,86 +72,166 @@ window.ResourceEngine = {
     },
 
 
-    getPageResources(page) {
 
-        if (!page) return [];
+    /**
+     * 标签统一匹配
+     *
+     * 支持：
+     * 精确
+     * 模糊
+     * 大小写
+     */
 
-        if (page === "home") {
+    labelMatch(source,target){
+
+        if(!source || !target)
+            return false;
+
+
+        const a = String(source)
+            .toLowerCase()
+            .trim();
+
+
+        const b = String(target)
+            .toLowerCase()
+            .trim();
+
+
+        return (
+
+            a === b ||
+
+            a.includes(b) ||
+
+            b.includes(a)
+
+        );
+
+    },
+
+
+
+    getPageResources(page){
+
+        if(!page)
+            return [];
+
+
+        if(page==="home"){
 
             return this.getAllResources();
 
         }
 
-        const getter = this.pages[page];
 
-        return typeof getter === "function"
+        const getter=this.pages[page];
+
+
+        return typeof getter==="function"
             ? getter()
             : [];
 
     },
 
 
-    getAllResources() {
+
+    getAllResources(){
 
         return Object.values(this.pages)
 
-            .filter(fn => typeof fn === "function")
+            .filter(fn =>
+                typeof fn==="function"
+            )
 
-            .flatMap(fn => fn());
+            .flatMap(fn=>fn());
 
     },
 
 
+
     /**
-     * 判断资源是否匹配标签
-     * 兼容：
+     * 标签匹配
+     *
+     * 兼容旧：
      * tag
      * tags
+     *
+     * 新：
      * capability
      * capabilities
      */
 
-    matchLabel(item, value) {
+    matchLabel(item,value){
 
-        if (!item || !value) return false;
-
-
-        if (item.tag === value) {
-
-            return true;
-
-        }
+        if(!item || !value)
+            return false;
 
 
-        if (
 
-            Array.isArray(item.tags) &&
-
-            item.tags.includes(value)
-
-        ) {
+        if(
+            this.labelMatch(
+                item.tag,
+                value
+            )
+        ){
 
             return true;
 
         }
 
 
-        if (item.capability === value) {
+
+        if(
+            Array.isArray(item.tags)
+        ){
+
+            if(
+                item.tags.some(tag =>
+                    this.labelMatch(
+                        tag,
+                        value
+                    )
+                )
+            ){
+
+                return true;
+
+            }
+
+        }
+
+
+
+        if(
+            this.labelMatch(
+                item.capability,
+                value
+            )
+        ){
 
             return true;
 
         }
 
 
-        if (
 
-            Array.isArray(item.capabilities) &&
+        if(
+            Array.isArray(item.capabilities)
+        ){
 
-            item.capabilities.includes(value)
+            if(
+                item.capabilities.some(cap =>
+                    this.labelMatch(
+                        cap,
+                        value
+                    )
+                )
+            ){
 
-        ) {
+                return true;
 
-            return true;
+            }
 
         }
 
@@ -178,81 +241,91 @@ window.ResourceEngine = {
     },
 
 
-    getCategory(category) {
 
-        category = this.normalize(category);
+    getCategory(category){
 
-
-        if (!category || category === "all") {
-
-            return this.getAllResources();
-
-        }
+        category=this.normalize(category);
 
 
-        return this.getAllResources().filter(item =>
-
-            item.category === category ||
-
-            item.subcategory === category ||
-
-            this.matchLabel(item, category)
-
-        );
-
-    },
-
-
-    getSubCategory(subcategory) {
-
-        subcategory = this.normalize(subcategory);
-
-
-        if (!subcategory || subcategory === "all") {
+        if(
+            !category ||
+            category==="all"
+        ){
 
             return this.getAllResources();
 
         }
 
 
-        return this.getAllResources().filter(item =>
+        return this.getAllResources()
+            .filter(item=>
 
-            item.subcategory === subcategory ||
+                item.category===category ||
 
-            this.matchLabel(item, subcategory)
+                item.subcategory===category ||
 
-        );
+                this.matchLabel(
+                    item,
+                    category
+                )
+
+            );
 
     },
 
 
-    search(keyword, data = []) {
 
-        if (!Array.isArray(data)) {
+    getSubCategory(subcategory){
 
+        subcategory=this.normalize(subcategory);
+
+
+        if(
+            !subcategory ||
+            subcategory==="all"
+        ){
+
+            return this.getAllResources();
+
+        }
+
+
+        return this.getAllResources()
+            .filter(item=>
+
+                item.subcategory===subcategory ||
+
+                this.matchLabel(
+                    item,
+                    subcategory
+                )
+
+            );
+
+    },
+
+
+
+    search(keyword,data=[]){
+
+        if(!Array.isArray(data))
             return [];
 
-        }
 
-
-        if (!keyword) {
-
+        if(!keyword)
             return data;
 
-        }
 
-
-        const key = String(keyword)
-
+        const key=String(keyword)
             .trim()
-
             .toLowerCase();
 
 
-        return data.filter(item => {
+
+        return data.filter(item=>{
 
 
-            const text = [
+            const text=[
 
                 item?.name,
 
@@ -290,7 +363,9 @@ window.ResourceEngine = {
             .toLowerCase();
 
 
+
             return text.includes(key);
+
 
         });
 
@@ -298,102 +373,85 @@ window.ResourceEngine = {
     },
 
 
+
     filter({
 
-        data = [],
+        data=[],
 
-        keyword = "",
+        keyword="",
 
-        category = "all",
+        category="all",
 
-        subcategory = "all"
+        subcategory="all"
 
-    } = {}) {
+    }={}){
 
 
-        let result = Array.isArray(data)
-
+        let result=Array.isArray(data)
             ? [...data]
-
             : [];
 
 
-        category = this.normalize(category);
 
-        subcategory = this.normalize(subcategory);
+        category=this.normalize(category);
 
-
-
-        if (category !== "all") {
-
-
-            result = result.filter(item => {
-
-
-                if (item.category === category)
-
-                    return true;
-
-
-                if (item.subcategory === category)
-
-                    return true;
-
-
-                if (this.matchLabel(item, category))
-
-                    return true;
-
-
-                return false;
-
-
-            });
-
-
-        }
+        subcategory=this.normalize(subcategory);
 
 
 
-        if (subcategory !== "all") {
+        if(category!=="all"){
 
 
-            result = result.filter(item => {
+            result=result.filter(item=>
 
 
-                if (item.subcategory === subcategory)
+                item.category===category ||
 
-                    return true;
+                item.subcategory===category ||
 
+                this.matchLabel(
+                    item,
+                    category
+                )
 
-                if (this.matchLabel(item, subcategory))
-
-                    return true;
-
-
-                return false;
-
-
-            });
-
-
-        }
-
-
-
-        if (keyword) {
-
-
-            result = this.search(
-
-                keyword,
-
-                result
 
             );
 
 
         }
+
+
+
+        if(subcategory!=="all"){
+
+
+            result=result.filter(item=>
+
+
+                item.subcategory===subcategory ||
+
+                this.matchLabel(
+                    item,
+                    subcategory
+                )
+
+
+            );
+
+
+        }
+
+
+
+        if(keyword){
+
+            result=this.search(
+                keyword,
+                result
+            );
+
+        }
+
 
 
         return result;
