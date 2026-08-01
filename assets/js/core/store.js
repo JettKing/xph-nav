@@ -126,6 +126,30 @@ window.ResourceStore = {
     },
 
 
+    labelMatch(item, value) {
+
+        if (!item || !value)
+            return false;
+
+
+        if (
+            window.ResourceEngine &&
+            typeof ResourceEngine.matchLabel === "function"
+        ) {
+
+            return ResourceEngine.matchLabel(
+                item,
+                value
+            );
+
+        }
+
+
+        return false;
+
+    },
+
+
     getData() {
 
         let data = [...this.resources];
@@ -157,7 +181,9 @@ window.ResourceStore = {
 
         /**
          * 标签筛选
-         * 兼容：
+         *
+         * V3.1:
+         * 兼容
          * tag
          * tags
          */
@@ -166,11 +192,9 @@ window.ResourceStore = {
 
             data = data.filter(item =>
 
-                item.tag === this.state.tag ||
-
-                (
-                    Array.isArray(item.tags) &&
-                    item.tags.includes(this.state.tag)
+                this.labelMatch(
+                    item,
+                    this.state.tag
                 )
 
             );
@@ -180,29 +204,61 @@ window.ResourceStore = {
 
 
         /**
-         * 能力筛选 V3.1
-         * 兼容：
+         * 能力筛选
+         *
+         * V3.1:
+         * 兼容
          * capability
          * capabilities
          */
 
         if (this.state.capability !== "all") {
 
-            data = data.filter(item =>
+            data = data.filter(item => {
 
 
-                item.capability === this.state.capability ||
-
-
-                (
-                    Array.isArray(item.capabilities) &&
-                    item.capabilities.includes(
+                if (
+                    item.capability &&
+                    this.labelMatch(
+                        {
+                            capabilities:[
+                                item.capability
+                            ]
+                        },
                         this.state.capability
                     )
-                )
+                ) {
+
+                    return true;
+
+                }
 
 
-            );
+
+                if (
+                    Array.isArray(item.capabilities)
+                ) {
+
+                    return item.capabilities.some(
+                        capability =>
+
+                            ResourceEngine.labelMatch(
+
+                                capability,
+
+                                this.state.capability
+
+                            )
+
+                    );
+
+                }
+
+
+                return false;
+
+
+            });
 
         }
 
