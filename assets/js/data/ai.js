@@ -2,6 +2,7 @@
  * ==========================================================
  * 徐胖虎资源社
  * AI工具资源数据 v3.1
+ * 能力标签升级版
  * ==========================================================
  */
 
@@ -20,9 +21,28 @@ window.aiResources = [
     platform:"Web",
     pricing:"Freemium",
     language:"多语言",
-    features:["聊天","写作","编程"],
-    capabilities:["文本生成","代码生成","翻译","搜索","数据分析","办公处理"],
-    tags:["AI聊天","AI助手"],
+
+    features:[
+        "聊天",
+        "写作",
+        "编程"
+    ],
+
+    capabilities:[
+        "文本生成",
+        "代码生成",
+        "翻译",
+        "联网搜索",
+        "数据分析",
+        "文档处理"
+    ],
+
+    tags:[
+        "AI助手",
+        "Web",
+        "免费额度"
+    ],
+
     audience:"所有用户",
     official:true,
     recommend:true,
@@ -43,9 +63,28 @@ window.aiResources = [
     platform:"Web",
     pricing:"Freemium",
     language:"多语言",
-    features:["长文本","分析","写作"],
-    capabilities:["文本生成","文档处理","数据分析","知识管理","翻译"],
-    tags:["AI聊天","AI助手"],
+
+    features:[
+        "长文本",
+        "分析",
+        "写作"
+    ],
+
+    capabilities:[
+        "文本生成",
+        "文本总结",
+        "文档处理",
+        "数据分析",
+        "知识管理",
+        "翻译"
+    ],
+
+    tags:[
+        "AI助手",
+        "Web",
+        "多语言"
+    ],
+
     audience:"所有用户",
     official:true,
     recommend:true,
@@ -66,9 +105,24 @@ window.aiResources = [
     platform:"Discord",
     pricing:"Paid",
     language:"英文",
-    features:["AI绘图","艺术创作"],
-    capabilities:["图片生成","图片编辑","设计创作"],
-    tags:["AI绘图","图片生成"],
+
+    features:[
+        "AI绘图",
+        "艺术创作"
+    ],
+
+    capabilities:[
+        "图片生成",
+        "图片编辑",
+        "图像设计"
+    ],
+
+    tags:[
+        "设计工具",
+        "英文",
+        "付费"
+    ],
+
     audience:"设计师",
     official:true,
     recommend:true,
@@ -79,7 +133,7 @@ window.aiResources = [
 {
     id:4,
     name:"Cursor",
-    description:"description:"description:"智能编程编辑器支持代码生成开发",
+    description:"智能编程编辑器支持代码生成开发",
     icon:"💻",
     thumbnail:"",
     category:"ai",
@@ -89,9 +143,25 @@ window.aiResources = [
     platform:"Windows / macOS",
     pricing:"Freemium",
     language:"英文",
-    features:["AI编程","自动补全"],
-    capabilities:["代码生成","代码补全","Bug修复","API"],
-    tags:["AI编程","代码助手"],
+
+    features:[
+        "AI编程",
+        "自动补全"
+    ],
+
+    capabilities:[
+        "代码生成",
+        "代码补全",
+        "程序调试",
+        "API调用"
+    ],
+
+    tags:[
+        "开发工具",
+        "Web",
+        "免费额度"
+    ],
+
     audience:"开发者",
     official:true,
     recommend:true,
@@ -112,9 +182,25 @@ window.aiResources = [
     platform:"Web",
     pricing:"Freemium",
     language:"多语言",
-    features:["PPT","文档","演示"],
-    capabilities:["PPT制作","文档处理","文本生成"],
-    tags:["AI办公","演示生成"],
+
+    features:[
+        "PPT",
+        "文档",
+        "演示"
+    ],
+
+    capabilities:[
+        "PPT生成",
+        "文档处理",
+        "文本生成"
+    ],
+
+    tags:[
+        "办公工具",
+        "Web",
+        "免费额度"
+    ],
+
     audience:"办公用户",
     official:true,
     recommend:true,
