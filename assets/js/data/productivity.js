@@ -2,6 +2,7 @@
  * ==========================================================
  * 徐胖虎资源社
  * 效率工具资源数据 v3.1
+ * 能力标签规范版
  * ==========================================================
  */
 
@@ -20,14 +21,25 @@ window.productivityResources = [
     platform:"Web / Windows / macOS / Mobile",
     pricing:"Freemium",
     language:"多语言",
-    features:["笔记","数据库","团队协作"],
+
+    features:[
+        "笔记",
+        "数据库",
+        "团队协作"
+    ],
+
     capabilities:[
         "知识管理",
         "笔记管理",
         "文档处理",
         "项目管理"
     ],
-    tags:["知识管理","笔记工具"],
+
+    tags:[
+        "知识管理",
+        "笔记工具"
+    ],
+
     audience:"学生",
     official:true,
     recommend:true,
@@ -48,13 +60,24 @@ window.productivityResources = [
     platform:"Web / Windows / macOS / Mobile",
     pricing:"Freemium",
     language:"多语言",
-    features:["待办事项","任务规划","提醒"],
+
+    features:[
+        "待办事项",
+        "任务规划",
+        "提醒"
+    ],
+
     capabilities:[
         "任务管理",
         "自动化",
-        "效率提升"
+        "工作流"
     ],
-    tags:["任务管理","效率工具"],
+
+    tags:[
+        "任务管理",
+        "效率工具"
+    ],
+
     audience:"所有用户",
     official:true,
     recommend:true,
@@ -75,13 +98,24 @@ window.productivityResources = [
     platform:"Windows / macOS / Linux / Mobile",
     pricing:"免费+付费",
     language:"多语言",
-    features:["双向链接","知识库","Markdown"],
+
+    features:[
+        "双向链接",
+        "知识库",
+        "Markdown"
+    ],
+
     capabilities:[
         "知识管理",
         "笔记管理",
         "文档处理"
     ],
-    tags:["知识管理","笔记工具"],
+
+    tags:[
+        "知识管理",
+        "笔记工具"
+    ],
+
     audience:"学生",
     official:true,
     recommend:true,
@@ -102,13 +136,24 @@ window.productivityResources = [
     platform:"Web",
     pricing:"Freemium",
     language:"英文",
-    features:["自动化","工作流","应用连接"],
+
+    features:[
+        "自动化",
+        "工作流",
+        "应用连接"
+    ],
+
     capabilities:[
         "自动化",
         "工作流",
-        "API"
+        "API调用"
     ],
-    tags:["自动化工具","工作流"],
+
+    tags:[
+        "自动化工具",
+        "工作流"
+    ],
+
     audience:"企业",
     official:true,
     recommend:true,
@@ -129,13 +174,24 @@ window.productivityResources = [
     platform:"Web / Windows / macOS / Mobile",
     pricing:"Freemium",
     language:"多语言",
-    features:["看板","任务协作","项目管理"],
+
+    features:[
+        "看板",
+        "任务协作",
+        "项目管理"
+    ],
+
     capabilities:[
         "项目管理",
-        "协同办公",
-        "任务管理"
+        "任务管理",
+        "协作管理"
     ],
-    tags:["团队协作","项目管理"],
+
+    tags:[
+        "团队协作",
+        "项目管理"
+    ],
+
     audience:"企业",
     official:true,
     recommend:true,
