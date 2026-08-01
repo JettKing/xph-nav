@@ -2,6 +2,7 @@
  * ==========================================================
  * 徐胖虎资源社
  * 软件工具资源数据 v3.1
+ * 能力标签升级版
  * ==========================================================
  */
 
@@ -21,15 +22,26 @@ window.softwareResources = [
     platform:"Windows / macOS / Linux",
     pricing:"免费",
     language:"多语言",
-    features:["代码编辑","插件扩展","开发调试"],
+
+    features:[
+        "代码编辑",
+        "插件扩展",
+        "开发调试"
+    ],
+
     capabilities:[
         "代码生成",
         "代码补全",
         "代码解释",
-        "Bug修复",
-        "API"
+        "程序调试",
+        "API调用"
     ],
-    tags:["开发工具","代码编辑器"],
+
+    tags:[
+        "开发工具",
+        "代码编辑器"
+    ],
+
     audience:"程序员",
     official:true,
     recommend:true,
@@ -50,12 +62,23 @@ window.softwareResources = [
     platform:"Windows",
     pricing:"免费",
     language:"多语言",
-    features:["文件压缩","文件解压","高压缩率"],
-    capabilities:[
-        "批量处理",
-        "文件管理"
+
+    features:[
+        "文件压缩",
+        "文件解压",
+        "高压缩率"
     ],
-    tags:["压缩工具","开源软件"],
+
+    capabilities:[
+        "文件管理",
+        "批量处理"
+    ],
+
+    tags:[
+        "压缩工具",
+        "开源软件"
+    ],
+
     audience:"所有用户",
     official:true,
     recommend:true,
@@ -76,13 +99,22 @@ window.softwareResources = [
     platform:"Windows",
     pricing:"免费",
     language:"多语言",
-    features:["快速搜索","文件索引"],
-    capabilities:[
-        "搜索",
-        "文件管理",
-        "效率提升"
+
+    features:[
+        "快速搜索",
+        "文件索引"
     ],
-    tags:["搜索工具","效率工具"],
+
+    capabilities:[
+        "智能搜索",
+        "文件管理"
+    ],
+
+    tags:[
+        "搜索工具",
+        "效率工具"
+    ],
+
     audience:"所有用户",
     official:true,
     recommend:true,
@@ -103,13 +135,24 @@ window.softwareResources = [
     platform:"Windows / macOS / Linux / Mobile",
     pricing:"免费+付费",
     language:"多语言",
-    features:["双向链接","知识库","Markdown"],
+
+    features:[
+        "双向链接",
+        "知识库",
+        "Markdown"
+    ],
+
     capabilities:[
         "知识管理",
         "文档处理",
         "笔记管理"
     ],
-    tags:["笔记工具","知识管理"],
+
+    tags:[
+        "笔记工具",
+        "知识管理"
+    ],
+
     audience:"学生",
     official:true,
     recommend:true,
@@ -130,13 +173,24 @@ window.softwareResources = [
     platform:"Windows",
     pricing:"免费",
     language:"多语言",
-    features:["截图","录屏","自动上传"],
+
+    features:[
+        "截图",
+        "录屏",
+        "自动上传"
+    ],
+
     capabilities:[
         "图片编辑",
-        "视频剪辑",
+        "视频编辑",
         "自动化"
     ],
-    tags:["截图工具","开源软件"],
+
+    tags:[
+        "截图工具",
+        "开源软件"
+    ],
+
     audience:"所有用户",
     official:true,
     recommend:true,
