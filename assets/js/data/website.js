@@ -2,6 +2,7 @@
  * ==========================================================
  * 徐胖虎资源社
  * 网页导航资源数据 v3.1
+ * 能力标签规范版
  * ==========================================================
  */
 
@@ -20,14 +21,25 @@ window.websiteResources = [
     platform:"Web",
     pricing:"免费",
     language:"多语言",
-    features:["代码托管","开源项目","开发协作"],
+
+    features:[
+        "代码托管",
+        "开源项目",
+        "开发协作"
+    ],
+
     capabilities:[
         "代码管理",
         "模型部署",
-        "API",
+        "API调用",
         "知识管理"
     ],
-    tags:["开源平台","开发工具"],
+
+    tags:[
+        "开源平台",
+        "开发工具"
+    ],
+
     audience:"程序员",
     official:true,
     recommend:true,
@@ -48,13 +60,23 @@ window.websiteResources = [
     platform:"Web",
     pricing:"免费",
     language:"英文",
-    features:["产品发现","科技资讯","工具推荐"],
-    capabilities:[
-        "搜索",
-        "知识管理",
-        "效率提升"
+
+    features:[
+        "产品发现",
+        "科技资讯",
+        "工具推荐"
     ],
-    tags:["产品发现","AI工具"],
+
+    capabilities:[
+        "智能搜索",
+        "知识管理"
+    ],
+
+    tags:[
+        "产品发现",
+        "AI工具"
+    ],
+
     audience:"所有用户",
     official:true,
     recommend:true,
@@ -75,13 +97,23 @@ window.websiteResources = [
     platform:"Web / Mobile",
     pricing:"Freemium",
     language:"多语言",
-    features:["海报设计","模板制作","图片编辑"],
+
+    features:[
+        "海报设计",
+        "模板制作",
+        "图片编辑"
+    ],
+
     capabilities:[
         "图片生成",
-        "图片编辑",
-        "设计创作"
+        "图片编辑"
     ],
-    tags:["设计工具","在线工具"],
+
+    tags:[
+        "设计工具",
+        "在线工具"
+    ],
+
     audience:"设计师",
     official:true,
     recommend:true,
@@ -102,13 +134,24 @@ window.websiteResources = [
     platform:"Web",
     pricing:"免费",
     language:"多语言",
-    features:["网页搜索","图片搜索","资讯搜索"],
-    capabilities:[
-        "搜索",
+
+    features:[
+        "网页搜索",
         "图片搜索",
+        "资讯搜索"
+    ],
+
+    capabilities:[
+        "智能搜索",
+        "图像搜索",
         "数据分析"
     ],
-    tags:["搜索引擎","信息查询"],
+
+    tags:[
+        "搜索引擎",
+        "信息查询"
+    ],
+
     audience:"所有用户",
     official:true,
     recommend:true,
@@ -129,13 +172,23 @@ window.websiteResources = [
     platform:"Web",
     pricing:"免费",
     language:"英文",
-    features:["编程课程","项目练习","开发认证"],
+
+    features:[
+        "编程课程",
+        "项目练习",
+        "开发认证"
+    ],
+
     capabilities:[
         "代码生成",
-        "教育学习",
         "知识管理"
     ],
-    tags:["学习网站","编程学习"],
+
+    tags:[
+        "学习网站",
+        "编程学习"
+    ],
+
     audience:"学生",
     official:true,
     recommend:true,
