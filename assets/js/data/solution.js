@@ -2,6 +2,7 @@
  * ==========================================================
  * 徐胖虎资源社
  * 解决方案数据 v3.1
+ * 能力标签规范版
  * ==========================================================
  */
 
@@ -20,14 +21,25 @@ window.solutionResources = [
     platform:"Web",
     pricing:"免费+付费",
     language:"多语言",
-    features:["AI写作","文档处理","办公自动化"],
+
+    features:[
+        "AI写作",
+        "文档处理",
+        "办公自动化"
+    ],
+
     capabilities:[
         "文本生成",
         "文档处理",
         "自动化",
         "工作流"
     ],
-    tags:["AI办公","效率提升"],
+
+    tags:[
+        "AI办公",
+        "企业方案"
+    ],
+
     audience:"企业",
     official:false,
     recommend:true,
@@ -48,14 +60,25 @@ window.solutionResources = [
     platform:"Web",
     pricing:"免费+付费",
     language:"多语言",
-    features:["内容创作","图片生成","视频制作"],
+
+    features:[
+        "内容创作",
+        "图片生成",
+        "视频制作"
+    ],
+
     capabilities:[
         "文本生成",
         "图片生成",
         "视频生成",
         "自动化"
     ],
-    tags:["AI创作","自媒体"],
+
+    tags:[
+        "AI创作",
+        "自媒体"
+    ],
+
     audience:"自媒体",
     official:true,
     recommend:true,
@@ -76,14 +99,24 @@ window.solutionResources = [
     platform:"Web / Discord",
     pricing:"Paid",
     language:"英文",
-    features:["AI绘图","设计辅助","创意生成"],
+
+    features:[
+        "AI绘图",
+        "设计辅助",
+        "创意生成"
+    ],
+
     capabilities:[
         "图片生成",
         "图片编辑",
-        "设计创作",
         "工作流"
     ],
-    tags:["AI设计","图片生成"],
+
+    tags:[
+        "AI设计",
+        "图片工具"
+    ],
+
     audience:"设计师",
     official:true,
     recommend:true,
@@ -104,13 +137,24 @@ window.solutionResources = [
     platform:"Web / Mobile",
     pricing:"Freemium",
     language:"多语言",
-    features:["视频生成","智能剪辑","内容制作"],
+
+    features:[
+        "视频生成",
+        "智能剪辑",
+        "内容制作"
+    ],
+
     capabilities:[
         "视频生成",
-        "视频剪辑",
+        "视频编辑",
         "自动化"
     ],
-    tags:["AI视频","视频工具"],
+
+    tags:[
+        "AI视频",
+        "视频工具"
+    ],
+
     audience:"创作者",
     official:true,
     recommend:true,
@@ -131,14 +175,25 @@ window.solutionResources = [
     platform:"Web / Mobile",
     pricing:"免费",
     language:"多语言",
-    features:["频道运营","内容管理","用户增长"],
+
+    features:[
+        "频道运营",
+        "内容管理",
+        "用户增长"
+    ],
+
     capabilities:[
         "内容管理",
         "自动化",
         "数据分析",
         "工作流"
     ],
-    tags:["Telegram","运营方案"],
+
+    tags:[
+        "Telegram",
+        "运营方案"
+    ],
+
     audience:"运营",
     official:true,
     recommend:true,
