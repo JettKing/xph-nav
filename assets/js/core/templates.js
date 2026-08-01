@@ -6,8 +6,8 @@
  * 全站唯一资源模板
  *
  * V3.1:
- * 支持 capabilities 能力标签展示
- * 保留 tags 兼容
+ * 支持 capabilities 能力展示
+ * 保持旧卡片结构
  * ==========================================================
  */
 
@@ -32,15 +32,14 @@ window.ResourceTemplates = {
 
 
 
-    badge(text) {
+    badge(text, className = "tool-tag") {
 
-        if (!text)
-            return "";
+        if (!text) return "";
 
 
         return `
 
-<span class="tool-tag">
+<span class="${className}">
 ${this.escape(text)}
 </span>
 
@@ -124,19 +123,18 @@ ${this.escape(text)}
                 ""
 
 
-
         } = resource;
 
 
 
-        /**
+        /*
          * V3.1 能力标签
          *
-         * capabilities:
-         * 描述资源能做什么
+         * 只展示前3个
+         * 防止移动端撑爆卡片
          */
 
-        const capabilityBadges =
+        const capabilityHTML =
 
             Array.isArray(capabilities)
 
@@ -144,10 +142,15 @@ ${this.escape(text)}
 
             capabilities
 
-                .slice(0,5)
+                .slice(0,3)
 
                 .map(item =>
-                    this.badge(item)
+
+                    this.badge(
+                        item,
+                        "tool-capability"
+                    )
+
                 )
 
                 .join("")
@@ -158,15 +161,13 @@ ${this.escape(text)}
 
 
 
-
-        /**
+        /*
          * 属性标签
          *
-         * tags:
-         * 描述资源属性
+         * 只展示前2个
          */
 
-        const tagBadges =
+        const tagHTML =
 
             Array.isArray(tags)
 
@@ -174,10 +175,15 @@ ${this.escape(text)}
 
             tags
 
-                .slice(0,3)
+                .slice(0,2)
 
                 .map(item =>
-                    this.badge(item)
+
+                    this.badge(
+                        item,
+                        "tool-tag"
+                    )
+
                 )
 
                 .join("")
@@ -243,17 +249,29 @@ data-subcategory="${this.escape(subcategory)}">
                 <div class="tool-tag-wrap">
 
 
-                    ${subcategory
-                        ? this.badge(subcategory)
-                        : ""}
+
+                    ${
+                        subcategory
+
+                        ?
+
+                        this.badge(
+                            subcategory,
+                            "tool-tag"
+                        )
+
+                        :
+
+                        ""
+                    }
 
 
 
-                    ${capabilityBadges}
+                    ${capabilityHTML}
 
 
 
-                    ${tagBadges}
+                    ${tagHTML}
 
 
 
@@ -368,9 +386,7 @@ data-subcategory="${this.escape(subcategory)}">
 
         return `
 
-
 <div class="empty">
-
 
     <div class="empty-icon">
 
@@ -379,16 +395,13 @@ data-subcategory="${this.escape(subcategory)}">
     </div>
 
 
-
     <div class="empty-text">
 
         ${this.escape(message)}
 
     </div>
 
-
 </div>
-
 
 `;
 
@@ -401,9 +414,7 @@ data-subcategory="${this.escape(subcategory)}">
 
         return `
 
-
 <div class="loading">
-
 
     <div class="loading-spinner"></div>
 
@@ -414,9 +425,7 @@ data-subcategory="${this.escape(subcategory)}">
 
     </div>
 
-
 </div>
-
 
 `;
 
