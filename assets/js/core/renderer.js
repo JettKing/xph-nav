@@ -1,18 +1,76 @@
 /**
  * ==========================================================
  * 徐胖虎资源社 Resource Center
- * Renderer v3.0
+ * Renderer v3.1
  * ----------------------------------------------------------
  * 职责：
  * 1. 清空容器
  * 2. 渲染资源列表
  * 3. 调用 Templates
  * 4. 更新资源数量
- * 5. 通知交互层刷新
+ * 5. V3.1能力标签兼容
  * ==========================================================
  */
 
 window.ResourceRenderer = {
+
+
+    /**
+     * V3.1 数据兼容处理
+     */
+    normalizeItem(item){
+
+        if(!item){
+            return {};
+        }
+
+
+        return {
+
+            ...item,
+
+
+            tags:
+
+                Array.isArray(item.tags)
+
+                ? item.tags
+
+                : [],
+
+
+
+            capabilities:
+
+                Array.isArray(item.capabilities)
+
+                ? item.capabilities
+
+                : []
+
+        };
+
+    },
+
+
+
+    normalizeData(data){
+
+        if(!Array.isArray(data)){
+
+            return [];
+
+        }
+
+
+        return data.map(item =>
+
+            this.normalizeItem(item)
+
+        );
+
+    },
+
 
 
     render({
@@ -48,7 +106,11 @@ window.ResourceRenderer = {
 
 
 
-        if (!Array.isArray(data) || !data.length) {
+        data = this.normalizeData(data);
+
+
+
+        if (!data.length) {
 
 
             element.innerHTML =
@@ -82,7 +144,9 @@ window.ResourceRenderer = {
 
 
         this.updateCount(
+
             data.length
+
         );
 
 
@@ -113,19 +177,19 @@ window.ResourceRenderer = {
 
         if (!element) {
 
-
             return;
-
 
         }
 
 
 
-        if (!Array.isArray(data) || !data.length) {
+        data = this.normalizeData(data);
 
+
+
+        if (!data.length) {
 
             return;
-
 
         }
 
