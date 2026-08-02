@@ -6,7 +6,7 @@
  * 全站唯一资源模板
  *
  * V3.1:
- * 支持 capabilities 能力标签
+ * 能力标签展示优化
  * 保持移动端卡片布局
  * ==========================================================
  */
@@ -26,19 +26,17 @@ window.ResourceTemplates = {
     },
 
 
-
-    badge(text, type = "tool-tag") {
+    badge(text, className = "tool-tag") {
 
         if (!text) return "";
 
         return `
-<span class="${type}">
+<span class="${className}">
 ${this.escape(text)}
 </span>
 `;
 
     },
-
 
 
     button(text, href, className = "") {
@@ -53,21 +51,17 @@ ${this.escape(text)}
 
         }
 
-
         return `
 <a
 class="action-btn ${className}"
 href="${this.escape(href)}"
 target="_blank"
 rel="noopener noreferrer">
-
 ${this.escape(text)}
-
 </a>
 `;
 
     },
-
 
 
     card(resource = {}) {
@@ -94,16 +88,11 @@ ${this.escape(text)}
 
             website = "",
 
-            github =
-                resource.github ||
-                resource.project ||
-                ""
+            github = resource.github || resource.project || ""
 
         } = resource;
 
 
-
-        // 能力标签：最多3个
 
         const capabilityHTML =
 
@@ -112,18 +101,13 @@ ${this.escape(text)}
             ?
 
             capabilities
-
                 .slice(0,3)
-
                 .map(item =>
-
                     this.badge(
                         item,
                         "tool-capability"
                     )
-
                 )
-
                 .join("")
 
             :
@@ -132,8 +116,6 @@ ${this.escape(text)}
 
 
 
-        // 属性标签：最多2个
-
         const tagHTML =
 
             Array.isArray(tags)
@@ -141,18 +123,13 @@ ${this.escape(text)}
             ?
 
             tags
-
                 .slice(0,2)
-
                 .map(item =>
-
                     this.badge(
                         item,
                         "tool-tag"
                     )
-
                 )
-
                 .join("")
 
             :
@@ -200,74 +177,63 @@ data-subcategory="${this.escape(subcategory)}">
 
 
 
-            <div class="tool-bottom">
+            <div class="tool-meta">
 
 
-                <div class="tool-tag-wrap">
-
-
-                    ${
-                        subcategory
-
-                        ?
-
-                        this.badge(
-                            subcategory
-                        )
-
-                        :
-
-                        ""
-                    }
-
-
-                    ${capabilityHTML}
+                ${
+                    subcategory
+                    ?
+                    this.badge(
+                        subcategory,
+                        "tool-category"
+                    )
+                    :
+                    ""
+                }
 
 
 
-                    ${
-                        capabilityHTML && tagHTML
-
-                        ?
-
-                        `<span class="tool-divider">|</span>`
-
-                        :
-
-                        ""
-                    }
+                ${capabilityHTML}
 
 
 
-                    ${tagHTML}
-
-
-                </div>
-
-
-
-                <div class="tool-actions">
-
-
-                    ${this.button(
-                        "官网地址",
-                        website,
-                        "website-btn"
-                    )}
+                ${
+                    capabilityHTML && tagHTML
+                    ?
+                    `<span class="tool-divider">|</span>`
+                    :
+                    ""
+                }
 
 
 
-                    ${this.button(
-                        "项目地址",
-                        github,
-                        "project-btn"
-                    )}
-
-
-                </div>
+                ${tagHTML}
 
 
             </div>
+
+
+
+            <div class="tool-actions">
+
+
+                ${this.button(
+                    "官网地址",
+                    website,
+                    "website-btn"
+                )}
+
+
+
+                ${this.button(
+                    "项目地址",
+                    github,
+                    "project-btn"
+                )}
+
+
+            </div>
+
 
 
         </div>
@@ -285,13 +251,9 @@ data-subcategory="${this.escape(subcategory)}">
 
     skeleton(count = 6) {
 
-
         return Array.from({
-
             length: count
-
         })
-
         .map(() => `
 
 <div class="tool-card skeleton-card">
@@ -313,11 +275,9 @@ data-subcategory="${this.escape(subcategory)}">
 </div>
 
 `)
-
         .join("");
 
     },
-
 
 
     empty(message = "暂无资源") {
@@ -339,7 +299,6 @@ ${this.escape(message)}
 `;
 
     },
-
 
 
     loading() {
