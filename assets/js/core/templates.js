@@ -6,8 +6,8 @@
  * 全站唯一资源模板
  *
  * V3.1:
- * 支持 capabilities 能力展示
- * 保持旧卡片结构
+ * 支持 capabilities 能力标签
+ * 保持移动端卡片布局
  * ==========================================================
  */
 
@@ -17,32 +17,24 @@ window.ResourceTemplates = {
     escape(value) {
 
         return String(value ?? "")
-
             .replace(/&/g, "&amp;")
-
             .replace(/</g, "&lt;")
-
             .replace(/>/g, "&gt;")
-
             .replace(/"/g, "&quot;")
-
             .replace(/'/g, "&#039;");
 
     },
 
 
 
-    badge(text, className = "tool-tag") {
+    badge(text, type = "tool-tag") {
 
         if (!text) return "";
 
-
         return `
-
-<span class="${className}">
+<span class="${type}">
 ${this.escape(text)}
 </span>
-
 `;
 
     },
@@ -51,23 +43,18 @@ ${this.escape(text)}
 
     button(text, href, className = "") {
 
-
         if (!href) {
 
-
             return `
-
 <span class="action-btn disabled-btn">
 暂无项目
 </span>
-
 `;
 
         }
 
 
         return `
-
 <a
 class="action-btn ${className}"
 href="${this.escape(href)}"
@@ -77,7 +64,6 @@ rel="noopener noreferrer">
 ${this.escape(text)}
 
 </a>
-
 `;
 
     },
@@ -89,50 +75,35 @@ ${this.escape(text)}
 
         const {
 
-
             name = "未命名资源",
-
 
             description =
                 resource.description ||
                 resource.desc ||
                 "暂无介绍",
 
-
             icon = "📦",
-
 
             category = "all",
 
-
             subcategory = "",
-
 
             capabilities = [],
 
-
             tags = [],
 
-
             website = "",
-
 
             github =
                 resource.github ||
                 resource.project ||
                 ""
 
-
         } = resource;
 
 
 
-        /*
-         * V3.1 能力标签
-         *
-         * 只展示前3个
-         * 防止移动端撑爆卡片
-         */
+        // 能力标签：最多3个
 
         const capabilityHTML =
 
@@ -161,11 +132,7 @@ ${this.escape(text)}
 
 
 
-        /*
-         * 属性标签
-         *
-         * 只展示前2个
-         */
+        // 属性标签：最多2个
 
         const tagHTML =
 
@@ -196,15 +163,10 @@ ${this.escape(text)}
 
         return `
 
-
 <div
-
 class="tool-card"
-
 data-name="${this.escape(name)}"
-
 data-category="${this.escape(category)}"
-
 data-subcategory="${this.escape(subcategory)}">
 
 
@@ -222,13 +184,11 @@ data-subcategory="${this.escape(subcategory)}">
         <div class="tool-info">
 
 
-
             <div class="tool-name">
 
                 ${this.escape(name)}
 
             </div>
-
 
 
 
@@ -240,14 +200,10 @@ data-subcategory="${this.escape(subcategory)}">
 
 
 
-
-
             <div class="tool-bottom">
 
 
-
                 <div class="tool-tag-wrap">
-
 
 
                     ${
@@ -256,8 +212,7 @@ data-subcategory="${this.escape(subcategory)}">
                         ?
 
                         this.badge(
-                            subcategory,
-                            "tool-tag"
+                            subcategory
                         )
 
                         :
@@ -266,18 +221,28 @@ data-subcategory="${this.escape(subcategory)}">
                     }
 
 
-
                     ${capabilityHTML}
+
+
+
+                    ${
+                        capabilityHTML && tagHTML
+
+                        ?
+
+                        `<span class="tool-divider">|</span>`
+
+                        :
+
+                        ""
+                    }
 
 
 
                     ${tagHTML}
 
 
-
                 </div>
-
-
 
 
 
@@ -285,52 +250,37 @@ data-subcategory="${this.escape(subcategory)}">
 
 
                     ${this.button(
-
                         "官网地址",
-
                         website,
-
                         "website-btn"
-
                     )}
 
 
 
                     ${this.button(
-
                         "项目地址",
-
                         github,
-
                         "project-btn"
-
                     )}
-
 
 
                 </div>
 
 
-
             </div>
-
 
 
         </div>
 
 
-
     </div>
-
 
 
 </div>
 
-
 `;
 
     },
-
 
 
     skeleton(count = 6) {
@@ -344,34 +294,23 @@ data-subcategory="${this.escape(subcategory)}">
 
         .map(() => `
 
-
 <div class="tool-card skeleton-card">
 
+<div class="tool-main">
 
-    <div class="tool-main">
+<div class="tool-icon skeleton"></div>
 
+<div class="tool-info">
 
-        <div class="tool-icon skeleton"></div>
+<div class="skeleton skeleton-title"></div>
 
-
-
-        <div class="tool-info">
-
-
-            <div class="skeleton skeleton-title"></div>
-
-
-            <div class="skeleton skeleton-desc"></div>
-
-
-        </div>
-
-
-    </div>
-
+<div class="skeleton skeleton-desc"></div>
 
 </div>
 
+</div>
+
+</div>
 
 `)
 
@@ -383,23 +322,17 @@ data-subcategory="${this.escape(subcategory)}">
 
     empty(message = "暂无资源") {
 
-
         return `
 
 <div class="empty">
 
-    <div class="empty-icon">
+<div class="empty-icon">
+📂
+</div>
 
-        📂
-
-    </div>
-
-
-    <div class="empty-text">
-
-        ${this.escape(message)}
-
-    </div>
+<div class="empty-text">
+${this.escape(message)}
+</div>
 
 </div>
 
@@ -411,19 +344,15 @@ data-subcategory="${this.escape(subcategory)}">
 
     loading() {
 
-
         return `
 
 <div class="loading">
 
-    <div class="loading-spinner"></div>
+<div class="loading-spinner"></div>
 
-
-    <div class="loading-text">
-
-        资源加载中...
-
-    </div>
+<div class="loading-text">
+资源加载中...
+</div>
 
 </div>
 
