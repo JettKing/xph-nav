@@ -57,7 +57,10 @@ window.aiResources = [
     icon:"🧠",
     thumbnail:"",
     category:"ai",
-    subcategory:"AI聊天",
+    subcategory:"AI写作",
+    subcategories:[
+        "AI聊天"
+    ],
     website:"https://claude.ai",
     github:"",
     platform:"Web",
