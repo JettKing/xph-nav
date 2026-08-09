@@ -82,7 +82,11 @@ window.ResourceStore = {
 
     setCategory(category) {
 
-        this.state.category = category || "all";
+        this.state.category =
+            window.ResourceEngine &&
+            typeof ResourceEngine.normalize === "function"
+                ? ResourceEngine.normalize(category || "all")
+                : (category || "all");
 
     },
 
