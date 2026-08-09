@@ -63,6 +63,7 @@ window.categories = {
             software_browser: "浏览器",
             software_download: "下载工具",
             software_file: "文件管理",
+            software_note: "笔记工具",
             software_archive: "压缩解压",
             software_system: "系统工具",
             software_network: "网络工具",
