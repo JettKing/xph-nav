@@ -2,7 +2,7 @@
  * ==========================================================
  * 徐胖虎资源社
  * 软件工具资源数据 v3.1
- * 能力标签规范版
+ * 能力标签升级版
  * ==========================================================
  */
 
@@ -157,7 +157,7 @@ window.softwareResources = [
     website:"https://obsidian.md",
     github:"",
     platform:"Windows / macOS / Linux / Mobile",
-    pricing:"免费+付费",
+    pricing:"增值",
     language:"多语言",
 
     features:[
@@ -180,7 +180,7 @@ window.softwareResources = [
 
     attributes:{
         platform:["Windows", "macOS", "Linux", "Mobile"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["多语言"],
         audience:["学生"]
     },
