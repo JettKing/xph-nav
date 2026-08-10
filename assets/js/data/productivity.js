@@ -19,7 +19,7 @@ window.productivityResources = [
     website:"https://www.notion.com",
     github:"",
     platform:"Web / Windows / macOS / Mobile",
-    pricing:"Freemium",
+    pricing:"增值",
     language:"多语言",
 
     features:[
@@ -44,7 +44,7 @@ window.productivityResources = [
 
     attributes:{
         platform:["Web", "Windows", "macOS", "Mobile"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["多语言"],
         audience:["学生"]
     },
@@ -67,7 +67,7 @@ window.productivityResources = [
     website:"https://todoist.com",
     github:"",
     platform:"Web / Windows / macOS / Mobile",
-    pricing:"Freemium",
+    pricing:"增值",
     language:"多语言",
 
     features:[
@@ -90,7 +90,7 @@ window.productivityResources = [
 
     attributes:{
         platform:["Web", "Windows", "macOS", "Mobile"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["多语言"],
         audience:["所有用户"]
     },
@@ -113,7 +113,7 @@ window.productivityResources = [
     website:"https://obsidian.md",
     github:"",
     platform:"Windows / macOS / Linux / Mobile",
-    pricing:"免费+付费",
+    pricing:"增值",
     language:"多语言",
 
     features:[
@@ -136,7 +136,7 @@ window.productivityResources = [
 
     attributes:{
         platform:["Windows", "macOS", "Linux", "Mobile"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["多语言"],
         audience:["学生"]
     },
@@ -159,7 +159,7 @@ window.productivityResources = [
     website:"https://zapier.com",
     github:"",
     platform:"Web",
-    pricing:"Freemium",
+    pricing:"增值",
     language:"英文",
 
     features:[
@@ -182,7 +182,7 @@ window.productivityResources = [
 
     attributes:{
         platform:["Web"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["英文"],
         audience:["企业"]
     },
@@ -205,7 +205,7 @@ window.productivityResources = [
     website:"https://trello.com",
     github:"",
     platform:"Web / Windows / macOS / Mobile",
-    pricing:"Freemium",
+    pricing:"增值",
     language:"多语言",
 
     features:[
@@ -228,7 +228,7 @@ window.productivityResources = [
 
     attributes:{
         platform:["Web", "Windows", "macOS", "Mobile"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["多语言"],
         audience:["企业"]
     },
