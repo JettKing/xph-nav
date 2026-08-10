@@ -9,7 +9,7 @@
 window.productivityResources = [
 
 {
-    id:1,
+    id:"prod-1",
     name:"Notion",
     description:"知识笔记数据库项目管理协作工具型",
     icon:"📒",
@@ -34,11 +34,20 @@ window.productivityResources = [
         "文档处理",
         "项目管理"
     ],
-
-    tags:[
+    scenarios:[
+        "办公",
         "知识管理",
-        "笔记工具"
-    ],
+        "项目管理",
+        "团队协作",
+        "个人效率"
+],
+
+    attributes:{
+        platform:["Web", "Windows", "macOS", "Mobile"],
+        pricing:"免费+付费",
+        language:["多语言"],
+        audience:["学生"]
+    },
 
     audience:"学生",
     official:true,
@@ -48,7 +57,7 @@ window.productivityResources = [
 
 
 {
-    id:2,
+    id:"prod-2",
     name:"Todoist",
     description:"任务管理清单规划提醒执行工具协作",
     icon:"✅",
@@ -72,11 +81,19 @@ window.productivityResources = [
         "自动化",
         "工作流"
     ],
-
-    tags:[
+    scenarios:[
+        "个人效率",
         "任务管理",
-        "效率工具"
-    ],
+        "项目管理",
+        "团队协作"
+],
+
+    attributes:{
+        platform:["Web", "Windows", "macOS", "Mobile"],
+        pricing:"免费+付费",
+        language:["多语言"],
+        audience:["所有用户"]
+    },
 
     audience:"所有用户",
     official:true,
@@ -86,7 +103,7 @@ window.productivityResources = [
 
 
 {
-    id:3,
+    id:"prod-3",
     name:"Obsidian",
     description:"本地知识库笔记链接管理工具应用端",
     icon:"🧠",
@@ -110,11 +127,19 @@ window.productivityResources = [
         "笔记管理",
         "文档处理"
     ],
-
-    tags:[
+    scenarios:[
         "知识管理",
-        "笔记工具"
-    ],
+        "学习",
+        "研究",
+        "个人效率"
+],
+
+    attributes:{
+        platform:["Windows", "macOS", "Linux", "Mobile"],
+        pricing:"免费+付费",
+        language:["多语言"],
+        audience:["学生"]
+    },
 
     audience:"学生",
     official:true,
@@ -124,7 +149,7 @@ window.productivityResources = [
 
 
 {
-    id:4,
+    id:"prod-4",
     name:"Zapier",
     description:"应用自动连接工作流程自动化工具型",
     icon:"⚡",
@@ -148,11 +173,19 @@ window.productivityResources = [
         "工作流",
         "API调用"
     ],
+    scenarios:[
+        "办公",
+        "自动化",
+        "团队协作",
+        "业务运营"
+],
 
-    tags:[
-        "自动化工具",
-        "工作流"
-    ],
+    attributes:{
+        platform:["Web"],
+        pricing:"免费+付费",
+        language:["英文"],
+        audience:["企业"]
+    },
 
     audience:"企业",
     official:true,
@@ -162,7 +195,7 @@ window.productivityResources = [
 
 
 {
-    id:5,
+    id:"prod-5",
     name:"Trello",
     description:"看板任务协作项目管理工具平台应用",
     icon:"📋",
@@ -186,11 +219,19 @@ window.productivityResources = [
         "任务管理",
         "协作管理"
     ],
-
-    tags:[
+    scenarios:[
+        "项目管理",
         "团队协作",
-        "项目管理"
-    ],
+        "任务管理",
+        "办公"
+],
+
+    attributes:{
+        platform:["Web", "Windows", "macOS", "Mobile"],
+        pricing:"免费+付费",
+        language:["多语言"],
+        audience:["企业"]
+    },
 
     audience:"企业",
     official:true,
