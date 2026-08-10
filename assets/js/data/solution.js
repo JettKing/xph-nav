@@ -9,7 +9,7 @@
 window.solutionResources = [
 
 {
-    id:1,
+    id:"sol-1",
     name:"AI办公自动化方案",
     description:"办公自动化方案提升文档处理高效率",
     icon:"💼",
@@ -34,11 +34,19 @@ window.solutionResources = [
         "自动化",
         "工作流"
     ],
+    scenarios:[
+        "办公",
+        "企业管理",
+        "自动化",
+        "团队协作"
+],
 
-    tags:[
-        "AI办公",
-        "企业方案"
-    ],
+    attributes:{
+        platform:["Web"],
+        pricing:"免费+付费",
+        language:["多语言"],
+        audience:["企业"]
+    },
 
     audience:"企业",
     official:false,
@@ -48,7 +56,7 @@ window.solutionResources = [
 
 
 {
-    id:2,
+    id:"sol-2",
     name:"AI自媒体创作方案",
     description:"自媒体创作方案结合智能内容生产流",
     icon:"🎬",
@@ -73,11 +81,19 @@ window.solutionResources = [
         "视频生成",
         "自动化"
     ],
+    scenarios:[
+        "自媒体",
+        "内容创作",
+        "短视频",
+        "营销"
+],
 
-    tags:[
-        "AI创作",
-        "自媒体"
-    ],
+    attributes:{
+        platform:["Web"],
+        pricing:"免费+付费",
+        language:["多语言"],
+        audience:["自媒体"]
+    },
 
     audience:"自媒体",
     official:true,
@@ -87,7 +103,7 @@ window.solutionResources = [
 
 
 {
-    id:3,
+    id:"sol-3",
     name:"AI设计工作流方案",
     description:"设计工作流方案辅助图片创意生成力",
     icon:"🎨",
@@ -111,11 +127,19 @@ window.solutionResources = [
         "图片编辑",
         "工作流"
     ],
+    scenarios:[
+        "设计",
+        "内容创作",
+        "自媒体",
+        "品牌营销"
+],
 
-    tags:[
-        "AI设计",
-        "图片工具"
-    ],
+    attributes:{
+        platform:["Web", "Discord"],
+        pricing:"付费",
+        language:["英文"],
+        audience:["设计师"]
+    },
 
     audience:"设计师",
     official:true,
@@ -125,7 +149,7 @@ window.solutionResources = [
 
 
 {
-    id:4,
+    id:"sol-4",
     name:"AI视频制作方案",
     description:"视频制作方案完成生成剪辑发布流程",
     icon:"🎥",
@@ -149,11 +173,19 @@ window.solutionResources = [
         "视频编辑",
         "自动化"
     ],
+    scenarios:[
+        "短视频",
+        "内容创作",
+        "自媒体",
+        "营销"
+],
 
-    tags:[
-        "AI视频",
-        "视频工具"
-    ],
+    attributes:{
+        platform:["Web", "Mobile"],
+        pricing:"免费+付费",
+        language:["多语言"],
+        audience:["创作者"]
+    },
 
     audience:"创作者",
     official:true,
@@ -163,7 +195,7 @@ window.solutionResources = [
 
 
 {
-    id:5,
+    id:"sol-5",
     name:"Telegram频道运营方案",
     description:"频道运营方案完成内容管理用户增长",
     icon:"✈️",
@@ -188,11 +220,19 @@ window.solutionResources = [
         "数据分析",
         "工作流"
     ],
+    scenarios:[
+        "Telegram运营",
+        "内容运营",
+        "社群运营",
+        "出海"
+],
 
-    tags:[
-        "Telegram",
-        "运营方案"
-    ],
+    attributes:{
+        platform:["Web", "Mobile"],
+        pricing:"免费",
+        language:["多语言"],
+        audience:["运营"]
+    },
 
     audience:"运营",
     official:true,
