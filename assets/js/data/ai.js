@@ -9,7 +9,7 @@
 window.aiResources = [
 
 {
-    id:1,
+    id:"ai-1",
     name:"ChatGPT",
     description:"智能对话助手支持文本生成编程辅助",
     icon:"🤖",
@@ -36,12 +36,20 @@ window.aiResources = [
         "数据分析",
         "文档处理"
     ],
+    scenarios:[
+        "办公",
+        "内容创作",
+        "编程开发",
+        "学习",
+        "研究"
+],
 
-    tags:[
-        "AI助手",
-        "Web",
-        "免费额度"
-    ],
+    attributes:{
+        platform:["Web"],
+        pricing:"免费+付费",
+        language:["多语言"],
+        audience:["所有用户"]
+    },
 
     audience:"所有用户",
     official:true,
@@ -51,7 +59,7 @@ window.aiResources = [
 
 
 {
-    id:2,
+    id:"ai-2",
     name:"Claude",
     description:"长文本分析助手支持理解写作创作力",
     icon:"🧠",
@@ -81,12 +89,19 @@ window.aiResources = [
         "知识管理",
         "翻译"
     ],
+    scenarios:[
+        "办公",
+        "内容创作",
+        "学习",
+        "研究"
+],
 
-    tags:[
-        "AI助手",
-        "Web",
-        "多语言"
-    ],
+    attributes:{
+        platform:["Web"],
+        pricing:"免费+付费",
+        language:["多语言"],
+        audience:["所有用户"]
+    },
 
     audience:"所有用户",
     official:true,
@@ -96,7 +111,7 @@ window.aiResources = [
 
 
 {
-    id:3,
+    id:"ai-3",
     name:"Midjourney",
     description:"图片生成平台支持艺术创作视觉设计",
     icon:"🎨",
@@ -119,12 +134,19 @@ window.aiResources = [
         "图片编辑",
         "图像设计"
     ],
+    scenarios:[
+        "设计",
+        "内容创作",
+        "自媒体",
+        "营销"
+],
 
-    tags:[
-        "设计工具",
-        "英文",
-        "付费"
-    ],
+    attributes:{
+        platform:["Discord"],
+        pricing:"付费",
+        language:["英文"],
+        audience:["设计师"]
+    },
 
     audience:"设计师",
     official:true,
@@ -134,7 +156,7 @@ window.aiResources = [
 
 
 {
-    id:4,
+    id:"ai-4",
     name:"Cursor",
     description:"智能编程编辑器支持代码生成开发",
     icon:"💻",
@@ -158,12 +180,19 @@ window.aiResources = [
         "程序调试",
         "API调用"
     ],
+    scenarios:[
+        "编程开发",
+        "网站开发",
+        "软件开发",
+        "个人效率"
+],
 
-    tags:[
-        "开发工具",
-        "Web",
-        "免费额度"
-    ],
+    attributes:{
+        platform:["Windows", "macOS"],
+        pricing:"免费+付费",
+        language:["英文"],
+        audience:["开发者"]
+    },
 
     audience:"开发者",
     official:true,
@@ -173,7 +202,7 @@ window.aiResources = [
 
 
 {
-    id:5,
+    id:"ai-5",
     name:"Gamma",
     description:"演示文稿生成工具支持办公内容制作",
     icon:"📊",
@@ -197,12 +226,19 @@ window.aiResources = [
         "文档处理",
         "文本生成"
     ],
+    scenarios:[
+        "办公",
+        "内容创作",
+        "演示汇报",
+        "教育"
+],
 
-    tags:[
-        "办公工具",
-        "Web",
-        "免费额度"
-    ],
+    attributes:{
+        platform:["Web"],
+        pricing:"免费+付费",
+        language:["多语言"],
+        audience:["办公用户"]
+    },
 
     audience:"办公用户",
     official:true,
