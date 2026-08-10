@@ -156,7 +156,7 @@ window.digitalResources = [
     website:"https://www.coursera.org",
     github:"",
     platform:"Web / Mobile",
-    pricing:"免费+付费",
+    pricing:"增值",
     language:"多语言",
 
     features:[
@@ -178,7 +178,7 @@ window.digitalResources = [
 
     attributes:{
         platform:["Web", "Mobile"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["多语言"],
         audience:["学生"]
     },
