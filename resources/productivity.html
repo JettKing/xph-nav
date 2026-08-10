@@ -5,6 +5,8 @@
 
 <meta charset="UTF-8">
 
+<meta name="xph-version" content="5.2.0">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>效率工具 - 徐胖虎资源社</title>
@@ -419,31 +421,8 @@ autocomplete="off"
 
 
 
-<!-- 分类 -->
-
-<div class="categories">
-
-<button class="category-btn active" data-category="all">
-全部
-</button>
-
-<button class="category-btn" data-category="productivity_knowledge">
-知识管理
-</button>
-
-<button class="category-btn" data-category="productivity_task">
-任务管理
-</button>
-
-<button class="category-btn" data-category="productivity_team">
-团队协作
-</button>
-
-<button class="category-btn" data-category="productivity_automation">
-自动化工具
-</button>
-
-</div>
+<!-- V5.3.1 FINAL 筛选挂载区域 -->
+<div class="categories" data-v531-filter-mount></div>
 
 
 
@@ -509,6 +488,7 @@ document.onkeydown=e=>!(e.keyCode===123||(e.ctrlKey&&e.keyCode===85)||(e.ctrlKey
 
 
 <script src="/assets/js/config/categories.js"></script>
+<script src="/assets/js/config/tags.js"></script>
 <script src="/assets/js/core/engine.js"></script>
 <script src="/assets/js/core/store.js"></script>
 <script src="/assets/js/core/templates.js"></script>
