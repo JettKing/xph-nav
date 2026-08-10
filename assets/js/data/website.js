@@ -111,7 +111,7 @@ window.websiteResources = [
     website:"https://www.canva.com",
     github:"",
     platform:"Web / Mobile",
-    pricing:"Freemium",
+    pricing:"增值",
     language:"多语言",
 
     features:[
@@ -133,7 +133,7 @@ window.websiteResources = [
 
     attributes:{
         platform:["Web", "Mobile"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["多语言"],
         audience:["设计师"]
     },
@@ -193,7 +193,7 @@ window.websiteResources = [
 
 {
     id:"web-5",
-    name:"FreeCodeCamp",
+    name:"免费CodeCamp",
     description:"编程学习课程练习开发技术认证平台",
     icon:"📚",
     thumbnail:"",
