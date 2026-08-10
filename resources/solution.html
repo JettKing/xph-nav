@@ -5,6 +5,8 @@
 
 <meta charset="UTF-8">
 
+<meta name="xph-version" content="5.2.0">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>解决方案 - 徐胖虎资源社</title>
@@ -419,32 +421,8 @@ autocomplete="off"
 
 
 
-<!-- 分类 -->
-
-<div class="categories">
-
-<button class="category-btn active" data-category="all">
-全部
-</button>
-
-<button class="category-btn" data-category="solution_ai_office">
-AI办公方案
-</button>
-
-<button class="category-btn" data-category="solution_ai_video">
-AI视频方案
-</button>
-
-<button class="category-btn" data-category="solution_ai_creator">
-AI自媒体方案
-</button>
-
-<button class="category-btn" data-category="solution_telegram">
-Telegram运营方案
-</button>
-
-
-</div>
+<!-- V5.3.1 FINAL 筛选挂载区域 -->
+<div class="categories" data-v531-filter-mount></div>
 
 
 
@@ -510,6 +488,7 @@ document.onkeydown=e=>!(e.keyCode===123||(e.ctrlKey&&e.keyCode===85)||(e.ctrlKey
 
 
 <script src="/assets/js/config/categories.js"></script>
+<script src="/assets/js/config/tags.js"></script>
 <script src="/assets/js/core/engine.js"></script>
 <script src="/assets/js/core/store.js"></script>
 <script src="/assets/js/core/templates.js"></script>
