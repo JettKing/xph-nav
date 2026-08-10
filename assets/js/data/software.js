@@ -10,7 +10,7 @@
 window.softwareResources = [
 
 {
-    id:1,
+    id:"sw-1",
     name:"Visual Studio Code",
     description:"代码编辑器支持开发调试插件扩展用",
     icon:"💻",
@@ -36,11 +36,19 @@ window.softwareResources = [
         "程序调试",
         "API调用"
     ],
+    scenarios:[
+        "编程开发",
+        "网站开发",
+        "软件开发",
+        "学习"
+],
 
-    tags:[
-        "开发工具",
-        "代码编辑器"
-    ],
+    attributes:{
+        platform:["Windows", "macOS", "Linux"],
+        pricing:"免费",
+        language:["多语言"],
+        audience:["程序员"]
+    },
 
     audience:"程序员",
     official:true,
@@ -50,7 +58,7 @@ window.softwareResources = [
 
 
 {
-    id:2,
+    id:"sw-2",
     name:"7-Zip",
     description:"压缩工具支持文件压缩解压高效存储",
     icon:"📦",
@@ -73,11 +81,19 @@ window.softwareResources = [
         "文件管理",
         "批量处理"
     ],
+    scenarios:[
+        "文件管理",
+        "办公",
+        "个人效率",
+        "数据整理"
+],
 
-    tags:[
-        "压缩工具",
-        "开源软件"
-    ],
+    attributes:{
+        platform:["Windows"],
+        pricing:"免费",
+        language:["多语言"],
+        audience:["所有用户"]
+    },
 
     audience:"所有用户",
     official:true,
@@ -87,7 +103,7 @@ window.softwareResources = [
 
 
 {
-    id:3,
+    id:"sw-3",
     name:"Everything",
     description:"文件搜索工具快速定位本地资料内容",
     icon:"🔍",
@@ -109,11 +125,19 @@ window.softwareResources = [
         "智能搜索",
         "文件管理"
     ],
+    scenarios:[
+        "文件管理",
+        "信息检索",
+        "个人效率",
+        "办公"
+],
 
-    tags:[
-        "搜索工具",
-        "效率工具"
-    ],
+    attributes:{
+        platform:["Windows"],
+        pricing:"免费",
+        language:["多语言"],
+        audience:["所有用户"]
+    },
 
     audience:"所有用户",
     official:true,
@@ -123,7 +147,7 @@ window.softwareResources = [
 
 
 {
-    id:4,
+    id:"sw-4",
     name:"Obsidian",
     description:"知识笔记工具管理信息构建知识体系",
     icon:"📝",
@@ -147,11 +171,19 @@ window.softwareResources = [
         "文档处理",
         "笔记管理"
     ],
+    scenarios:[
+        "知识管理",
+        "学习",
+        "研究",
+        "个人效率"
+],
 
-    tags:[
-        "笔记工具",
-        "知识管理"
-    ],
+    attributes:{
+        platform:["Windows", "macOS", "Linux", "Mobile"],
+        pricing:"免费+付费",
+        language:["多语言"],
+        audience:["学生"]
+    },
 
     audience:"学生",
     official:true,
@@ -161,7 +193,7 @@ window.softwareResources = [
 
 
 {
-    id:5,
+    id:"sw-5",
     name:"ShareX",
     description:"截图录屏工具捕获分享屏幕内容资料",
     icon:"📸",
@@ -185,11 +217,19 @@ window.softwareResources = [
         "视频编辑",
         "自动化"
     ],
+    scenarios:[
+        "内容创作",
+        "办公",
+        "截图录屏",
+        "个人效率"
+],
 
-    tags:[
-        "截图工具",
-        "开源软件"
-    ],
+    attributes:{
+        platform:["Windows"],
+        pricing:"免费",
+        language:["多语言"],
+        audience:["所有用户"]
+    },
 
     audience:"所有用户",
     official:true,
