@@ -2,7 +2,7 @@
  * ==========================================================
  * 徐胖虎资源社
  * AI工具资源数据 v3.1
- * 能力标签规范版
+ * 能力标签升级版
  * ==========================================================
  */
 
@@ -19,7 +19,7 @@ window.aiResources = [
     website:"https://chatgpt.com",
     github:"",
     platform:"Web",
-    pricing:"Freemium",
+    pricing:"增值",
     language:"多语言",
 
     features:[
@@ -46,7 +46,7 @@ window.aiResources = [
 
     attributes:{
         platform:["Web"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["多语言"],
         audience:["所有用户"]
     },
@@ -72,7 +72,7 @@ window.aiResources = [
     website:"https://claude.ai",
     github:"",
     platform:"Web",
-    pricing:"Freemium",
+    pricing:"增值",
     language:"多语言",
 
     features:[
@@ -98,7 +98,7 @@ window.aiResources = [
 
     attributes:{
         platform:["Web"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["多语言"],
         audience:["所有用户"]
     },
@@ -121,7 +121,7 @@ window.aiResources = [
     website:"https://www.midjourney.com",
     github:"",
     platform:"Discord",
-    pricing:"Paid",
+    pricing:"付费",
     language:"英文",
 
     features:[
@@ -166,7 +166,7 @@ window.aiResources = [
     website:"https://cursor.com",
     github:"",
     platform:"Windows / macOS",
-    pricing:"Freemium",
+    pricing:"增值",
     language:"英文",
 
     features:[
@@ -189,7 +189,7 @@ window.aiResources = [
 
     attributes:{
         platform:["Windows", "macOS"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["英文"],
         audience:["开发者"]
     },
@@ -212,7 +212,7 @@ window.aiResources = [
     website:"https://gamma.app",
     github:"",
     platform:"Web",
-    pricing:"Freemium",
+    pricing:"增值",
     language:"多语言",
 
     features:[
@@ -235,7 +235,7 @@ window.aiResources = [
 
     attributes:{
         platform:["Web"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["多语言"],
         audience:["办公用户"]
     },
