@@ -9,7 +9,7 @@
 window.websiteResources = [
 
 {
-    id:1,
+    id:"web-1",
     name:"GitHub",
     description:"代码托管开源项目协作开发平台工具",
     icon:"🐙",
@@ -34,11 +34,19 @@ window.websiteResources = [
         "API调用",
         "知识管理"
     ],
+    scenarios:[
+        "编程开发",
+        "开源协作",
+        "项目管理",
+        "学习"
+],
 
-    tags:[
-        "开源平台",
-        "开发工具"
-    ],
+    attributes:{
+        platform:["Web"],
+        pricing:"免费",
+        language:["多语言"],
+        audience:["程序员"]
+    },
 
     audience:"程序员",
     official:true,
@@ -48,7 +56,7 @@ window.websiteResources = [
 
 
 {
-    id:2,
+    id:"web-2",
     name:"Product Hunt",
     description:"发现科技产品创新工具资讯平台导航",
     icon:"🚀",
@@ -71,11 +79,19 @@ window.websiteResources = [
         "智能搜索",
         "知识管理"
     ],
-
-    tags:[
+    scenarios:[
         "产品发现",
-        "AI工具"
-    ],
+        "创业",
+        "科技资讯",
+        "工具选型"
+],
+
+    attributes:{
+        platform:["Web"],
+        pricing:"免费",
+        language:["英文"],
+        audience:["所有用户"]
+    },
 
     audience:"所有用户",
     official:true,
@@ -85,7 +101,7 @@ window.websiteResources = [
 
 
 {
-    id:3,
+    id:"web-3",
     name:"Canva",
     description:"在线设计视觉创作图片编辑工具平台",
     icon:"🎨",
@@ -108,11 +124,19 @@ window.websiteResources = [
         "图片生成",
         "图片编辑"
     ],
+    scenarios:[
+        "设计",
+        "内容创作",
+        "自媒体",
+        "营销"
+],
 
-    tags:[
-        "设计工具",
-        "在线工具"
-    ],
+    attributes:{
+        platform:["Web", "Mobile"],
+        pricing:"免费+付费",
+        language:["多语言"],
+        audience:["设计师"]
+    },
 
     audience:"设计师",
     official:true,
@@ -122,7 +146,7 @@ window.websiteResources = [
 
 
 {
-    id:4,
+    id:"web-4",
     name:"Google",
     description:"网页搜索信息查询图片搜索服务平台",
     icon:"🔎",
@@ -146,11 +170,19 @@ window.websiteResources = [
         "图像搜索",
         "数据分析"
     ],
+    scenarios:[
+        "信息检索",
+        "研究",
+        "学习",
+        "日常办公"
+],
 
-    tags:[
-        "搜索引擎",
-        "信息查询"
-    ],
+    attributes:{
+        platform:["Web"],
+        pricing:"免费",
+        language:["多语言"],
+        audience:["所有用户"]
+    },
 
     audience:"所有用户",
     official:true,
@@ -160,7 +192,7 @@ window.websiteResources = [
 
 
 {
-    id:5,
+    id:"web-5",
     name:"FreeCodeCamp",
     description:"编程学习课程练习开发技术认证平台",
     icon:"📚",
@@ -183,11 +215,19 @@ window.websiteResources = [
         "代码生成",
         "知识管理"
     ],
+    scenarios:[
+        "学习",
+        "编程开发",
+        "职业技能",
+        "网站开发"
+],
 
-    tags:[
-        "学习网站",
-        "编程学习"
-    ],
+    attributes:{
+        platform:["Web"],
+        pricing:"免费",
+        language:["英文"],
+        audience:["学生"]
+    },
 
     audience:"学生",
     official:true,
