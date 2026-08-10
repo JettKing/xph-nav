@@ -19,7 +19,7 @@ window.solutionResources = [
     website:"https://chat.openai.com",
     github:"",
     platform:"Web",
-    pricing:"免费+付费",
+    pricing:"增值",
     language:"多语言",
 
     features:[
@@ -43,7 +43,7 @@ window.solutionResources = [
 
     attributes:{
         platform:["Web"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["多语言"],
         audience:["企业"]
     },
@@ -66,7 +66,7 @@ window.solutionResources = [
     website:"https://www.canva.com",
     github:"",
     platform:"Web",
-    pricing:"免费+付费",
+    pricing:"增值",
     language:"多语言",
 
     features:[
@@ -90,7 +90,7 @@ window.solutionResources = [
 
     attributes:{
         platform:["Web"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["多语言"],
         audience:["自媒体"]
     },
@@ -113,7 +113,7 @@ window.solutionResources = [
     website:"https://www.midjourney.com",
     github:"",
     platform:"Web / Discord",
-    pricing:"Paid",
+    pricing:"付费",
     language:"英文",
 
     features:[
@@ -159,7 +159,7 @@ window.solutionResources = [
     website:"https://www.capcut.com",
     github:"",
     platform:"Web / Mobile",
-    pricing:"Freemium",
+    pricing:"增值",
     language:"多语言",
 
     features:[
@@ -182,7 +182,7 @@ window.solutionResources = [
 
     attributes:{
         platform:["Web", "Mobile"],
-        pricing:"免费+付费",
+        pricing:"增值",
         language:["多语言"],
         audience:["创作者"]
     },
