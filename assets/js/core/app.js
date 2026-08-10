@@ -36,7 +36,6 @@ window.ResourceApp={
         ResourceStore.setPlatform("all");
         ResourceStore.setLanguage("all");
         ResourceStore.setAudience("all");
-        ResourceStore.setSort(p.get("sort")||"recommend");
         ResourceStore.setPage(p.get("page")||1);
         this._draft={scenario:ResourceStore.getState().scenario,capability:ResourceStore.getState().capability,pricing:ResourceStore.getState().pricing};
     },
@@ -47,7 +46,6 @@ window.ResourceApp={
         if(s.capability!=="all")p.set("capability",s.capability);
         if(s.scenario!=="all")p.set("scenario",s.scenario);
         if(s.pricing!=="all")p.set("pricing",s.pricing);
-        if(s.sort!=="recommend")p.set("sort",s.sort);
         if(s.page>1)p.set("page",s.page);
         history.replaceState(null,"",location.pathname+(p.toString()?`?${p}`:""));
     },
@@ -64,12 +62,6 @@ window.ResourceApp={
         mount.innerHTML=`
             <div class="v533-toolbar" data-v533-filter>
                 <button type="button" class="v533-filter-button" data-open-filter aria-expanded="false">筛选 <span aria-hidden="true">⌄</span></button>
-                <label class="v533-sort"><span>排序</span><select data-sort-select>
-                    <option value="recommend">推荐</option>
-                    <option value="score">评分</option>
-                    <option value="name">名称</option>
-                    <option value="new">最新</option>
-                </select></label>
             </div>
             <div class="v533-modal" data-filter-modal hidden aria-hidden="true">
                 <div class="v533-backdrop" data-close-filter></div>
@@ -91,7 +83,6 @@ window.ResourceApp={
             </div>`;
         this.populateFilterOptions();
         this.syncFilterButton();
-        const sort=document.querySelector("[data-sort-select]");if(sort)sort.value=ResourceStore.getState().sort;
     },
 
     openFilter(){
@@ -198,7 +189,6 @@ window.ResourceApp={
             if(e.key==="Escape"&&this._modalOpen){this.closeFilter();return;}
             if(e.key==="/"&&!/input|textarea|select/i.test(document.activeElement?.tagName||"")){e.preventDefault();document.getElementById("searchInput")?.focus();}
         });
-        document.querySelector("[data-sort-select]")?.addEventListener("change",e=>{ResourceStore.setSort(e.target.value);this.updateUrl();this.render();});
     },
 
     injectStyles(){
@@ -206,12 +196,10 @@ window.ResourceApp={
         const s=document.createElement("style");s.id="xph-v533-style";
         s.textContent=`
         .categories[data-v531-filter-mount]{display:block;margin:0 0 30px;padding:0;overflow:visible}
-        .v533-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+        .v533-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:12px}
         .v533-filter-button{border:0;border-radius:16px;background:#fff;color:#333;padding:11px 16px;font-size:14px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.05)}
         .v533-filter-button:active{transform:translateY(1px)}
         .v533-filter-count{display:inline-flex;min-width:18px;height:18px;align-items:center;justify-content:center;border-radius:9px;background:#3478f6;color:#fff;font-size:11px;margin-left:4px;padding:0 5px}
-        .v533-sort{display:flex;align-items:center;gap:6px;color:#888;font-size:12px}
-        .v533-sort select{border:0;background:#fff;border-radius:14px;padding:9px 12px;color:#555;font:inherit}
         .v533-modal{position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-end;justify-content:center}
         .v533-modal[hidden]{display:none}
         .v533-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.28);backdrop-filter:blur(2px)}
