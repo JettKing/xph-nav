@@ -204,21 +204,55 @@
   }
 
   async function fetchPage(url){
-    const clean=text(url);if(!/^https?:\/\//i.test(clean))throw new Error("请输入有效网址");
-    let html="";
-    try{const r=await fetch(clean,{mode:"cors",redirect:"follow"});if(!r.ok)throw new Error("HTTP "+r.status);html=await r.text();}
-    catch(e){
+    const clean=text(url);
+    if(!/^https?:\/\//i.test(clean))throw new Error("请输入有效网址");
+    let raw="", source="direct";
+    try{
+      const r=await fetch(clean,{mode:"cors",redirect:"follow"});
+      if(!r.ok)throw new Error("HTTP "+r.status);
+      raw=await r.text();
+    }catch(e){
       const proxy="https://r.jina.ai/"+clean;
-      const r=await fetch(proxy,{headers:{Accept:"text/plain"}});if(!r.ok)throw new Error("网页读取失败："+r.status);html=await r.text();
+      const r=await fetch(proxy,{headers:{Accept:"text/plain"}});
+      if(!r.ok)throw new Error("网页读取失败："+r.status);
+      raw=await r.text();
+      source="jina";
     }
-    const doc=new DOMParser().parseFromString(html,"text/html");
-    const get=(sel,attr)=>{const n=doc.querySelector(sel);return n?(attr?n.getAttribute(attr):n.textContent):""};
-    const title=text(get("title"));
-    const description=text(get('meta[name="description"]',"content")||get('meta[property="og:description"]',"content"));
-    const keywords=text(get('meta[name="keywords"]',"content"));
-    const og=text(get('meta[property="og:title"]',"content"));
-    const body=text(doc.body?.innerText||"").slice(0,18000);
-    return {title:title||og,description,keywords,content:body};
+
+    const looksLikeMarkdown = source==="jina" || !/<html[\s>]/i.test(raw);
+    let title="",description="",keywords="",body="";
+
+    if(looksLikeMarkdown){
+      const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+      const heading=lines.find(x=>/^#{1,6}\s+/.test(x));
+      title=text((heading||"").replace(/^#{1,6}\s+/,"").replace(/\s+#*$/,""));
+      const blocks=[];
+      for(const line of lines){
+        if(/^#{1,6}\s+/.test(line))continue;
+        if(/^[-*]\s+/.test(line))continue;
+        if(/^https?:\/\//i.test(line))continue;
+        const cleaned=line.replace(/[`*_>\[\]]/g," ").replace(/\s+/g," ").trim();
+        if(cleaned.length>=12)blocks.push(cleaned);
+      }
+      body=blocks.join(" ").slice(0,18000);
+      const metaMatch=raw.match(/(?:description|meta description)\s*[:：]\s*(.+)/i);
+      description=text(metaMatch?.[1]||"");
+      if(!description)description=blocks[0]||"";
+    }else{
+      const doc=new DOMParser().parseFromString(raw,"text/html");
+      const get=(sel,attr)=>{const n=doc.querySelector(sel);return n?(attr?n.getAttribute(attr):n.textContent):""};
+      title=text(get("title"));
+      description=text(get('meta[name="description"]',"content")||get('meta[property="og:description"]',"content"));
+      keywords=text(get('meta[name="keywords"]',"content"));
+      const og=text(get('meta[property="og:title"]',"content"));
+      title=title||og;
+      body=text(doc.body?.innerText||"").slice(0,18000);
+      if(!description){
+        const first=body.split(/[\n。！？!?]/).map(x=>x.trim()).find(x=>x.length>=12);
+        description=first||"";
+      }
+    }
+    return {title,description,keywords,content:body,source};
   }
 
   function renderChips(container,items,type){
@@ -284,6 +318,27 @@
     };
     $("#fetchBtn").onclick=async()=>{const url=$("#resourceUrl").value;if(!url){setStatus("请先填写 URL");return;}setStatus("正在读取网页…");try{const m=await fetchPage(url);if(m.title&&!$("#resourceName").value)$("#resourceName").value=m.title;if(m.description)$("#resourceDescription").value=m.description;$("#pageMeta").textContent=`已读取：${m.title||"无标题"}`;setStatus("网页信息读取完成",true);}catch(e){setStatus(e.message||"网页读取失败");}};
     $("#resetBtn").onclick=()=>{state.draft=null;$("#reviewPanel").hidden=true;$("#resourceName").value="";$("#resourceUrl").value="";$("#resourceDescription").value="";setStatus("已清空");};
+    $("#clearAllBtn").onclick=()=>{
+      if(!window.confirm("确定全部清空当前录入内容吗？\n已保存的历史草稿不会删除。"))return;
+      state.draft=null;
+      $("#reviewPanel").hidden=true;
+      $("#resourceName").value="";
+      $("#resourceUrl").value="";
+      $("#resourceDescription").value="";
+      $("#resourceId").value="";
+      $("#pageMeta").textContent="";
+      $("#status").textContent="当前录入已全部清空";
+      $("#status").className="status";
+      $("#jsonPreview").textContent="等待智能分析生成。";
+      $("#warnings").innerHTML="";
+      $("#capabilityChips").innerHTML="";
+      $("#scenarioChips").innerHTML="";
+      $("#pricingChips").innerHTML="";
+      $("#platformChips").innerHTML="";
+      $("#languageChips").innerHTML="";
+      $("#audienceChips").innerHTML="";
+      // 历史草稿 localStorage 保持不变。
+    };
     $("#saveBtn").onclick=()=>{state.draft=readForm();saveDraft();loadDrafts();};
     $("#exportJsonBtn").onclick=exportJSON;$("#exportJsBtn").onclick=exportJS;$("#copyBtn").onclick=copyJSON;
     $("#loadDraftBtn").onclick=()=>{const id=$("#draftSelect").value;const all=JSON.parse(localStorage.getItem(KEY)||"[]");const r=all.find(x=>x.id===id);if(r)renderDraft(r);};
