@@ -18,7 +18,7 @@
   const TAGS = window.tags || {capabilities:[],scenarios:[],attributes:{pricing:[],platform:[],language:[],audience:[]}};
   const ALL = window.ResourceEngine?.getAllResources?.() || [];
 
-  const state = { draft:null, meta:{}, warnings:[] };
+  const state = { draft:null, meta:{}, warnings:[], autoDescription:"" };
 
   const stopWords = new Set("the a an and or of to in on for with from by is are ai tool app platform official online free pro com www https http www io co".split(/\s+/));
   const norm = s => text(s).toLowerCase().replace(/[\s_\-./:：，。！!？?（）()【】\[\],，]/g," ");
@@ -350,6 +350,7 @@
     $("#resourceName").value=resource.name;
     $("#resourceUrl").value=resource.website;
     $("#resourceGithub").value=resource.github||"";
+    $("#resourceThumbnail").value=resource.thumbnail||"";
     $("#resourceDescription").value=resource.description||"";
     $("#resourceId").value=resource.id;
     renderChips($("#capabilityChips"),resource.capabilities,"capabilities");
@@ -452,12 +453,14 @@
       let meta={};
       try{meta=await fetchPage(input.url);}catch(e){meta={};setStatus("网页读取失败，已使用 URL 进行本地分析");}
       if(!input.name)input.name=meta.resourceName||nameFromTitle(meta.title,input.url)||"未命名资源";
-      if(!input.description)input.description=meta.description||chineseDescription({...input,...meta});
+      const shouldRefreshAutoDescription=!input.description||input.description===state.autoDescription;
+      if(shouldRefreshAutoDescription){input.description=limit16(meta.description||chineseDescription({...input,...meta}));state.autoDescription=input.description;}
       if(!input.github)input.github=meta.github||"";
       if(!input.thumbnail)input.thumbnail=meta.thumbnail||"";
       $("#resourceName").value=input.name;
       $("#resourceDescription").value=input.description;
       $("#resourceGithub").value=input.github;
+      $("#resourceThumbnail").value=input.thumbnail;
       const r=analyze({...input,...meta});
       renderDraft(r);setStatus("分析完成，请人工审核后导出",true);
     };
@@ -468,16 +471,23 @@
       try{
         const m=await fetchPage(url);
         if(!$("#resourceName").value)$("#resourceName").value=m.resourceName||nameFromTitle(m.title,url)||"";
-        if(!$("#resourceDescription").value)$("#resourceDescription").value=limit16(m.description||chineseDescription({name:$("#resourceName").value,url,...m}));
+        const currentDescription=text($("#resourceDescription").value);
+        if(!currentDescription||currentDescription===state.autoDescription){
+          const nextDescription=limit16(m.description||chineseDescription({name:$("#resourceName").value,url,...m}));
+          $("#resourceDescription").value=nextDescription;
+          state.autoDescription=nextDescription;
+        }
         if(!$("#resourceGithub").value)$("#resourceGithub").value=m.github||"";
+        if(!$("#resourceThumbnail").value)$("#resourceThumbnail").value=m.thumbnail||"";
         $("#pageMeta").textContent=`已读取：${m.resourceName||m.title||"无标题"}${m.github?" · 已发现 GitHub 项目":" "}`;
         setStatus("网页信息读取完成",true);
       }catch(e){setStatus(e.message||"网页读取失败");}
     };
-    $("#resetBtn").onclick=()=>{state.draft=null;$("#reviewPanel").hidden=true;$("#resourceName").value="";$("#resourceUrl").value="";$("#resourceDescription").value="";$("#resourceGithub").value="";$("#resourceThumbnail").value="";setStatus("已清空");};
+    $("#resetBtn").onclick=()=>{state.draft=null;state.autoDescription="";$("#reviewPanel").hidden=true;$("#resourceName").value="";$("#resourceUrl").value="";$("#resourceDescription").value="";$("#resourceGithub").value="";$("#resourceThumbnail").value="";setStatus("已清空");};
     $("#clearAllBtn").onclick=()=>{
       if(!window.confirm("确定全部清空当前录入内容吗？\n已保存的历史草稿不会删除。"))return;
       state.draft=null;
+      state.autoDescription="";
       $("#reviewPanel").hidden=true;
       $("#resourceName").value="";
       $("#resourceUrl").value="";
