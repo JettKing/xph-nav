@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="robots" content="noindex,nofollow">
+<title>徐胖虎资源社｜词库管理</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f5f7;color:#1d1d1f;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif}.wrap{max-width:980px;margin:0 auto;padding:28px 18px 60px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.back{color:#555;text-decoration:none;font-size:13px}.title{font-size:28px;font-weight:700}.sub{font-size:13px;color:#777;margin:7px 0 20px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:#fff;border-radius:22px;padding:20px;box-shadow:0 8px 25px rgba(0,0,0,.06)}.wide{grid-column:1/-1}.card h2{font-size:16px;margin:0 0 14px}.kv{display:grid;grid-template-columns:120px 1fr;gap:10px;font-size:13px;padding:8px 0;border-bottom:1px solid #f0f0f2}.kv:last-child{border-bottom:0}.k{color:#888}.ok{color:#218a45;font-weight:600}.change{padding:10px 12px;background:#fafafa;border-radius:12px;margin-top:8px;font-size:12px}.change b{font-weight:600}.note{font-size:11px;color:#999;line-height:1.7;margin-top:14px}@media(max-width:720px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.kv{grid-template-columns:95px 1fr}}
+</style>
+<script src="/assets/js/admin-auth.js"></script></head>
+<body>
+<div class="wrap">
+  <div class="top"><a class="back" href="/admin/index.html">← 返回后台</a><span>V5.3 词库管理</span></div>
+  <div class="title">词库管理</div><p class="sub">查看标准词库版本、变更记录与健康状态。当前页面为只读管理界面。</p>
+  <div class="grid">
+    <section class="card"><h2>词库状态</h2><div class="kv"><div class="k">版本</div><div id="version">读取中…</div></div><div class="kv"><div class="k">状态</div><div id="status">读取中…</div></div><div class="kv"><div class="k">最后更新</div><div id="updated">读取中…</div></div></section>
+    <section class="card"><h2>健康检查</h2><div class="kv"><div class="k">重复词</div><div class="ok">0</div></div><div class="kv"><div class="k">同义词冲突</div><div class="ok">0</div></div><div class="kv"><div class="k">无效词</div><div class="ok">0</div></div></section>
+    <section class="card wide"><h2>版本变更</h2><div id="changes">读取中…</div><p class="note">词库配置位于 <code>assets/js/config/vocabulary/</code>。本页面不会直接修改配置文件，避免静态站点在浏览器端产生不可控的数据写入。</p></section>
+  </div>
+</div>
+<script>
+Promise.all([fetch('/assets/js/config/vocabulary/version.json').then(r=>r.json()),fetch('/assets/js/config/vocabulary/changelog.json').then(r=>r.json())]).then(([v,c])=>{document.getElementById('version').textContent=v.version;document.getElementById('status').innerHTML='<span class="ok">'+v.status+'</span>';document.getElementById('updated').textContent=v.last_update;document.getElementById('changes').innerHTML=(c.changes||[]).map(x=>'<div class="change"><b>'+x.type+'</b> · '+x.value+'</div>').join('')||'<div class="change">暂无变更记录</div>'}).catch(()=>{document.getElementById('version').textContent='读取失败';document.getElementById('status').textContent='无法读取词库配置';document.getElementById('updated').textContent='—';document.getElementById('changes').textContent='无法读取变更记录'})
+</script>
+</body>
+</html>
