@@ -15,8 +15,9 @@
   <div class="grid">
     <section class="card">
       <h2>① 基础信息</h2>
-      <div class="row"><div><label>资源名称 *</label><input id="resourceName" placeholder="例如：Perplexity"></div><div><label>资源 URL *</label><input id="resourceUrl" placeholder="https://www.perplexity.ai/"></div></div>
-      <div style="margin-top:12px"><label>资源简介（可选）</label><textarea id="resourceDescription" placeholder="可以留空，读取网页后自动补充"></textarea></div>
+      <div class="row"><div><label>资源名称 *</label><input id="resourceName" placeholder="可留空，读取 URL 后自动识别"></div><div><label>资源 URL *</label><input id="resourceUrl" placeholder="https://www.example.com/"></div></div>
+      <div class="row" style="margin-top:12px"><div><label>GitHub URL（可选）</label><input id="resourceGithub" placeholder="https://github.com/owner/repo"></div><div><label>资源简介（可选）</label><input id="resourceDescription" maxlength="16" placeholder="中文核心简介，最多16字"></div></div>
+      <div class="hint">官网 URL 与 GitHub URL 分开保存；人工简介自由填写，最多16个字符。自动读取时系统生成中文核心简介。</div>
       <div class="actions"><button id="fetchBtn">读取网页信息</button><button class="primary" id="analyzeBtn">智能分析并生成</button><button id="resetBtn">清空</button><button id="clearAllBtn" class="danger">全部清空</button></div>
       <div class="meta" id="pageMeta"></div><div class="status" id="status"></div>
     </section>
@@ -35,7 +36,8 @@
       <div class="row" style="margin-top:14px"><div><label>Pricing · 价格</label><div class="chips" id="pricingChips"></div></div><div><label>Platform · 平台</label><div class="chips" id="platformChips"></div></div></div>
       <div class="row" style="margin-top:14px"><div><label>Language · 语言</label><div class="chips" id="languageChips"></div></div><div><label>Audience · 受众</label><div class="chips" id="audienceChips"></div></div></div>
       <div style="margin-top:16px"><label>审核提示</label><div id="warnings"></div></div>
-      <div class="actions"><button class="primary" id="saveBtn">保存审核草稿</button><button id="copyBtn">复制 JSON</button><button id="exportJsonBtn">导出 JSON</button><select id="exportTarget" style="width:auto"><option value="ai">AI工具</option><option value="software">软件工具</option><option value="productivity">效率工具</option><option value="website">网页导航</option><option value="digital">数字资源</option><option value="solution">解决方案</option></select><button id="exportJsBtn">导出 JS</button></div>
+      <div class="hint">JSON：单条资源数据，适合备份/检查/导入；JS：生成与项目原生 data/*.js 结构一致、可直接粘贴进对应分类数据数组的资源代码片段。</div>
+      <div class="actions"><button class="primary" id="saveBtn">保存审核草稿</button><select id="exportTarget" style="width:auto"><option value="ai">AI工具</option><option value="software">软件工具</option><option value="productivity">效率工具</option><option value="website">网页导航</option><option value="digital">数字资源</option><option value="solution">解决方案</option></select><button id="exportJsonBtn">导出 JSON</button><button id="exportJsBtn">导出 JS</button><button id="copyBtn">复制 JSON</button><button id="copyJsBtn">复制 JS</button></div>
     </section>
 
     <section class="card full" id="previewCard">
