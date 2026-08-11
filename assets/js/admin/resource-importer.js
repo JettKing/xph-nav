@@ -253,8 +253,8 @@
     if(c.score<1)warnings.push("分类置信度较低，请人工确认分类/子分类");
     if(attrs.pricing==="增值")warnings.push("价格为规则推断值，发布前建议人工确认");
     return {
-      id,name:text(input.name),description:limit16(text(input.description)||chineseDescription(input)),
-      icon:"🔗",thumbnail:"",category:c.cat,subcategory:sub,website:text(input.url),github:text(input.github||input.githubUrl),
+      id,name:text(input.name),description:text(input.description)||chineseDescription(input),
+      icon:"🔗",thumbnail:text(input.thumbnail),category:c.cat,subcategory:sub,website:text(input.url),github:text(input.github||input.githubUrl),
       features:[],capabilities:caps,scenarios:scs,attributes:attrs,official:false,recommend:false,status:"active",
       _meta:{categoryScore:c.score,warnings}
     };
@@ -277,7 +277,7 @@
     }
 
     const looksLikeMarkdown=source==="jina"||!/<html[\s>]/i.test(raw);
-    let title="",description="",keywords="",body="",siteName="",structuredName="",github=extractGithub(raw);
+    let title="",description="",keywords="",body="",siteName="",structuredName="",github=extractGithub(raw),thumbnail="";
 
     if(looksLikeMarkdown){
       const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
@@ -295,6 +295,8 @@
       const metaMatch=raw.match(/(?:description|meta description)\s*[:：]\s*(.+)/i);
       description=text(metaMatch?.[1]||"");
       github=github||extractGithub(raw);
+      const mdImage=raw.match(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/i);
+      thumbnail=thumbnail||text(mdImage?.[1]||"");
     }else{
       const doc=new DOMParser().parseFromString(raw,"text/html");
       const get=(sel,attr)=>{const n=doc.querySelector(sel);return n?(attr?n.getAttribute(attr):n.textContent):""};
@@ -302,6 +304,14 @@
       description=text(get('meta[name="description"]',"content")||get('meta[property="og:description"]',"content"));
       keywords=text(get('meta[name="keywords"]',"content"));
       const og=text(get('meta[property="og:title"]',"content"));
+      thumbnail=text(get('meta[property="og:image"]',"content")||get('meta[name="twitter:image"]',"content")||get('meta[name="twitter:image:src"]',"content"));
+      if(!thumbnail){
+        try{
+          const data=[...doc.querySelectorAll('script[type="application/ld+json"]')].map(s=>JSON.parse(s.textContent||"")).flatMap(x=>Array.isArray(x)?x:(Array.isArray(x?.["@graph"])?x["@graph"]:[x]));
+          const img=data.map(x=>x?.image).find(Boolean);
+          thumbnail=Array.isArray(img)?text(img[0]):typeof img==="object"?text(img?.url):text(img);
+        }catch(e){}
+      }
       siteName=text(get('meta[property="og:site_name"]',"content")||get('meta[name="application-name"]',"content"));
       structuredName=extractStructuredName(doc);
       title=title||og;
@@ -314,7 +324,7 @@
       title,
       resourceName:name,
       description:limit16(chineseDescription({name,url:clean,description,content:body,title,keywords})),
-      keywords,content:body,github,siteName,structuredName,source
+      keywords,content:body,github,thumbnail,siteName,structuredName,source
     };
   }
 
@@ -340,7 +350,7 @@
     $("#resourceName").value=resource.name;
     $("#resourceUrl").value=resource.website;
     $("#resourceGithub").value=resource.github||"";
-    $("#resourceDescription").value=limit16(resource.description);
+    $("#resourceDescription").value=resource.description||"";
     $("#resourceId").value=resource.id;
     renderChips($("#capabilityChips"),resource.capabilities,"capabilities");
     renderChips($("#scenarioChips"),resource.scenarios,"scenarios");
@@ -357,7 +367,7 @@
     const [parent,sub]=text($("#categorySelect").value).split("::");
     const r=state.draft||{};
     r.id=text($("#resourceId").value)||makeId($("#resourceName").value,$("#resourceUrl").value);
-    r.name=text($("#resourceName").value);r.website=text($("#resourceUrl").value);r.description=limit16(text($("#resourceDescription").value));r.github=text($("#resourceGithub").value);
+    r.name=text($("#resourceName").value);r.website=text($("#resourceUrl").value);r.description=text($("#resourceDescription").value);r.github=text($("#resourceGithub").value);r.thumbnail=text($("#resourceThumbnail").value);
     r.category=parent;r.subcategory=sub;
     r.capabilities=selectedChips("capabilities");r.scenarios=selectedChips("scenarios");
     r.attributes={pricing:selectedChips("pricing")[0]||"增值",platform:selectedChips("platform"),language:selectedChips("language"),audience:selectedChips("audience")};
@@ -382,7 +392,7 @@
     const native={
       id:text(r.id),
       name:text(r.name),
-      description:limit16(text(r.description)),
+      description:text(r.description),
       icon:text(r.icon)||"🔗",
       thumbnail:text(r.thumbnail),
       category:text(r.category)||target,
@@ -436,7 +446,7 @@
     renderChips($("#capabilityChips"),[],"capabilities");renderChips($("#scenarioChips"),[],"scenarios");renderChips($("#pricingChips"),[],"pricing");renderChips($("#platformChips"),[],"platform");renderChips($("#languageChips"),[],"language");renderChips($("#audienceChips"),[],"audience");loadDrafts();
 
     $("#analyzeBtn").onclick=async()=>{
-      let input={name:text($("#resourceName").value),url:text($("#resourceUrl").value),description:limit16($("#resourceDescription").value),github:text($("#resourceGithub").value)};
+      let input={name:text($("#resourceName").value),url:text($("#resourceUrl").value),description:text($("#resourceDescription").value),github:text($("#resourceGithub").value),thumbnail:text($("#resourceThumbnail").value)};
       if(!input.url){setStatus("请先填写 URL");return;}
       setStatus("正在读取并分析…");
       let meta={};
@@ -444,8 +454,9 @@
       if(!input.name)input.name=meta.resourceName||nameFromTitle(meta.title,input.url)||"未命名资源";
       if(!input.description)input.description=meta.description||chineseDescription({...input,...meta});
       if(!input.github)input.github=meta.github||"";
+      if(!input.thumbnail)input.thumbnail=meta.thumbnail||"";
       $("#resourceName").value=input.name;
-      $("#resourceDescription").value=limit16(input.description);
+      $("#resourceDescription").value=input.description;
       $("#resourceGithub").value=input.github;
       const r=analyze({...input,...meta});
       renderDraft(r);setStatus("分析完成，请人工审核后导出",true);
@@ -463,7 +474,7 @@
         setStatus("网页信息读取完成",true);
       }catch(e){setStatus(e.message||"网页读取失败");}
     };
-    $("#resetBtn").onclick=()=>{state.draft=null;$("#reviewPanel").hidden=true;$("#resourceName").value="";$("#resourceUrl").value="";$("#resourceDescription").value="";$("#resourceGithub").value="";setStatus("已清空");};
+    $("#resetBtn").onclick=()=>{state.draft=null;$("#reviewPanel").hidden=true;$("#resourceName").value="";$("#resourceUrl").value="";$("#resourceDescription").value="";$("#resourceGithub").value="";$("#resourceThumbnail").value="";setStatus("已清空");};
     $("#clearAllBtn").onclick=()=>{
       if(!window.confirm("确定全部清空当前录入内容吗？\n已保存的历史草稿不会删除。"))return;
       state.draft=null;
@@ -493,7 +504,7 @@
     $(document).onchange?.();
     document.addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;b.classList.toggle("selected");const r=readForm();$("#jsonPreview").textContent=JSON.stringify(cleanResource(r),null,2);});
     $("#categorySelect").addEventListener("change",()=>{const [parent,sub]=$("#categorySelect").value.split("::");syncExportTarget(parent);if(state.draft){state.draft.category=parent;state.draft.subcategory=sub;}});
-    ["resourceName","resourceUrl","resourceDescription","resourceGithub","resourceId"].forEach(id=>$("#"+id).addEventListener("input",()=>{if(id==="resourceDescription"){const el=$("#resourceDescription");el.value=limit16(el.value);}if(state.draft){const r=readForm();$("#jsonPreview").textContent=JSON.stringify(cleanResource(r),null,2);}}));
+    ["resourceName","resourceUrl","resourceDescription","resourceGithub","resourceThumbnail","resourceId"].forEach(id=>$("#"+id).addEventListener("input",()=>{if(state.draft){const r=readForm();$("#jsonPreview").textContent=JSON.stringify(cleanResource(r),null,2);}}));
   }
   document.addEventListener("DOMContentLoaded",init);
 })();
