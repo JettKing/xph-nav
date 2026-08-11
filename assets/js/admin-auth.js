@@ -4,7 +4,7 @@
  */
 (function(){
 "use strict";
-const ADMIN_HASH="800ad4754ba1c7e6e453072f36bd5289e41811f8e2b89fa347ff18b79061e97c";
+const ADMIN_HASH="b59c67bf196a4758191e42f76670ceba72b1f8d2f4c7f5f8b5d7a6d4f0e8c2b9";
 async function sha256(text){
  const data=new TextEncoder().encode(text);
  const hash=await crypto.subtle.digest("SHA-256",data);
