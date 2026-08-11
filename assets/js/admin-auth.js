@@ -15,5 +15,6 @@ function requireAuth(){
  location.href="/admin/login.html"; return false;
 }
 window.XPHAdminAuth={sha256,requireAuth,ADMIN_HASH};
-if(location.pathname.includes("/admin/")&&!location.pathname.endsWith("/login.html")) requireAuth();
+const isLoginPage=location.pathname.endsWith("/admin/login.html")||location.pathname.endsWith("/login.html");
+if(location.pathname.includes("/admin/")&&!isLoginPage) requireAuth();
 })();
