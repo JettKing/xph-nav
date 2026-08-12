@@ -1,5 +1,5 @@
 /**
- * 徐胖虎资源社 V5.3.10.5-FIX2 智能资源录入系统
+ * 徐胖虎资源社 V5.3.10.5-FIX3 智能资源录入系统
  * - 只从 V5.2 标准词库中选择标签
  * - 本地规则推断，不调用第三方 AI API，不暴露密钥
  * - 支持网页元信息读取、智能分类、人工审核、JSON/JS 导出
@@ -267,44 +267,150 @@
 
   function charCount(value){return Array.from(text(value)).length;}
   function limit32(value){return Array.from(text(value)).slice(0,32).join("");}
-  function exact16(value){
-    let s=text(value);
-    if(charCount(s)>16)s=Array.from(s).slice(0,16).join("");
-    const fillers=["工具平台","服务平台","辅助工具","应用平台","资源平台"];
-    let i=0;
-    while(charCount(s)<16){
-      const f=fillers[i++%fillers.length];
-      const need=16-charCount(s);
-      s+=Array.from(f).slice(0,need).join("");
+
+  // 自动简介规则：不再使用“网站特判 + 关键词命中固定模板”。
+  // 这里只负责把网页事实压缩成一个“来源于页面语义”的中文核心短句，并严格控制16字。
+  const ZH_STOP = /^(首页|欢迎来到|欢迎使用|了解更多|立即开始|开始使用|联系我们|关于我们|登录|注册|免费试用|查看更多|learn more|sign in|sign up|home|homepage|welcome|about|contact|privacy|terms)$/i;
+  const EN_ZH = [
+    [/free\s+(?:collection|library|set)/gi,"免费资源库"],[/brand\s+logos?/gi,"品牌Logo"],[/svg\s+icons?/gi,"SVG图标"],[/clipboard\s+manager/gi,"剪贴板管理"],
+    [/web\s+clipping|web\s+clip(ping)?/gi,"网页剪藏"],[/knowledge\s+(?:base|management)/gi,"知识管理"],[/project\s+management/gi,"项目管理"],[/(?:team\s+)?collaboration/gi,"团队协作"],
+    [/ai\s+agents?|ai\s+assistant|artificial\s+intelligence/gi,"AI智能体"],[/content\s+generation/gi,"内容生成"],[/image\s+generation/gi,"图像生成"],[/video\s+generation/gi,"视频生成"],
+    [/audio\s+generation|music\s+generation/gi,"音频生成"],[/voice\s+synthesis|text\s+to\s+speech/gi,"语音合成"],[/search\s+engine|web\s+search/gi,"信息搜索"],[/research\s+assistant/gi,"研究辅助"],
+    [/code\s+generation|coding\s+assistant/gi,"代码生成"],[/version\s+control/gi,"版本控制"],[/git\s+client/gi,"Git客户端"],[/automation\s+workflow/gi,"自动化工作流"],
+    [/note\s+taking/gi,"笔记管理"],[/task\s+management/gi,"任务管理"],[/interface\s+design|ui\/?ux/gi,"界面设计"],[/learning\s+platform/gi,"学习平台"],
+    [/developer\s+platform|api\s+platform/gi,"开发者平台"],[/remote\s+control/gi,"远程控制"],[/design\s+tool/gi,"设计工具"],[/extension(s)?|plugin(s)?/gi,"插件扩展"],
+    [/dataset(s)?/gi,"数据集"],[/template(s)?/gi,"模板素材"],[/screenshot(s)?/gi,"截图工具"],[/pdf/gi,"PDF文档"],[/browser/gi,"浏览器"],
+    [/icons?/gi,"图标"],[/logos?/gi,"Logo"],[/library|collection/gi,"资源库"],[/asset(s)?/gi,"素材"],[/resource(s)?/gi,"资源"],[/clipboard/gi,"剪贴板"],
+    [/bookmark(s)?/gi,"网页收藏"],[/agent(s)?/gi,"智能体"],[/chat|conversation/gi,"对话"],[/writing|writer/gi,"写作"],[/programming|coding|development/gi,"编程开发"],
+    [/marketing/gi,"营销"],[/advertising/gi,"广告创作"],[/course(s)?|tutorial(s)?/gi,"课程教程"],[/software/gi,"软件"],[/tool(s)?/gi,"工具"],[/platform/gi,"平台"],[/service(s)?/gi,"服务"],[/free/gi,"免费"]
+  ];
+
+  const SEMANTIC_BOOST = [
+    [/svg|icon|logo|图标|品牌/gi,"图标资源"],[/clipboard|剪贴板/gi,"剪贴板管理"],[/web\s*clip|网页剪藏|网页收藏/gi,"网页内容管理"],
+    [/project|项目/gi,"项目管理"],[/collaboration|协作/gi,"团队协作"],[/agent|智能体/gi,"智能体应用"],[/search|搜索/gi,"信息搜索"],
+    [/research|研究/gi,"研究分析"],[/code|coding|编程|开发/gi,"编程开发"],[/version\s*control|git|版本控制/gi,"版本协作"],
+    [/image|图像|绘图/gi,"图像创作"],[/video|视频/gi,"视频创作"],[/audio|music|音频|音乐/gi,"音频创作"],[/voice|语音/gi,"语音处理"],
+    [/design|设计|ui|ux/gi,"界面设计"],[/note|笔记|knowledge/gi,"知识管理"],[/task|todo|任务/gi,"任务管理"],[/automation|workflow|自动化/gi,"流程自动化"],
+    [/course|tutorial|learning|课程|教程|学习/gi,"学习资源"],[/template|模板/gi,"模板素材"],[/dataset|数据集/gi,"数据资源"],[/browser|浏览器/gi,"浏览工具"],[/pdf|文档/gi,"文档处理"]
+  ];
+  function semanticText(input){
+    const parts=[input.title,input.description,input.name,input.content,input.keywords].map(text).filter(Boolean);
+    let raw=parts.join("。 ");
+    raw=raw.replace(/https?:\/\/\S+/gi," ").replace(/\[[^\]]*\]\([^)]*\)/g," ").replace(/[`*_>#|{}]/g," ");
+    for(const [re,zh] of EN_ZH) raw=raw.replace(re,` ${zh} `);
+    raw=raw.replace(/\b(?:is|are|the|a|an|and|or|for|with|to|of|on|in|from|by|your|our|this|that|you|we|it|as|at|into|using|used|use|powered|built|modern|next|best|easy|simple|free|online|download|learn|more|official|website|home|welcome|about|contact|login|sign|get|start|manage|create|help)\b/gi," ");
+    return raw.replace(/[\r\n]+/g,"。 ").replace(/[。！？!?]+/g,"。 ").replace(/[,:;，、；：]+/g," ").replace(/\s+/g," ").trim();
+  }
+
+  function semanticAtoms(input){
+    const raw=semanticText(input);
+    const groups=[];
+    const addGroup=(re,vals,weight)=>{if(re.test(raw))groups.push({vals,weight});re.lastIndex=0;};
+    addGroup(/svg|icon|logo|图标|品牌/i,["免费","SVG图标","品牌Logo","资源库","设计素材"],10);
+    addGroup(/clipboard|剪贴板/i,["剪贴板管理","内容整理","效率工具","应用","平台"],10);
+    addGroup(/web\s*clip|网页剪藏|网页收藏/i,["网页剪藏","内容收藏","知识管理","效率工具","应用"],10);
+    addGroup(/project|项目/i,["项目管理","团队协作","任务管理","应用","工具"],8);
+    addGroup(/collaboration|协作/i,["团队协作","共享管理","任务管理","工具","平台"],7);
+    addGroup(/agent|智能体/i,["AI智能体","团队协作","项目管理","应用","工具"],10);
+    addGroup(/search|搜索/i,["信息搜索","内容检索","研究分析","效率工具","应用"],8);
+    addGroup(/research|研究/i,["研究分析","信息检索","内容整理","工具","平台"],7);
+    addGroup(/code|coding|编程|开发/i,["编程开发","代码管理","协作工具","应用","平台"],8);
+    addGroup(/version\s*control|git|版本控制/i,["Git","版本控制","协作开发","工具","平台"],10);
+    addGroup(/image|图像|绘图/i,["图像生成","视觉创作","设计工具","应用","平台"],8);
+    addGroup(/video|视频/i,["视频生成","内容创作","编辑工具","应用","平台"],8);
+    addGroup(/audio|music|音频|音乐/i,["音频生成","音乐创作","语音工具","应用","平台"],8);
+    addGroup(/voice|语音/i,["语音处理","识别合成","音频工具","应用","平台"],7);
+    addGroup(/design|设计|ui|ux/i,["界面设计","视觉创作","协作工具","应用","平台"],7);
+    addGroup(/note|笔记|knowledge/i,["笔记管理","知识整理","内容协作","效率工具","应用"],7);
+    addGroup(/task|todo|任务/i,["任务管理","团队协作","效率工具","应用","平台"],7);
+    addGroup(/automation|workflow|自动化/i,["流程自动化","工作流管理","效率工具","应用","平台"],8);
+    addGroup(/course|tutorial|learning|课程|教程|学习/i,["课程教程","学习资源","知识内容","资源库","平台"],7);
+    addGroup(/template|模板/i,["模板素材","设计资源","内容资源","资源库","平台"],7);
+    addGroup(/dataset|数据集/i,["数据集资源","数据分析","数据管理","资源库","平台"],7);
+    addGroup(/browser|浏览器/i,["浏览器工具","网页访问","效率工具","应用","平台"],7);
+    const atoms=[];const add=v=>{v=text(v).replace(/\s+/g,"");if(v&&!atoms.includes(v))atoms.push(v);};
+    groups.sort((a,b)=>b.weight-a.weight);
+    for(const g of groups.slice(0,3))g.vals.forEach(add);
+    const cn=[text(input.description),text(input.title),text(input.content)].join(" ").match(/[\u4e00-\u9fa5]{2,8}/g)||[];
+    cn.slice(0,6).forEach(v=>{if(v.length>=3)add(v);});
+    return atoms;
+  }
+  function semanticCandidates(input){
+    const atoms=semanticAtoms(input);
+    const candidates=[]; const add=v=>{v=text(v).replace(/\s+/g,"");if(v&&!candidates.includes(v))candidates.push(v);};
+    const sourceCn=[text(input.description),text(input.title),text(input.content)].flatMap(v=>v.split(/[。！？!?]/)).map(v=>v.replace(/[，、；：:;“”‘’"'()（）\[\]{}<>《》.,!?！？]/g,"").replace(/\s+/g,"")).filter(v=>/[\u4e00-\u9fa5]/.test(v)&&charCount(v)>=8);
+    sourceCn.sort((a,b)=>scoreSemanticSentence(b)-scoreSemanticSentence(a)||charCount(b)-charCount(a));
+    sourceCn.slice(0,4).forEach(add);
+    // 动态组合语义原子，使用带记忆的16字搜索，避免穷举爆炸。
+    const n=Math.min(atoms.length,10);
+    const suffixes=["","工具","平台","资源","服务","应用","素材库"];
+    const memo=new Map();
+    function search(i,len,picked){
+      const key=i+"|"+len+"|"+picked.length; if(memo.has(key))return memo.get(key);
+      if(len===16 && picked.length>=2)return picked.join("");
+      if(len>16 || i>=n || picked.length>=7){memo.set(key,"");return "";}
+      for(let take=i;take<n;take++){
+        const atom=atoms[take];
+        for(const connector of (picked.length?["","与"]:[""])) {
+          const next=pickLen(picked.join("")+connector+atom);
+          if(next>16)continue;
+          const out=search(take+1,next,picked.concat([connector+atom]));
+          if(out){memo.set(key,out);return out;}
+        }
+      }
+      if(picked.length>=2){
+        const base=picked.join("");
+        for(const suf of suffixes){if(charCount(base+suf)===16){memo.set(key,base+suf);return base+suf;}}
+      }
+      memo.set(key,"");return "";
     }
-    return s;
+    function pickLen(v){return Array.from(v).length;}
+    const found=search(0,0,[]); if(found)add(found);
+    // 优先使用页面已提供的中文片段，再使用动态组合。
+    return candidates;
   }
-  function autoDescription16(input){
-    const hay=currentHay(input);
-    const rawDescription=text(input.description);
-    // 先尊重网页自己提供的中文核心描述；英文/无效描述不得直接截断后冒充中文简介。
-    const zh=rawDescription.match(/[\u4e00-\u9fa5][\u4e00-\u9fa5A-Za-z0-9&·+._/ -]{5,}/g)?.join(" ").trim()||"";
-    if(/[\u4e00-\u9fa5]/.test(zh) && charCount(zh)>=8)return exact16(zh);
-    // 高置信站点/产品规则优先，避免通用 search/code/design 等词污染结果。
-    if(/icon\s*oop|iconoop|svg icons?|brand logos?|icon library|free svg icon|图标库|图标资源/.test(hay))return exact16("免费SVG图标品牌Logo资源库");
-    if(/weclipper|clipboard assistant|clipboard tool|剪贴板助手|剪贴板工具|clipboard manager/.test(hay))return exact16("剪贴板内容管理与效率辅助工具平台");
-    if(/webclip|网页剪藏|网页收藏|web clipping|save (?:the )?web/.test(hay))return exact16("网页内容剪藏知识管理辅助工具平台");
-    if(/gitdesktop|git desktop|git client|version control|版本控制|gitlab|bitbucket/.test(hay))return exact16("Git版本控制与协作开发工具平台");
-    if(/multica|human.*agent|agent.*team|project management|项目管理|智能体协作/.test(hay))return exact16("智能体协作与项目管理辅助工具平台");
-    if(/chatgpt|claude|gemini|gpt-\d|llm|对话|assistant/.test(hay))return exact16("智能对话内容生成创作辅助工具平台");
-    if(/midjourney|stable diffusion|flux|image generation|图片生成|绘图|绘画/.test(hay))return exact16("图像生成视觉创作设计辅助工具平台");
-    if(/video generation|text to video|runway|kling|sora|视频生成/.test(hay))return exact16("视频生成内容创作剪辑辅助工具平台");
-    if(/audio generation|music generation|voice synthesis|tts|音频生成|音乐生成|语音合成/.test(hay))return exact16("音频语音生成创作辅助工具服务平台");
-    if(/perplexity|search engine|web search|联网搜索|搜索引擎|信息检索|research assistant|研究辅助/.test(hay))return exact16("信息搜索与研究分析辅助工具平台型");
-    if(/code generation|coding assistant|developer tool|ide|编程开发|代码生成|代码补全/.test(hay))return exact16("编程代码开发调试辅助工具服务平台");
-    if(/automation|自动化|workflow|工作流/.test(hay))return exact16("自动化流程效率管理辅助工具平台型");
-    if(/notion|note taking|笔记|knowledge base|知识管理/.test(hay))return exact16("知识笔记团队协作管理工具服务平台");
-    if(/marketing|营销|广告创作|advertising/.test(hay))return exact16("营销策划内容创作推广辅助工具平台");
-    if(/figma|ui\/ux|interface design|design tool|设计工具|界面设计/.test(hay))return exact16("设计创作界面协作视觉辅助工具平台");
-    if(/course|tutorial|learning platform|课程|教程|学习平台/.test(hay))return exact16("学习课程知识获取训练辅助资源平台");
-    // 没有高置信产品信号时，不再凭单个普通关键词猜测业务类型。
-    return exact16("数字资源管理应用服务辅助工具平台");
+
+  function buildSemanticCandidate(input){
+    const candidates=semanticCandidates(input); let best="",bestScore=-999;
+    for(const c of candidates){
+      const len=charCount(c); if(len<8)continue;
+      let score=scoreSemanticSentence(c)+(len===16?30:0)+(len>=12&&len<=20?5:0);
+      if(score>bestScore){bestScore=score;best=c;}
+    }
+    return best;
   }
+
+  function scoreSemanticSentence(s){
+    const t=text(s); if(!t || ZH_STOP.test(t))return -999;
+    let score=charCount(t)>=8?1:0;
+    if(/[\u4e00-\u9fa5]/.test(t))score+=4;
+    if(/(?:图标|Logo|资源库|素材|剪贴板|网页剪藏|网页内容|知识管理|项目管理|智能体|对话|内容生成|图像生成|视频生成|音频|语音|搜索|研究|代码|编程|版本控制|自动化|笔记|任务|设计|课程|浏览器|插件|数据集|模板|PDF|截图|远程|平台|工具|软件)/.test(t))score+=5;
+    return score;
+  }
+
+  function semanticQuality(s){
+    const t=text(s);let score=0;
+    if(/[与及]/.test(t))score+=2;
+    if(/(?:图标|品牌Logo|资源库|剪贴板管理|内容整理|网页内容|知识管理|项目管理|智能体|版本控制|协作开发|图像生成|视频生成|音频生成|界面设计|自动化工作流)/.test(t))score+=8;
+    const seen=new Set();let repeats=0;
+    for(let i=0;i<t.length-1;i++){const g=t.slice(i,i+2);if(seen.has(g))repeats++;seen.add(g);}
+    score-=repeats*5;
+    if(/(.)\1{2,}/.test(t))score-=8;
+    return score;
+  }
+  function exact16(value,input={}){
+    const clean=v=>text(v).replace(/\s+/g,"").replace(/[。！？!?.,，、；：:;“”‘’"'()（）\[\]{}<>《》]/g,"");
+    const all=semanticCandidates(input).map(clean).filter(Boolean);
+    const exact=all.filter(c=>charCount(c)===16).sort((a,b)=>semanticQuality(b)-semanticQuality(a));
+    if(exact.length)return exact[0];
+    const raw=clean(value); if(charCount(raw)===16)return raw;
+    const long=all.filter(c=>charCount(c)>16).sort((a,b)=>semanticQuality(b)-semanticQuality(a));
+    if(long.length)return Array.from(long[0]).slice(0,16).join("");
+    return "";
+  }
+
+  function autoDescription16(input){return exact16(buildSemanticCandidate(input),input);}
+  function chineseDescription(input){return autoDescription16(input);}
   function isLikelyGenericTitle(value){
     const s=text(value).toLowerCase();
     return !s || s.length>30 || /^(your next|welcome|home|homepage|untitled|coming soon|the future|we are|we're|won.?t be|will be|github|gitlab|bitbucket|cloudflare|wordpress)$/i.test(s);
@@ -447,7 +553,7 @@
     }
     const name=nameFromTitle(structuredName,clean)||nameFromTitle(title,clean)||nameFromTitle(siteName,clean);
     return {
-      title,resourceName:name,description:exact16(autoDescription16({name,url:clean,description,content:body,title,keywords})),
+      title,resourceName:name,description:autoDescription16({name,url:clean,description,content:body,title,keywords}),
       keywords,content:body,github,thumbnail,siteName,structuredName,source,fetchedUrl
     };
   }
