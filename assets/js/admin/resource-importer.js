@@ -14,6 +14,19 @@
   const uniq = arr => [...new Set((arr||[]).map(v=>String(v).trim()).filter(Boolean))];
   const text = v => String(v||"").trim();
 
+  // 所有外部读取必须有超时；第三方站点/翻译服务无响应时，UI 不能永久卡在“正在读取”。
+  async function fetchWithTimeout(url, options={}, timeoutMs=12000){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),timeoutMs);
+    try{return await fetch(url,{...options,signal:controller.signal});}
+    finally{clearTimeout(timer);}
+  }
+
+  function readError(e,fallback){
+    if(e?.name==='AbortError') return `${fallback}：请求超时`;
+    return e?.message||fallback;
+  }
+
   const CATEGORIES = window.categories || {};
   const TAGS = window.tags || {capabilities:[],scenarios:[],attributes:{pricing:[],platform:[],language:[],audience:[]}};
   const ALL = window.ResourceEngine?.getAllResources?.() || [];
@@ -318,24 +331,20 @@
   async function translateToChinese(value){
     const source=text(value); if(!source||isChinese(source))return source;
     const q=encodeURIComponent(source.slice(0,900));
-    const endpoints=[
-      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q=${q}`,
-      `https://api.mymemory.translated.net/get?q=${q}&langpair=auto|zh-CN`
-    ];
-    for(const endpoint of endpoints){
-      try{
-        const r=await fetch(endpoint,{mode:'cors'}); if(!r.ok)continue;
-        const data=await r.json();
-        if(Array.isArray(data) && Array.isArray(data[0])){
-          const out=data[0].map(x=>Array.isArray(x)?x[0]:'').filter(Boolean).join('');
-          if(out)return text(out);
-        }
-        const out=text(data?.responseData?.translatedText||'');
-        if(out)return out;
-      }catch(e){}
-    }
-    return isChinese(source)?source:"";
+    // 翻译是增强能力，不允许阻塞网页读取；单次最多等待4秒。
+    const endpoint=`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q=${q}`;
+    try{
+      const r=await fetchWithTimeout(endpoint,{mode:'cors'},5000);
+      if(!r.ok)return '';
+      const data=await r.json();
+      if(Array.isArray(data) && Array.isArray(data[0])){
+        const out=data[0].map(x=>Array.isArray(x)?x[0]:'').filter(Boolean).join('');
+        if(out)return text(out);
+      }
+    }catch(e){}
+    return '';
   }
+
   async function exact16FromSource(input){
     // 只选择一个“真实来源”生成简介，禁止把多个候选句子拼接成伪简介。
     const candidates=[];
@@ -346,9 +355,12 @@
     pushDescriptionCandidate(candidates,input?.description,'provided-description',15);
 
     const ordered=candidates.sort((a,b)=>a.priority-b.priority);
-    for(const item of ordered){
-      const translated=cleanDescriptionCandidate(await translateToChinese(item.value));
-      if(charCount(translated)>=16)return Array.from(translated).slice(0,16).join('');
+    // 中文候选无需翻译；非中文候选最多尝试前4条，避免第三方翻译服务拖死整个读取流程。
+    const preferred=[...ordered.filter(x=>isChinese(x.value)),...ordered.filter(x=>!isChinese(x.value))].slice(0,2);
+    for(const item of preferred){
+      const translated=isChinese(item.value)?item.value:await translateToChinese(item.value);
+      const clean=cleanDescriptionCandidate(translated);
+      if(charCount(clean)>=16)return Array.from(clean).slice(0,16).join('');
     }
 
     const title=cleanDescriptionCandidate(await translateToChinese(input?.title||input?.name||''));
@@ -360,7 +372,7 @@
     const github=normalizeGithubUrl(githubUrl); if(!github)throw new Error('无效 GitHub URL');
     const m=github.match(/github\.com\/([^/]+)\/([^/]+)/i); if(!m)throw new Error('无效 GitHub URL');
     const api=`https://api.github.com/repos/${m[1]}/${m[2]}`;
-    const r=await fetch(api,{headers:{Accept:'application/vnd.github+json'}});
+    const r=await fetchWithTimeout(api,{headers:{Accept:'application/vnd.github+json'}},10000);
     if(!r.ok)throw new Error('GitHub 读取失败：HTTP '+r.status);
     const data=await r.json();
     return {github:normalizeGithubUrl(data.html_url||github),homepage:text(data.homepage),resourceName:text(data.name),title:text(data.name),description:text(data.description),descriptionCandidates:[],keywords:asArray(data.topics),content:text(data.description),thumbnail:'',siteName:'GitHub',structuredName:''};
@@ -372,30 +384,32 @@
 
     let githubInput=normalizeGithubUrl(clean);
     if(githubInput && /github\.com\//i.test(clean)){
+      // GitHub-only 输入：先读仓库 API，再尝试仓库 homepage；homepage 不可读时仍返回 GitHub 结果。
       const gh=await fetchGithubInfo(githubInput);
-      if(gh.homepage){
+      gh.descriptionCandidates=gh.description?[{value:gh.description,source:'github-repository-description',priority:35}]:[];
+      if(gh.homepage && normalizeUrl(gh.homepage)!==githubInput){
         try{
           const web=await fetchPage(gh.homepage);
-          return {...web,github:gh.github||web.github,resourceName:web.resourceName||gh.resourceName,homepage:web.homepage||gh.homepage||gh.homepage||'',descriptionCandidates:[...asArray(web.descriptionCandidates),...(gh.description?[{value:gh.description,source:'github-repository-description',priority:35}]:[])]};
+          return {...web,github:gh.github||web.github,resourceName:web.resourceName||gh.resourceName,homepage:web.homepage||gh.homepage,descriptionCandidates:[...asArray(web.descriptionCandidates),...gh.descriptionCandidates]};
         }catch(e){
-          gh.descriptionCandidates=gh.description?[{value:gh.description,source:'github-repository-description',priority:35}]:[];
-          gh.description=await exact16FromSource(gh);
-          return gh;
+          // 官网失败不是整个 GitHub 读取失败；继续使用 GitHub 仓库信息。
         }
       }
-      gh.descriptionCandidates=gh.description?[{value:gh.description,source:'github-repository-description',priority:35}]:[];
       gh.description=await exact16FromSource(gh);
+      gh.source='github';
+      gh.fetchedUrl=githubInput;
+      gh.homepage=gh.homepage||'';
       return gh;
     }
 
     let raw='',source='direct';
     try{
-      const r=await fetch(clean,{mode:'cors',redirect:'follow'});
+      const r=await fetchWithTimeout(clean,{mode:'cors',redirect:'follow'},12000);
       if(!r.ok)throw new Error('HTTP '+r.status);
       raw=await r.text();
     }catch(e){
       const proxy='https://r.jina.ai/'+clean;
-      const r=await fetch(proxy,{headers:{Accept:'text/plain'}});
+      const r=await fetchWithTimeout(proxy,{headers:{Accept:'text/plain'}},15000);
       if(!r.ok)throw new Error('网页读取失败：'+r.status);
       raw=await r.text(); source='jina';
     }
@@ -620,7 +634,7 @@
         if(normalizeGithubUrl(url) && meta.homepage){
           $("#resourceUrl").value=normalizeUrl(meta.homepage);
         }
-      }catch(e){meta={};setStatus("网页读取失败，已使用 URL 进行本地分析");}
+      }catch(e){meta={};setStatus(readError(e,"网页读取失败")); return;}
 
       // 同一 URL 重读时，刷新仍由自动读取产生的字段；人工改过的字段保持不动。
       const autoName=sameAutoUrl && current.name===state.auto.name;
@@ -694,7 +708,7 @@
         $("#reviewPanel").hidden=true;
         $("#pageMeta").textContent=`已读取：${m.resourceName||m.title||"无标题"}${m.github?" · 已发现 GitHub 项目":""}${m.thumbnail?" · 已读取缩略图":""}`;
         setStatus("网页信息读取完成",true);
-      }catch(e){setStatus(e.message||"网页读取失败");}
+      }catch(e){setStatus(readError(e,"网页读取失败"));}
     };
     $("#resetBtn").onclick=()=>{state.draft=null;resetAutoState();$("#reviewPanel").hidden=true;$("#resourceName").value="";$("#resourceUrl").value="";$("#resourceDescription").value="";$("#resourceGithub").value="";$("#resourceThumbnail").value="";setStatus("已清空");};
     $("#clearAllBtn").onclick=()=>{
