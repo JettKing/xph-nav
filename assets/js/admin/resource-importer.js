@@ -268,87 +268,72 @@
   function charCount(value){return Array.from(text(value)).length;}
   function limit32(value){return Array.from(text(value)).slice(0,32).join("");}
 
-  // 自动简介候选源：严格按“产品事实来源”优先级取值。
-  // 禁止把整页正文、FAQ、营销对比、免责声明、导航等随机句子作为核心简介。
-  const DESCRIPTION_LEXICON = [
-    [/1088\+?\s*pure\s+frontend\s+online\s+tools?/gi,"1088个纯前端在线工具集合平台"],
-    [/\b(?:pure\s+)?frontend\s+(?:online\s+)?tools?\b/gi,"纯前端在线工具"],
-    [/\bonline\s+tools?\b/gi,"在线工具"], [/\btools?\s+collection\b/gi,"工具集合"],
-    [/\b(?:free|open[- ]source)\s+(?:svg\s+)?icons?\b/gi,"免费SVG图标"],
-    [/\bbrand\s+logos?\b/gi,"品牌Logo"], [ /\bweb\s+clip(?:ping|per)?\b/gi,"网页剪藏" ],
-    [/\bclipboard\s+manager\b/gi,"剪贴板管理"], [/\bknowledge\s+(?:base|management)\b/gi,"知识管理"],
-    [/\bproject\s+management\b/gi,"项目管理"], [/\bteam\s+collaboration\b|\bcollaboration\b/gi,"团队协作"],
-    [/\bai\s+(?:agents?|assistant)\b|\bartificial\s+intelligence\b/gi,"AI智能体"], [/\bintelligent\b/gi,"智能"],
-    [/\bassistant\b/gi,"助手"], [/\bhuman\b/gi,"人类"], [/\bcontent\s+generation\b/gi,"内容生成"], [/\bimage\s+generation\b/gi,"图像生成"],
-    [/\bvideo\s+generation\b/gi,"视频生成"], [/\baudio\s+generation\b|\bmusic\s+generation\b/gi,"音频生成"],
-    [/\bvoice\s+synthesis\b|\btext\s+to\s+speech\b/gi,"语音合成"], [/\bsearch\s+engine\b|\bweb\s+search\b/gi,"信息搜索"],
-    [/\bresearch\s+assistant\b/gi,"研究辅助"], [/\bcode\s+generation\b|\bcoding\s+assistant\b/gi,"代码生成"],
-    [/\bversion\s+control\b/gi,"版本控制"], [/\bgit\s+client\b/gi,"Git客户端"],
-    [/\bautomation\s+workflow\b/gi,"自动化工作流"], [/\bnote\s+taking\b/gi,"笔记管理"],
-    [/\btask\s+management\b/gi,"任务管理"], [/\binterface\s+design\b|\bui\/?ux\b/gi,"界面设计"],
-    [/\blearning\s+platform\b/gi,"学习平台"], [/\bdeveloper\s+platform\b|\bapi\s+platform\b/gi,"开发者平台"],
-    [/\bremote\s+control\b/gi,"远程控制"], [/\bdesign\s+tool\b/gi,"设计工具"],
-    [/\bextensions?\b|\bplugins?\b/gi,"插件扩展"], [/\bdatasets?\b/gi,"数据集"],
-    [/\btemplates?\b/gi,"模板素材"], [/\bscreenshots?\b/gi,"截图工具"], [/\bpdf\b/gi,"PDF文档"],
-    [/\bbrowsers?\b/gi,"浏览器"], [/\bicons?\b/gi,"图标"], [/\blogos?\b/gi,"Logo"],
-    [/\blibraries?\b|\bcollections?\b/gi,"资源库"], [/\bassets?\b/gi,"素材"], [/\bresources?\b/gi,"资源"],
-    [/\bbookmarks?\b/gi,"网页收藏"], [/\bagents?\b/gi,"智能体"], [/\bchat|conversations?\b/gi,"对话"],
-    [/\bwriting|writers?\b/gi,"写作"], [/\bprogramming|coding|development\b/gi,"编程开发"],
-    [/\bmarketing\b/gi,"营销"], [/\badvertising\b/gi,"广告创作"], [/\bcourses?|tutorials?\b/gi,"课程教程"],
-    [/\bsoftware\b/gi,"软件"], [/\bplatform\b/gi,"平台"], [/\btools?\b/gi,"工具"], [/\bdevelopers?\b/gi,"开发者"], [/\bservices?\b/gi,"服务"]
-  ];
+  // Description Reader Architecture Reset:
+  // 自动简介只允许来自“当前 URL 明确声明的结构化描述”，禁止从整页正文、关键词或站点模板猜测。
   const DESCRIPTION_NOISE=/^(home|homepage|welcome|about|contact|privacy|terms|login|sign\s*(?:in|up)|learn\s+more|read\s+more|get\s+started|start\s+now|official\s+website|menu|navigation|features?|pricing|faq|frequently\s+asked\s+questions?|why\s+choose|how\s+it\s+works?)$/i;
-  const DESCRIPTION_BAD_PATTERNS=/(privacy policy|terms of (?:use|service)|cookie policy|all rights reserved|免责声明|隐私政策|服务条款|用户协议|常见问题|faq|传统(?:算命|方法).*?(?:主观|偏差)|主观偏差|联系我们|登录|注册|导航|价格方案|立即开始|为什么选择|工作原理)/i;
+  const DESCRIPTION_BAD_PATTERNS=/(privacy policy|terms of (?:use|service)|cookie policy|all rights reserved|免责声明|隐私政策|服务条款|用户协议|常见问题|faq|主观偏差|联系我们|登录|注册|导航|价格方案|立即开始|为什么选择|工作原理)/i;
 
   function normalizeSourceText(value){
     return text(value).replace(/https?:\/\/\S+/gi," ").replace(/\[[^\]]*\]\([^)]*\)/g," ")
       .replace(/[`*_>#|{}]/g," ").replace(/[\r\n]+/g,"。 ").replace(/\s+/g," ").trim();
   }
-  function translateSourceText(value){
-    let out=normalizeSourceText(value);
-    for(const [re,zh] of DESCRIPTION_LEXICON)out=out.replace(re,` ${zh} `);
-    out=out.replace(/\b(?:is|are|the|a|an|and|or|for|with|to|of|on|in|from|by|your|our|this|that|you|we|it|as|at|into|using|used|use|powered|built|modern|next|best|easy|simple|free|online|download|learn|more|official|website|home|welcome|about|contact|login|sign|get|start|manage|create|help)\b/gi," ");
-    return out.replace(/[。！？!?]+/g,"。 ").replace(/[,:;，、；：]+/g," ").replace(/\s+/g," ").trim();
-  }
-
   function cleanDescriptionCandidate(value){
     return text(value).replace(/\s+/g,"").replace(/[。！？!?.,，、；：:;“”‘’"'()（）\[\]{}<>《》\-–—]/g,"");
   }
-  function validDescriptionSource(value){
+  function validDescriptionSource(value,source=""){
     const raw=normalizeSourceText(value);
     if(!raw||DESCRIPTION_NOISE.test(raw)||DESCRIPTION_BAD_PATTERNS.test(raw))return false;
-    if(/^https?:\/\//i.test(raw))return false;
-    if(raw.length<6)return false;
+    if(/^https?:\/\//i.test(raw)||raw.length<6)return false;
+    // 仅允许明确的结构化来源进入自动简介：正文段落不再是候选源。
+    const allowed=/^(meta-description|og-description|twitter-description|meta-item-description|jsonld-description|jsonld-offer-description|frontmatter-description|markdown-description|github-readme)$/i;
+    if(source&&!allowed.test(source))return false;
     return true;
   }
 
-  // 候选项必须携带来源等级；高等级来源永远优先于正文。
   function sourceCandidates(input){
     const candidates=[];
     const add=(value,source,priority)=>{
       const raw=normalizeSourceText(value);
-      if(!validDescriptionSource(raw))return;
+      if(!validDescriptionSource(raw,source))return;
       const key=cleanDescriptionCandidate(raw).toLowerCase();
       if(!key||candidates.some(x=>cleanDescriptionCandidate(x.value).toLowerCase()===key))return;
       candidates.push({value:raw,source,priority});
     };
     (input.descriptionCandidates||[]).forEach(x=>add(x?.value||x,x?.source||"unknown",Number(x?.priority||90)));
-    // 兼容旧状态，但不再把 content 当候选源。
+    // 仅兼容已明确标记为 meta-description 的旧状态，禁止普通 description 偷渡。
     if(input.description)add(input.description,"meta-description",10);
     return candidates.sort((a,b)=>a.priority-b.priority);
   }
 
+  function toChineseCore16(value){
+    const raw=cleanDescriptionCandidate(value);
+    if(!raw)return "";
+    // 来源本身已经是16字符时直接保留，避免为了“中文化”破坏 AI / Git / SVG 等产品术语。
+    if(charCount(raw)===16&&/[\u4e00-\u9fff]/.test(raw))return raw;
+    let s=raw;
+    // 只做语言清洗，不做 URL/网站/关键词模板推断。
+    s=s.replace(/^(欢迎来到|欢迎使用|这是|这里是|我们提供|我们为你|专为|一款|一个|一种|基于|致力于|帮助用户|为用户|让你|让您)/,"" );
+    s=s.replace(/(最佳|免费|在线|官方|全新|现代|简单|轻松|立即|开始使用|了解更多)$/g,"");
+    if(charCount(s)!==16){
+      // 优先选择原始描述中的自然语义句，而不是从正文随机取句或机械填充。
+      const parts=String(value).split(/[。！？!?；;]/).map(x=>cleanDescriptionCandidate(x)).filter(x=>charCount(x)>=16&&charCount(x)<=32&&/[\u4e00-\u9fff]/.test(x));
+      const natural=parts.find(x=>charCount(x)===16)||parts[0];
+      if(natural)s=natural;
+    }
+    s=cleanDescriptionCandidate(s);
+    if(charCount(s)===16&&/[\u4e00-\u9fff]/.test(s))return s;
+    // 若来源明确为中文描述但超过16字，只保留前16字；不追加虚构词。
+    if(/^[\u4e00-\u9fffA-Za-z0-9]+$/.test(s)&&charCount(s)>16&&/[\u4e00-\u9fff]/.test(s))return Array.from(s).slice(0,16).join("");
+    return "";
+  }
+
   function exact16FromSource(input){
     const candidates=sourceCandidates(input);
-    const translated=candidates.flatMap(c=>{
-      const variants=[translateSourceText(c.value),c.value];
-      return variants.map(cleanDescriptionCandidate).filter(v=>validDescriptionSource(v)).map(v=>({value:v,source:c.source,priority:c.priority}));
-    });
-    const exact=translated.find(x=>charCount(x.value)===16);
-    if(exact)return exact.value;
-    const long=translated.filter(x=>charCount(x.value)>16).sort((a,b)=>a.priority-b.priority||charCount(a.value)-charCount(b.value));
-    if(long.length)return Array.from(long[0].value).slice(0,16).join("");
-    // 没有可靠产品描述时必须留空，禁止从正文随机抽句或用模板硬凑。
+    for(const c of candidates){
+      const value=toChineseCore16(c.value);
+      if(value&&charCount(value)===16)return value;
+    }
+    // 没有可靠结构化来源时保持空白，交给人工审核；禁止猜测。
     return "";
   }
   function autoDescription16(input){return exact16FromSource(input);}
@@ -441,22 +426,8 @@
       }
     }catch(e){}
 
-    // 只读取明确标记为“描述/简介”的节点；不扫描整页正文。
-    const explicitSelectors=[
-      '[itemprop="description"]',
-      '[data-description]',
-      '#description', '#about-description', '#product-description',
-      '.description', '.product-description', '.tool-description', '.hero-description',
-      '.subtitle', '.tagline', '.intro', '.lead'
-    ];
-    explicitSelectors.forEach(sel=>doc.querySelectorAll(sel).forEach(n=>add(n.getAttribute?.("data-description")||n.textContent,"explicit-description",35)));
-
-    // 仅把首屏主内容中的首个短段落作为低优先级候选，不再把 body 全文交给简介生成器。
-    const main=doc.querySelector('main, [role="main"], article');
-    if(main){
-      const paragraphs=[...main.querySelectorAll('p')].map(p=>text(p.textContent)).filter(x=>x.length>=12&&x.length<=240);
-      paragraphs.slice(0,3).forEach((x,i)=>add(x,`main-paragraph-${i+1}`,45));
-    }
+    // 不再读取 .description / .subtitle / .intro / 首屏正文等通用节点。
+    // 页面结构化描述之外的内容一律不能直接成为自动简介候选。
     return out.sort((a,b)=>a.priority-b.priority);
   }
 
@@ -509,7 +480,6 @@
         if(cleaned.length>=12)blocks.push(cleaned);
       }
       body=blocks.join(" ").slice(0,18000);
-      blocks.slice(0,3).forEach((x,i)=>descriptionCandidates.push({value:x,source:`markdown-paragraph-${i+1}`,priority:45}));
       const metaMatch=raw.match(/(?:description|meta description)\s*[:：]\s*(.+)/i);
       description=text(fmDescription||metaMatch?.[1]||"");
       if(fmDescription)descriptionCandidates.push({value:fmDescription,source:"frontmatter-description",priority:10});
