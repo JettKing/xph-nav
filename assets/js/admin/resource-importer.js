@@ -1,9 +1,9 @@
 /* Resource name policy: preserve the real source name verbatim; translate descriptions only. */
 /**
- * 徐胖虎资源社 V5.3.10.5 Description Reader Clean Baseline
- * - 只从 V5.2 标准词库中选择标签
- * - 本地规则推断，不调用第三方 AI API，不暴露密钥
- * - 支持网页元信息读取、智能分类、人工审核、JSON/JS 导出
+ * 徐胖虎资源社 V5.3.10.5-FIX1-TEST
+ * - 补全 analyze 函数，修复智能分析按钮无法工作的问题
+ * - 统一翻译超时注释与实际值
+ * - 其他逻辑保持不变
  */
 (function(){
   "use strict";
@@ -332,7 +332,7 @@
   async function translateToChinese(value){
     const source=text(value); if(!source||isChinese(source))return source;
     const q=encodeURIComponent(source.slice(0,900));
-    // 翻译是增强能力，不允许阻塞网页读取；单次最多等待4秒。
+    // 翻译是增强能力，不允许阻塞网页读取；单次最多等待5秒。
     const endpoint=`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q=${q}`;
     try{
       const r=await fetchWithTimeout(endpoint,{mode:'cors'},5000);
@@ -614,6 +614,62 @@
   function copyJS(){navigator.clipboard?.writeText(buildNativeJS()).then(()=>setStatus("原生 JS 数据片段已复制",true));}
   function download(name,content,type){const blob=new Blob([content],{type});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 
+  // ==================== 补全 analyze 函数 ====================
+  /**
+   * 智能分析：根据读取到的页面元数据（meta）和当前表单输入，推断分类、标签、属性。
+   * 不调用任何外部 API，仅使用内置规则。
+   */
+  function analyze(input) {
+    // input 包含从 fetchPage 返回的字段，以及当前表单中的 name, description, github, thumbnail
+    const hay = currentHay(input); // 组合所有可用的文本信息
+    const catResult = inferCategory(hay);
+    const caps = inferMulti(hay, rules.capabilities);
+    const scens = inferMulti(hay, rules.scenarios);
+    const attrs = inferAttributes(hay, input.url || input.website || '');
+
+    // 若输入已有名称，优先保留；否则使用读取结果
+    const name = input.resourceName || input.name || '';
+    // 描述：如果已有且非自动，可能已由读取生成，这里保留；但 analyze 不负责生成简介（由 fetchPage 完成）
+    // 若 description 为空，可尝试从 hay 中提取，但一般 fetchPage 已生成。
+    const description = input.description || '';
+
+    // 构建资源对象
+    const resource = {
+      id: makeId(name, input.url || input.website || ''),
+      name: name,
+      description: description,
+      website: input.url || input.website || '',
+      github: input.github || '',
+      thumbnail: input.thumbnail || '',
+      category: catResult.cat,
+      subcategory: catResult.sub,
+      capabilities: caps,
+      scenarios: scens,
+      attributes: attrs,
+      icon: '🔗',
+      features: [],
+      official: false,
+      recommend: false,
+      status: 'active',
+      _meta: {
+        autoId: '',
+        autoName: '',
+        autoDescription: '',
+        autoGithub: '',
+        autoThumbnail: '',
+        autoUrl: input.url || input.website || '',
+        descriptionMode: 'auto', // 由分析生成，视为自动
+        warnings: []
+      }
+    };
+    // 若 description 为空，尝试从 hay 生成（但已有 fetchPage 生成，一般不会空）
+    if (!resource.description) {
+      resource.description = exact16(hay) || '待补充简介';
+    }
+    return resource;
+  }
+
+  // ==================== 原有初始化代码 ====================
   async function init(){
     if(!$("#resourceImporter"))return;
     renderCategoryOptions($("#categorySelect"),"ai_chat");
@@ -674,6 +730,7 @@
       $("#resourceDescription").value=input.description;
       $("#resourceGithub").value=input.github;
       $("#resourceThumbnail").value=input.thumbnail;
+      // 调用 analyze 进行智能分类和标签
       const r=analyze({...input,...meta});
       r._meta={...(r._meta||{}),descriptionMode:state.descriptionMode,autoDescription:state.descriptionMode==="auto"?exact16(input.description):"",autoId:state.auto.id,autoName:state.auto.name,autoGithub:state.auto.github,autoThumbnail:state.auto.thumbnail,autoUrl:state.autoUrl};
       renderDraft(r);setStatus("分析完成，请人工审核后导出",true);
