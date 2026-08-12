@@ -1,5 +1,5 @@
 /**
- * 徐胖虎资源社 V5.3.10.4 智能资源录入系统
+ * 徐胖虎资源社 V5.3.10.5 智能资源录入系统
  * - 只从 V5.2 标准词库中选择标签
  * - 本地规则推断，不调用第三方 AI API，不暴露密钥
  * - 支持网页元信息读取、智能分类、人工审核、JSON/JS 导出
@@ -55,6 +55,29 @@
     $("#pageMeta").textContent="";
   }
 
+  function prepareForReadUrl(nextUrl){
+    const url=text(nextUrl);
+    if(!url)return;
+    // 不依赖 input 事件：点击“读取/分析”时再次兜底，确保 URL 变化后不会把上一资源的自动字段带入新资源。
+    if(state.autoUrl && state.autoUrl!==url){
+      const fields=[
+        ["resourceId","id"],["resourceName","name"],["resourceDescription","description"],
+        ["resourceGithub","github"],["resourceThumbnail","thumbnail"]
+      ];
+      fields.forEach(([field,key])=>{
+        const input=$("#"+field);
+        if(input && isAutoFieldCurrent(key,field))input.value="";
+      });
+      state.auto={id:"",name:"",description:"",github:"",thumbnail:""};
+      state.autoUrl="";
+      state.descriptionMode="manual";
+      state.draft=null;
+      $("#reviewPanel").hidden=true;
+      $("#jsonPreview").textContent="等待智能分析生成。";
+      $("#pageMeta").textContent="";
+    }
+  }
+
   const stopWords = new Set("the a an and or of to in on for with from by is are ai tool app platform official online free pro com www https http www io co".split(/\s+/));
   const norm = s => text(s).toLowerCase().replace(/[\s_\-./:：，。！!？?（）()【】\[\],，]/g," ");
   const tokens = s => uniq(norm(s).split(/\s+/).filter(x=>x && x.length>1 && !stopWords.has(x)));
@@ -83,6 +106,7 @@
       {k:["agent","智能体","autonomous"],cat:"ai",sub:"ai_agent"},
       {k:["model","模型","hugging face","ollama"],cat:"ai",sub:"ai_model"},
       {k:["office","word","excel","powerpoint","ppt","办公"],cat:"ai",sub:"ai_office"},
+      {k:["gitdesktop","git desktop","git client","desktop app","desktop application","安装包","installer","download app","version control"],cat:"software",sub:"software_dev"},
       {k:["telegram","tg","频道","群组","机器人"],cat:"solution",sub:"solution_telegram"},
       {k:["course","课程","教程","学习"],cat:"digital",sub:"digital_course"},
       {k:["ebook","电子书","book","书籍"],cat:"digital",sub:"digital_book"},
@@ -171,8 +195,25 @@
 
   function scoreRule(hay, keys){return keys.reduce((n,k)=>n+(hay.includes(norm(k))?1:0),0);}
   function inferCategory(hay){
+    // 分类必须“宁可保守，也不要把普通网站误判成 AI”。
+    // AI 只有出现明确 AI/模型/具体产品信号时才允许进入 AI 类；
+    // 普通网站若只有 search/code/design 等通用词，默认保留在网页导航。
+    const strongAi=/(?:\b(?:chatgpt|claude|gemini|gpt-\d*|midjourney|stable\s*diffusion|dall[· -]?e|runway|kling|sora|copilot|cursor|hugging\s*face|ollama)\b|\b(?:llm|ai\s+assistant|ai\s+agent|artificial\s+intelligence)\b|人工智能|生成式人工智能|大语言模型|智能体)/i.test(hay);
+    const aiCandidates=rules.category.filter(r=>r.cat==="ai");
+    const nonAiCandidates=rules.category.filter(r=>r.cat!=="ai");
     let best={score:0,cat:"website",sub:"website_tool"};
-    rules.category.forEach(r=>{const s=scoreRule(hay,r.k);if(s>best.score)best={score:s,cat:r.cat,sub:r.sub};});
+    const candidates=strongAi?rules.category:nonAiCandidates;
+    candidates.forEach(r=>{
+      const s=scoreRule(hay,r.k);
+      if(s>best.score)best={score:s,cat:r.cat,sub:r.sub};
+    });
+    // 无明确高置信信号时，永远不要仅凭“search/code/api/design”等通用词跳到 AI。
+    if(!strongAi && best.score<2)return {score:best.score,cat:"website",sub:"website_tool"};
+    if(strongAi){
+      let aiBest={score:0,cat:"ai",sub:"ai_chat"};
+      aiCandidates.forEach(r=>{const s=scoreRule(hay,r.k);if(s>aiBest.score)aiBest={score:s,cat:r.cat,sub:r.sub};});
+      if(aiBest.score>0 && (best.cat!=="website" || aiBest.score>=2))return aiBest;
+    }
     return best;
   }
   function inferMulti(hay,map,limit=8){
@@ -245,12 +286,14 @@
   }
   function isLikelyGenericTitle(value){
     const s=text(value).toLowerCase();
-    return !s || s.length>30 || /^(your next|welcome|home|homepage|untitled|coming soon|the future|we are|we're|won.?t be|will be)/i.test(s);
+    return !s || s.length>30 || /^(your next|welcome|home|homepage|untitled|coming soon|the future|we are|we're|won.?t be|will be|github|gitlab|bitbucket|cloudflare|wordpress)$/i.test(s);
   }
   function nameFromTitle(title,url){
     const t=text(title).replace(/\s+/g," ").trim();
     if(!t)return "";
     const first=t.split(/\s*[|｜—–-]\s*/)[0].trim();
+    const ghRepo=t.match(/github\.com\s*[-:]?\s*[^/\s]+\/([^\s:|]+)/i)?.[1]?.replace(/[).,]+$/g,"");
+    if(ghRepo && ghRepo.length<=28 && !isLikelyGenericTitle(ghRepo))return ghRepo;
     if(first && !isLikelyGenericTitle(first) && first.length<=28)return first;
     if(!isLikelyGenericTitle(t) && t.length<=24)return t;
     try{
@@ -281,6 +324,11 @@
     return "";
   }
 
+  function defaultIcon(category){
+    const map={ai:"🤖",software:"💻",productivity:"⚡",website:"🌐",digital:"📚",solution:"💎"};
+    return map[text(category)]||"🌐";
+  }
+
   function analyze(input){
     const hay=currentHay(input);
     const c=inferCategory(hay);
@@ -301,7 +349,7 @@
     if(attrs.pricing==="增值")warnings.push("价格为规则推断值，发布前建议人工确认");
     return {
       id,name:text(input.name),description:text(input.description)||autoDescription16(input),
-      icon:"🔗",thumbnail:text(input.thumbnail),category:c.cat,subcategory:sub,website:text(input.url),github:text(input.github||input.githubUrl),
+      icon:defaultIcon(c.cat),thumbnail:text(input.thumbnail),category:c.cat,subcategory:sub,website:text(input.url),github:text(input.github||input.githubUrl),
       features:[],capabilities:caps,scenarios:scs,attributes:attrs,official:false,recommend:false,status:"active",
       _meta:{categoryScore:c.score,warnings}
     };
@@ -366,11 +414,11 @@
       github=github||[...doc.querySelectorAll('a[href*="github.com"]')].map(a=>a.href).find(Boolean)||"";
     }
 
-    const name=nameFromTitle(structuredName||siteName||title,clean);
+    const name=nameFromTitle(structuredName,clean)||nameFromTitle(title,clean)||nameFromTitle(siteName,clean);
     return {
       title,
       resourceName:name,
-      description:exact16(chineseDescription({name,url:clean,description,content:body,title,keywords})),
+      description:exact16(autoDescription16({name,url:clean,description,content:body,title,keywords})),
       keywords,content:body,github,thumbnail,siteName,structuredName,source
     };
   }
@@ -471,7 +519,7 @@
       id:text(r.id),
       name:text(r.name),
       description:text(r.description),
-      icon:text(r.icon)||"🔗",
+      icon:text(r.icon)||defaultIcon(r.category),
       thumbnail:text(r.thumbnail),
       category:text(r.category)||target,
       subcategory:text(r.subcategory),
@@ -526,6 +574,7 @@
     $("#analyzeBtn").onclick=async()=>{
       const url=text($("#resourceUrl").value);
       if(!url){setStatus("请先填写 URL");return;}
+      prepareForReadUrl(url);
       const current={
         name:text($("#resourceName").value),
         description:text($("#resourceDescription").value),
@@ -549,7 +598,7 @@
         markAutoField("name",input.name);
       }else state.auto.name="";
       if(!current.description || autoDescription){
-        input.description=exact16(meta.description||autoDescription16({...input,...meta}));
+        input.description=exact16(autoDescription16({name:meta.resourceName||input.name,url,...meta}));
         state.descriptionMode="auto";
         markAutoField("description",input.description);
       }else{
@@ -577,6 +626,7 @@
     $("#fetchBtn").onclick=async()=>{
       const url=text($("#resourceUrl").value);
       if(!url){setStatus("请先填写 URL");return;}
+      prepareForReadUrl(url);
       const current={name:text($("#resourceName").value),description:text($("#resourceDescription").value),github:text($("#resourceGithub").value),thumbnail:text($("#resourceThumbnail").value)};
       const sameAutoUrl=state.autoUrl===url;
       setStatus("正在读取网页…");
@@ -591,7 +641,7 @@
           $("#resourceName").value=value;markAutoField("name",value);
         }else state.auto.name="";
         if(!current.description || autoDescription){
-          const value=exact16(m.description||autoDescription16({name:$("#resourceName").value,url,...m}));
+          const value=exact16(autoDescription16({name:m.resourceName||$("#resourceName").value,url,...m}));
           $("#resourceDescription").value=value;state.descriptionMode="auto";markAutoField("description",value);
         }else{state.descriptionMode="manual";state.auto.description="";}
         if(!current.github || autoGithub){
