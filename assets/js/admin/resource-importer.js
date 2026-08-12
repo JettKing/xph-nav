@@ -296,7 +296,8 @@
       "twitter-description",
       "meta-item-description",
       "jsonld-description",
-      "github-repository-description"
+      "github-repository-description",
+      "reader-main-description"
     ]);
     const candidates=[];
     const add=(value,source,priority)=>{
@@ -337,17 +338,28 @@
   async function translateToChinese(value){
     const source=normalizeSourceText(value);
     if(!source||isMostlyChinese(source))return source;
-    const endpoint="https://api.mymemory.translated.net/get?q="+encodeURIComponent(source.slice(0,1200))+"&langpair=auto|zh-CN";
     const controller=new AbortController();
-    const timer=setTimeout(()=>controller.abort(),6500);
+    const timer=setTimeout(()=>controller.abort(),7000);
     try{
-      const r=await fetch(endpoint,{cache:"no-store",signal:controller.signal,headers:{"Accept":"application/json"}});
-      if(!r.ok)throw new Error("translation failed");
-      const data=await r.json();
-      const translated=text(data?.responseData?.translatedText||"");
-      return translated||"";
-    }catch(e){return "";}
+      const google="https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q="+encodeURIComponent(source.slice(0,1200));
+      const r=await fetch(google,{cache:"no-store",signal:controller.signal,headers:{"Accept":"application/json"}});
+      if(r.ok){
+        const data=await r.json();
+        const translated=Array.isArray(data?.[0])?data[0].map(x=>x?.[0]||"").join(""):"";
+        if(translated)return translated;
+      }
+    }catch(e){}
     finally{clearTimeout(timer);}
+    const controller2=new AbortController();
+    const timer2=setTimeout(()=>controller2.abort(),6500);
+    try{
+      const endpoint="https://api.mymemory.translated.net/get?q="+encodeURIComponent(source.slice(0,1200))+"&langpair=auto|zh-CN";
+      const r=await fetch(endpoint,{cache:"no-store",signal:controller2.signal,headers:{"Accept":"application/json"}});
+      if(!r.ok)return "";
+      const data=await r.json();
+      return text(data?.responseData?.translatedText||"");
+    }catch(e){return "";}
+    finally{clearTimeout(timer2);}
   }
   async function exact16FromSourceTranslated(input){
     const candidates=sourceCandidates(input);
@@ -535,10 +547,10 @@
     }
 
     if(fetchedUrl&&!sameFetchedResource(clean,fetchedUrl))throw new Error("读取结果与当前 URL 不一致，已拒绝使用");
-    return {raw,source,fetchedUrl,clean};
+    return {raw,source,fetchedUrl,clean,jinaTitle:typeof jinaTitle!=="undefined"?jinaTitle:""};
   }
 
-  function parseRawPage(raw,source,clean,fetchedUrl){
+  function parseRawPage(raw,source,clean,fetchedUrl,readerTitle=""){
     const looksLikeMarkdown=source.startsWith("jina")||!/<html[\s>]/i.test(raw);
     let title="",description="",keywords="",body="",siteName="",structuredName="",github=extractGithub(raw),thumbnail="",descriptionCandidates=[];
     if(looksLikeMarkdown){
@@ -553,6 +565,14 @@
         if(cleaned.length>=12)blocks.push(cleaned);
       }
       body=blocks.join(" ").slice(0,18000);
+      title=text(title||readerTitle);
+      // Jina Reader 返回的是正文 Markdown，不含原始 meta 标签。
+      // 这里仅取正文最前面的“产品事实段”作为通用描述来源，不建立站点模板。
+      const readerDescription=blocks.find(x=>x.length>=16&&!/^https?:\/\//i.test(x))||"";
+      if(readerDescription){
+        descriptionCandidates=[{value:readerDescription,source:"reader-main-description",priority:35}];
+        description=readerDescription;
+      }
     }else{
       const doc=new DOMParser().parseFromString(raw,"text/html");
       const get=(sel,attr)=>{const n=doc.querySelector(sel);return n?(attr?n.getAttribute(attr):n.textContent):""};
@@ -601,7 +621,7 @@
       };
     }catch(apiError){
       const rawPage=await fetchRawPage(url);
-      const parsed=parseRawPage(rawPage.raw,rawPage.source,rawPage.clean,rawPage.fetchedUrl);
+      const parsed=parseRawPage(rawPage.raw,rawPage.source,rawPage.clean,rawPage.fetchedUrl,rawPage.jinaTitle);
       const homepage=extractHomepage(rawPage.raw,url);
       return {...parsed,resourceName:nameFromTitle(parsed.structuredName, url)||nameFromTitle(parsed.title,url),homepage,github:normalizeGithubUrl(parsed.github)||text(url)};
     }
@@ -632,7 +652,7 @@
       }
     }else{
       const raw=await fetchRawPage(clean);
-      website=parseRawPage(raw.raw,raw.source,raw.clean,raw.fetchedUrl);
+      website=parseRawPage(raw.raw,raw.source,raw.clean,raw.fetchedUrl,raw.jinaTitle);
       websiteUrl=clean;
       githubUrl=normalizeGithubUrl(website.github)||normalizeGithubUrl(githubHint);
       if(githubUrl){
