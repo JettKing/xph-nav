@@ -619,8 +619,11 @@
     renderChips($("#capabilityChips"),[],"capabilities");renderChips($("#scenarioChips"),[],"scenarios");renderChips($("#pricingChips"),[],"pricing");renderChips($("#platformChips"),[],"platform");renderChips($("#languageChips"),[],"language");renderChips($("#audienceChips"),[],"audience");loadDrafts();
 
     $("#analyzeBtn").onclick=async()=>{
-      const url=text($("#resourceUrl").value);
-      if(!url){setStatus("请先填写 URL");return;}
+      // 官网优先；没有官网时允许直接使用 GitHub URL，并由读取器自动发现官网。
+      const websiteUrl=text($("#resourceUrl").value);
+      const githubUrl=text($("#resourceGithub").value);
+      const url=websiteUrl||githubUrl;
+      if(!url){setStatus("请先填写官网 URL 或 GitHub URL");return;}
       const current={
         name:text($("#resourceName").value),
         description:text($("#resourceDescription").value),
@@ -675,8 +678,11 @@
       renderDraft(r);setStatus("分析完成，请人工审核后导出",true);
     };
     $("#fetchBtn").onclick=async()=>{
-      const url=text($("#resourceUrl").value);
-      if(!url){setStatus("请先填写 URL");return;}
+      // 官网优先；没有官网时允许直接读取 GitHub URL。
+      const websiteUrl=text($("#resourceUrl").value);
+      const githubUrl=text($("#resourceGithub").value);
+      const url=websiteUrl||githubUrl;
+      if(!url){setStatus("请先填写官网 URL 或 GitHub URL");return;}
       const current={name:text($("#resourceName").value),description:text($("#resourceDescription").value),github:text($("#resourceGithub").value),thumbnail:text($("#resourceThumbnail").value)};
       const sameAutoUrl=state.autoUrl===url;
       setStatus("正在读取网页…");
