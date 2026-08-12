@@ -1,5 +1,5 @@
 /**
- * 徐胖虎资源社 V5.3.10.5-FIX4-TEST 智能资源录入系统
+ * 徐胖虎资源社 V5.3.10.5-FIX5-TEST 智能资源录入系统
  * - 只从 V5.2 标准词库中选择标签
  * - 本地规则推断，不调用第三方 AI API，不暴露密钥
  * - 支持网页元信息读取、智能分类、人工审核、JSON/JS 导出
@@ -268,15 +268,14 @@
   function charCount(value){return Array.from(text(value)).length;}
   function limit32(value){return Array.from(text(value)).slice(0,32).join("");}
 
-  // 自动简介：只基于当前网页读取到的事实生成。
-  // 不再使用“网站名称→固定简介”或“关键词命中→固定句式”的站点模板。
-  // 这里的词典只负责把网页原文中的常见英文产品术语转换为中文语义。
+  // 自动简介候选源：严格按“产品事实来源”优先级取值。
+  // 禁止把整页正文、FAQ、营销对比、免责声明、导航等随机句子作为核心简介。
   const DESCRIPTION_LEXICON = [
     [/1088\+?\s*pure\s+frontend\s+online\s+tools?/gi,"1088个纯前端在线工具集合平台"],
     [/\b(?:pure\s+)?frontend\s+(?:online\s+)?tools?\b/gi,"纯前端在线工具"],
     [/\bonline\s+tools?\b/gi,"在线工具"], [/\btools?\s+collection\b/gi,"工具集合"],
     [/\b(?:free|open[- ]source)\s+(?:svg\s+)?icons?\b/gi,"免费SVG图标"],
-    [/\bbrand\s+logos?\b/gi,"品牌Logo"], [/\bweb\s+clipping\b|\bweb\s+clip(ping)?\b/gi,"网页剪藏"],
+    [/\bbrand\s+logos?\b/gi,"品牌Logo"], [ /\bweb\s+clip(?:ping|per)?\b/gi,"网页剪藏" ],
     [/\bclipboard\s+manager\b/gi,"剪贴板管理"], [/\bknowledge\s+(?:base|management)\b/gi,"知识管理"],
     [/\bproject\s+management\b/gi,"项目管理"], [/\bteam\s+collaboration\b|\bcollaboration\b/gi,"团队协作"],
     [/\bai\s+(?:agents?|assistant)\b|\bartificial\s+intelligence\b/gi,"AI智能体"], [/\bintelligent\b/gi,"智能"],
@@ -298,7 +297,8 @@
     [/\bmarketing\b/gi,"营销"], [/\badvertising\b/gi,"广告创作"], [/\bcourses?|tutorials?\b/gi,"课程教程"],
     [/\bsoftware\b/gi,"软件"], [/\bplatform\b/gi,"平台"], [/\btools?\b/gi,"工具"], [/\bdevelopers?\b/gi,"开发者"], [/\bservices?\b/gi,"服务"]
   ];
-  const DESCRIPTION_NOISE=/^(home|homepage|welcome|about|contact|privacy|terms|login|sign\s*(?:in|up)|learn\s+more|read\s+more|get\s+started|start\s+now|official\s+website|menu|navigation)$/i;
+  const DESCRIPTION_NOISE=/^(home|homepage|welcome|about|contact|privacy|terms|login|sign\s*(?:in|up)|learn\s+more|read\s+more|get\s+started|start\s+now|official\s+website|menu|navigation|features?|pricing|faq|frequently\s+asked\s+questions?|why\s+choose|how\s+it\s+works?)$/i;
+  const DESCRIPTION_BAD_PATTERNS=/(privacy policy|terms of (?:use|service)|cookie policy|all rights reserved|免责声明|隐私政策|服务条款|用户协议|常见问题|faq|传统(?:算命|方法).*?(?:主观|偏差)|主观偏差|联系我们|登录|注册|导航|价格方案|立即开始|为什么选择|工作原理)/i;
 
   function normalizeSourceText(value){
     return text(value).replace(/https?:\/\/\S+/gi," ").replace(/\[[^\]]*\]\([^)]*\)/g," ")
@@ -310,28 +310,45 @@
     out=out.replace(/\b(?:is|are|the|a|an|and|or|for|with|to|of|on|in|from|by|your|our|this|that|you|we|it|as|at|into|using|used|use|powered|built|modern|next|best|easy|simple|free|online|download|learn|more|official|website|home|welcome|about|contact|login|sign|get|start|manage|create|help)\b/gi," ");
     return out.replace(/[。！？!?]+/g,"。 ").replace(/[,:;，、；：]+/g," ").replace(/\s+/g," ").trim();
   }
-  function sourceSentences(input){
-    const titleValue=normalizeSourceText(input.title), nameValue=normalizeSourceText(input.name);
-    const stripBrand=v=>{let out=normalizeSourceText(v);if(nameValue&&out.toLowerCase()===nameValue.toLowerCase())return "";const escaped=nameValue.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");if(escaped)out=out.replace(new RegExp("^"+escaped+"\\s*","i"),"");return out;};
-    const values=[input.description,(titleValue&&titleValue!==nameValue)?stripBrand(titleValue):"",input.content,input.keywords].map(normalizeSourceText).filter(Boolean);
-    const result=[]; const add=v=>{v=stripBrand(v);if(!v||DESCRIPTION_NOISE.test(v)||result.includes(v))return;result.push(v);};
-    values.forEach(v=>v.split(/[。！？!?]+/).map(x=>x.trim()).filter(x=>x.length>=4).forEach(add));
-    return result.slice(0,24);
-  }
+
   function cleanDescriptionCandidate(value){
     return text(value).replace(/\s+/g,"").replace(/[。！？!?.,，、；：:;“”‘’"'()（）\[\]{}<>《》\-–—]/g,"");
   }
-  function charCount(value){return Array.from(text(value)).length;}
+  function validDescriptionSource(value){
+    const raw=normalizeSourceText(value);
+    if(!raw||DESCRIPTION_NOISE.test(raw)||DESCRIPTION_BAD_PATTERNS.test(raw))return false;
+    if(/^https?:\/\//i.test(raw))return false;
+    if(raw.length<6)return false;
+    return true;
+  }
+
+  // 候选项必须携带来源等级；高等级来源永远优先于正文。
+  function sourceCandidates(input){
+    const candidates=[];
+    const add=(value,source,priority)=>{
+      const raw=normalizeSourceText(value);
+      if(!validDescriptionSource(raw))return;
+      const key=cleanDescriptionCandidate(raw).toLowerCase();
+      if(!key||candidates.some(x=>cleanDescriptionCandidate(x.value).toLowerCase()===key))return;
+      candidates.push({value:raw,source,priority});
+    };
+    (input.descriptionCandidates||[]).forEach(x=>add(x?.value||x,x?.source||"unknown",Number(x?.priority||90)));
+    // 兼容旧状态，但不再把 content 当候选源。
+    if(input.description)add(input.description,"meta-description",10);
+    return candidates.sort((a,b)=>a.priority-b.priority);
+  }
+
   function exact16FromSource(input){
-    const translated=sourceSentences(input).flatMap(s=>{
-      const zh=translateSourceText(s), raw=cleanDescriptionCandidate(s), out=[];
-      if(zh)out.push(zh); if(/[\u4e00-\u9fa5]/.test(raw))out.push(raw); return out;
-    }).map(cleanDescriptionCandidate).filter(Boolean);
-    const exact=translated.find(x=>charCount(x)===16); if(exact)return exact;
-    const long=translated.filter(x=>charCount(x)>16).sort((a,b)=>charCount(b)-charCount(a));
-    if(long.length)return Array.from(long[0]).slice(0,16).join("");
-    // ③ 无法从当前网页事实可靠形成16字时，宁可留空交人工审核，
-    // 也禁止重复拼接、品牌名填充或固定后缀把句子“凑够16字”。
+    const candidates=sourceCandidates(input);
+    const translated=candidates.flatMap(c=>{
+      const variants=[translateSourceText(c.value),c.value];
+      return variants.map(cleanDescriptionCandidate).filter(v=>validDescriptionSource(v)).map(v=>({value:v,source:c.source,priority:c.priority}));
+    });
+    const exact=translated.find(x=>charCount(x.value)===16);
+    if(exact)return exact.value;
+    const long=translated.filter(x=>charCount(x.value)>16).sort((a,b)=>a.priority-b.priority||charCount(a.value)-charCount(b.value));
+    if(long.length)return Array.from(long[0].value).slice(0,16).join("");
+    // 没有可靠产品描述时必须留空，禁止从正文随机抽句或用模板硬凑。
     return "";
   }
   function autoDescription16(input){return exact16FromSource(input);}
@@ -401,6 +418,63 @@
     };
   }
 
+  function extractDescriptionCandidatesFromDoc(doc){
+    const out=[]; const seen=new Set();
+    const add=(value,source,priority)=>{
+      const raw=normalizeSourceText(value); const key=cleanDescriptionCandidate(raw).toLowerCase();
+      if(!validDescriptionSource(raw)||!key||seen.has(key))return;
+      seen.add(key); out.push({value:raw,source,priority});
+    };
+    const getMeta=(selector,source,priority)=>{
+      const node=doc.querySelector(selector); if(node)add(node.getAttribute("content")||node.textContent,source,priority);
+    };
+    getMeta('meta[name="description"]','meta-description',10);
+    getMeta('meta[property="og:description"]','og-description',20);
+    getMeta('meta[name="twitter:description"]','twitter-description',25);
+    getMeta('meta[itemprop="description"]','meta-item-description',25);
+
+    try{
+      const data=[...doc.querySelectorAll('script[type="application/ld+json"]')].map(s=>JSON.parse(s.textContent||"")).flatMap(x=>Array.isArray(x)?x:(Array.isArray(x?.["@graph"])?x["@graph"]:[x]));
+      for(const item of data){
+        add(item?.description,"jsonld-description",30);
+        if(item?.offers?.description)add(item.offers.description,"jsonld-offer-description",32);
+      }
+    }catch(e){}
+
+    // 只读取明确标记为“描述/简介”的节点；不扫描整页正文。
+    const explicitSelectors=[
+      '[itemprop="description"]',
+      '[data-description]',
+      '#description', '#about-description', '#product-description',
+      '.description', '.product-description', '.tool-description', '.hero-description',
+      '.subtitle', '.tagline', '.intro', '.lead'
+    ];
+    explicitSelectors.forEach(sel=>doc.querySelectorAll(sel).forEach(n=>add(n.getAttribute?.("data-description")||n.textContent,"explicit-description",35)));
+
+    // 仅把首屏主内容中的首个短段落作为低优先级候选，不再把 body 全文交给简介生成器。
+    const main=doc.querySelector('main, [role="main"], article');
+    if(main){
+      const paragraphs=[...main.querySelectorAll('p')].map(p=>text(p.textContent)).filter(x=>x.length>=12&&x.length<=240);
+      paragraphs.slice(0,3).forEach((x,i)=>add(x,`main-paragraph-${i+1}`,45));
+    }
+    return out.sort((a,b)=>a.priority-b.priority);
+  }
+
+  async function fetchGithubDescription(github){
+    const normalized=normalizeGithubUrl(github); if(!normalized)return "";
+    try{
+      const proxy="https://r.jina.ai/"+normalized;
+      const r=await fetch(proxy,{cache:"no-store",headers:{Accept:"text/plain","x-no-cache":"true"}});
+      if(!r.ok)return "";
+      const raw=await r.text();
+      const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+      const start=lines.findIndex(x=>/^#{1,2}\s+/.test(x));
+      const pool=(start>=0?lines.slice(start+1):lines).filter(x=>!/^#{1,6}\s+/.test(x)&&!/^[-*]\s+/.test(x)&&!/^https?:\/\//i.test(x));
+      const candidate=pool.map(x=>x.replace(/[`*_>#\[\]]/g," ").replace(/\s+/g," ").trim()).find(x=>validDescriptionSource(x)&&x.length>=12&&x.length<=300);
+      return candidate||"";
+    }catch(e){return "";}
+  }
+
   async function fetchPage(url){
     const clean=text(url);
     if(!/^https?:\/\//i.test(clean))throw new Error("请输入有效网址");
@@ -417,7 +491,7 @@
     }
 
     const looksLikeMarkdown=source==="jina"||!/<html[\s>]/i.test(raw);
-    let title="",description="",keywords="",body="",siteName="",structuredName="",github=extractGithub(raw),thumbnail="";
+    let title="",description="",keywords="",body="",siteName="",structuredName="",github=extractGithub(raw),thumbnail="",descriptionCandidates=[];
 
     if(looksLikeMarkdown){
       const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
@@ -435,8 +509,11 @@
         if(cleaned.length>=12)blocks.push(cleaned);
       }
       body=blocks.join(" ").slice(0,18000);
+      blocks.slice(0,3).forEach((x,i)=>descriptionCandidates.push({value:x,source:`markdown-paragraph-${i+1}`,priority:45}));
       const metaMatch=raw.match(/(?:description|meta description)\s*[:：]\s*(.+)/i);
       description=text(fmDescription||metaMatch?.[1]||"");
+      if(fmDescription)descriptionCandidates.push({value:fmDescription,source:"frontmatter-description",priority:10});
+      else if(metaMatch?.[1])descriptionCandidates.push({value:metaMatch[1],source:"markdown-description",priority:15});
       keywords=text(raw.match(/(?:keywords?)\s*[:：]\s*(.+)/i)?.[1]||"");
       thumbnail=text(raw.match(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/i)?.[1]||"");
     }else{
@@ -444,6 +521,7 @@
       const get=(sel,attr)=>{const n=doc.querySelector(sel);return n?(attr?n.getAttribute(attr):n.textContent):""};
       title=text(get("title"));
       description=text(get('meta[name="description"]',"content")||get('meta[property="og:description"]',"content"));
+      descriptionCandidates=extractDescriptionCandidatesFromDoc(doc);
       keywords=text(get('meta[name="keywords"]',"content"));
       const og=text(get('meta[property="og:title"]',"content"));
       thumbnail=text(get('meta[property="og:image"]',"content")||get('meta[name="twitter:image"]',"content")||get('meta[name="twitter:image:src"]',"content"));
@@ -458,6 +536,7 @@
           return [x?.codeRepository,x?.repository,...same].flatMap(v=>typeof v==="object"?[v?.url]:[v]);
         });
         description=description||text(desc);
+        if(desc)descriptionCandidates.push({value:text(desc),source:"jsonld-description",priority:30});
         github=github||repoCandidates.map(normalizeGithubUrl).find(Boolean)||"";
         thumbnail=thumbnail||(Array.isArray(img)?text(img[0]):typeof img==="object"?text(img?.url):text(img));
       }catch(e){}
@@ -468,11 +547,16 @@
     }
 
     github=github||extractGithub(raw);
+    if(github){
+      const ghDescription=await fetchGithubDescription(github);
+      if(ghDescription)descriptionCandidates.push({value:ghDescription,source:"github-readme",priority:50});
+    }
+    descriptionCandidates=descriptionCandidates.filter((x,i,a)=>a.findIndex(y=>cleanDescriptionCandidate(y.value).toLowerCase()===cleanDescriptionCandidate(x.value).toLowerCase())===i).sort((a,b)=>a.priority-b.priority);
     if(source==="jina"&&fetchedUrl&&!sameFetchedResource(clean,fetchedUrl)){
       throw new Error("读取结果与当前 URL 不一致，已拒绝使用旧网页内容，请再次读取");
     }
     const name=nameFromTitle(structuredName,clean)||nameFromTitle(title,clean)||nameFromTitle(siteName,clean);
-    return {title,resourceName:name,description,keywords,content:body,github:normalizeGithubUrl(github),thumbnail,siteName,structuredName,source,fetchedUrl};
+    return {title,resourceName:name,description,descriptionCandidates,keywords,content:body,github:normalizeGithubUrl(github),thumbnail,siteName,structuredName,source,fetchedUrl};
   }
 
   function renderChips(container,items,type){
@@ -659,7 +743,7 @@
       if(!current.description||autoDescription){
         input.description=exact16FromSource({
           name:meta.resourceName||input.name,url,
-          description:meta.description,content:meta.content,title:meta.title,keywords:meta.keywords
+          description:meta.description,descriptionCandidates:meta.descriptionCandidates,content:meta.content,title:meta.title,keywords:meta.keywords
         });
         state.descriptionMode="auto";
         markAutoField("description",input.description);
@@ -730,7 +814,7 @@
         if(!current.description||autoDescription){
           const value=exact16FromSource({
             name:m.resourceName||$("#resourceName").value,url,
-            description:m.description,content:m.content,title:m.title,keywords:m.keywords
+            description:m.description,descriptionCandidates:m.descriptionCandidates,content:m.content,title:m.title,keywords:m.keywords
           });
           $("#resourceDescription").value=value;
           state.descriptionMode="auto";
