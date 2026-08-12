@@ -273,6 +273,8 @@
       .replace(/\s+/g,' ')
       .trim();
     if(!s || s.length<8 || s.length>1000)return '';
+    // Description Reader 严禁把 URL、来源提示、导航/页脚文本当成简介来源。
+    if(/https?:\/\/|www\.|(?:地址|网址|链接)?来源\s*[:：]|(?:source|url|link)\s*[:：]/i.test(s))return '';
     if(/^(home|homepage|welcome|about|contact|privacy|terms|login|sign in|sign up|learn more|read more|get started|menu|navigation|features|pricing|faq)$/i.test(s))return '';
     return s;
   }
@@ -335,22 +337,23 @@
     return isChinese(source)?source:"";
   }
   async function exact16FromSource(input){
+    // 只选择一个“真实来源”生成简介，禁止把多个候选句子拼接成伪简介。
     const candidates=[];
     for(const item of asArray(input?.descriptionCandidates)){
       if(typeof item==='string')pushDescriptionCandidate(candidates,item,'source',90);
       else if(item)pushDescriptionCandidate(candidates,item.value,item.source||'source',Number(item.priority||90));
     }
     pushDescriptionCandidate(candidates,input?.description,'provided-description',15);
-    const pieces=[];
-    for(const item of candidates.sort((a,b)=>a.priority-b.priority).slice(0,4)){
+
+    const ordered=candidates.sort((a,b)=>a.priority-b.priority);
+    for(const item of ordered){
       const translated=cleanDescriptionCandidate(await translateToChinese(item.value));
-      if(translated && !pieces.some(x=>x.toLowerCase()===translated.toLowerCase()))pieces.push(translated);
-      if(charCount(pieces.join(''))>=16)break;
+      if(charCount(translated)>=16)return Array.from(translated).slice(0,16).join('');
     }
+
     const title=cleanDescriptionCandidate(await translateToChinese(input?.title||input?.name||''));
-    if(title && !pieces.some(x=>x===title))pieces.push(title);
-    const combined=pieces.join('');
-    return charCount(combined)>=16 ? Array.from(combined).slice(0,16).join('') : "";
+    if(charCount(title)>=16)return Array.from(title).slice(0,16).join('');
+    return '';
   }
 
   async function fetchGithubInfo(githubUrl){
