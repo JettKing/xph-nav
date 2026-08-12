@@ -1,5 +1,5 @@
 /**
- * 徐胖虎资源社 V5.3.10.5-FIX5-TEST 智能资源录入系统
+ * 徐胖虎资源社 V5.3.10.5-TRANSLATE-TEST 智能资源录入系统
  * - 只从 V5.2 标准词库中选择标签
  * - 本地规则推断，不调用第三方 AI API，不暴露密钥
  * - 支持网页元信息读取、智能分类、人工审核、JSON/JS 导出
@@ -268,76 +268,104 @@
   function charCount(value){return Array.from(text(value)).length;}
   function limit32(value){return Array.from(text(value)).slice(0,32).join("");}
 
-  // Description Reader Architecture Reset:
-  // 自动简介只允许来自“当前 URL 明确声明的结构化描述”，禁止从整页正文、关键词或站点模板猜测。
-  const DESCRIPTION_NOISE=/^(home|homepage|welcome|about|contact|privacy|terms|login|sign\s*(?:in|up)|learn\s+more|read\s+more|get\s+started|start\s+now|official\s+website|menu|navigation|features?|pricing|faq|frequently\s+asked\s+questions?|why\s+choose|how\s+it\s+works?)$/i;
-  const DESCRIPTION_BAD_PATTERNS=/(privacy policy|terms of (?:use|service)|cookie policy|all rights reserved|免责声明|隐私政策|服务条款|用户协议|常见问题|faq|主观偏差|联系我们|登录|注册|导航|价格方案|立即开始|为什么选择|工作原理)/i;
-
   function normalizeSourceText(value){
     return text(value).replace(/https?:\/\/\S+/gi," ").replace(/\[[^\]]*\]\([^)]*\)/g," ")
       .replace(/[`*_>#|{}]/g," ").replace(/[\r\n]+/g,"。 ").replace(/\s+/g," ").trim();
   }
+
+  // 自动简介候选源：严格按“产品事实来源”优先级取值。
+  // 禁止把整页正文、FAQ、营销对比、免责声明、导航等随机句子作为核心简介。
   function cleanDescriptionCandidate(value){
     return text(value).replace(/\s+/g,"").replace(/[。！？!?.,，、；：:;“”‘’"'()（）\[\]{}<>《》\-–—]/g,"");
   }
-  function validDescriptionSource(value,source=""){
+  function validDescriptionSource(value){
     const raw=normalizeSourceText(value);
-    if(!raw||DESCRIPTION_NOISE.test(raw)||DESCRIPTION_BAD_PATTERNS.test(raw))return false;
-    if(/^https?:\/\//i.test(raw)||raw.length<6)return false;
-    // 仅允许明确的结构化来源进入自动简介：正文段落不再是候选源。
-    const allowed=/^(meta-description|og-description|twitter-description|meta-item-description|jsonld-description|jsonld-offer-description|frontmatter-description|markdown-description|github-readme)$/i;
-    if(source&&!allowed.test(source))return false;
+    if(!raw)return false;
+    if(/^https?:\/\//i.test(raw))return false;
+    if(raw.length<6)return false;
     return true;
   }
 
+  // 候选项必须携带来源等级；高等级来源永远优先于正文。
+  // 自动简介只允许使用“网页明确声明的产品描述”来源。
+  // 不扫描正文、不抽取段落、不使用 GitHub README、不使用营销/FAQ/免责声明。
   function sourceCandidates(input){
+    const allowed=new Set([
+      "meta-description",
+      "og-description",
+      "twitter-description",
+      "meta-item-description",
+      "jsonld-description"
+    ]);
     const candidates=[];
     const add=(value,source,priority)=>{
+      if(!allowed.has(source))return;
       const raw=normalizeSourceText(value);
-      if(!validDescriptionSource(raw,source))return;
+      if(!validDescriptionSource(raw))return;
       const key=cleanDescriptionCandidate(raw).toLowerCase();
       if(!key||candidates.some(x=>cleanDescriptionCandidate(x.value).toLowerCase()===key))return;
-      candidates.push({value:raw,source,priority});
+      candidates.push({value:raw,source,priority:Number(priority||90)});
     };
-    (input.descriptionCandidates||[]).forEach(x=>add(x?.value||x,x?.source||"unknown",Number(x?.priority||90)));
-    // 仅兼容已明确标记为 meta-description 的旧状态，禁止普通 description 偷渡。
+    (input.descriptionCandidates||[]).forEach(x=>add(x?.value||x,x?.source||"unknown",x?.priority));
+    // 兼容旧状态：只有明确标记为 description 的字段才可进入候选。
     if(input.description)add(input.description,"meta-description",10);
     return candidates.sort((a,b)=>a.priority-b.priority);
   }
 
-  function toChineseCore16(value){
-    const raw=cleanDescriptionCandidate(value);
-    if(!raw)return "";
-    // 来源本身已经是16字符时直接保留，避免为了“中文化”破坏 AI / Git / SVG 等产品术语。
-    if(charCount(raw)===16&&/[\u4e00-\u9fff]/.test(raw))return raw;
-    let s=raw;
-    // 只做语言清洗，不做 URL/网站/关键词模板推断。
-    s=s.replace(/^(欢迎来到|欢迎使用|这是|这里是|我们提供|我们为你|专为|一款|一个|一种|基于|致力于|帮助用户|为用户|让你|让您)/,"" );
-    s=s.replace(/(最佳|免费|在线|官方|全新|现代|简单|轻松|立即|开始使用|了解更多)$/g,"");
-    if(charCount(s)!==16){
-      // 优先选择原始描述中的自然语义句，而不是从正文随机取句或机械填充。
-      const parts=String(value).split(/[。！？!?；;]/).map(x=>cleanDescriptionCandidate(x)).filter(x=>charCount(x)>=16&&charCount(x)<=32&&/[\u4e00-\u9fff]/.test(x));
-      const natural=parts.find(x=>charCount(x)===16)||parts[0];
-      if(natural)s=natural;
-    }
-    s=cleanDescriptionCandidate(s);
-    if(charCount(s)===16&&/[\u4e00-\u9fff]/.test(s))return s;
-    // 若来源明确为中文描述但超过16字，只保留前16字；不追加虚构词。
-    if(/^[\u4e00-\u9fffA-Za-z0-9]+$/.test(s)&&charCount(s)>16&&/[\u4e00-\u9fff]/.test(s))return Array.from(s).slice(0,16).join("");
-    return "";
-  }
-
   function exact16FromSource(input){
     const candidates=sourceCandidates(input);
+    const cleanChinese=candidates
+      .map(c=>({value:cleanDescriptionCandidate(c.value),source:c.source,priority:c.priority}))
+      .filter(x=>/^[\u3400-\u9fff]{16,}$/.test(x.value))
+      .sort((a,b)=>a.priority-b.priority||xLength(a.value)-xLength(b.value));
+    if(!cleanChinese.length)return "";
+    return Array.from(cleanChinese[0].value).slice(0,16).join("");
+  }
+  function xLength(v){return Array.from(String(v||"")).length;}
+  function isMostlyChinese(value){
+    const s=text(value).replace(/[\s\p{P}\p{S}]/gu,"");
+    if(!s)return false;
+    const zh=(s.match(/[\u3400-\u9fff]/g)||[]).length;
+    return zh/Math.max(1,Array.from(s).length)>=0.45;
+  }
+  function compactChinese16(value){
+    const s=normalizeSourceText(value).replace(/[\u3400-\u9fffA-Za-z0-9]/g,ch=>ch).replace(/[^\u3400-\u9fff]/g,"");
+    if(Array.from(s).length<16)return "";
+    return Array.from(s).slice(0,16).join("");
+  }
+  async function translateToChinese(value){
+    const source=normalizeSourceText(value);
+    if(!source||isMostlyChinese(source))return source;
+    const endpoint="https://api.mymemory.translated.net/get?q="+encodeURIComponent(source.slice(0,1200))+"&langpair=auto|zh-CN";
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),6500);
+    try{
+      const r=await fetch(endpoint,{cache:"no-store",signal:controller.signal,headers:{"Accept":"application/json"}});
+      if(!r.ok)throw new Error("translation failed");
+      const data=await r.json();
+      const translated=text(data?.responseData?.translatedText||"");
+      return translated||"";
+    }catch(e){return "";}
+    finally{clearTimeout(timer);}
+  }
+  async function exact16FromSourceTranslated(input){
+    const candidates=sourceCandidates(input);
     for(const c of candidates){
-      const value=toChineseCore16(c.value);
-      if(value&&charCount(value)===16)return value;
+      const raw=normalizeSourceText(c.value);
+      if(!raw)continue;
+      if(isMostlyChinese(raw)){
+        const v=compactChinese16(raw);
+        if(v)return v;
+        continue;
+      }
+      const zh=await translateToChinese(raw);
+      const v=compactChinese16(zh);
+      if(v)return v;
     }
-    // 没有可靠结构化来源时保持空白，交给人工审核；禁止猜测。
     return "";
   }
   function autoDescription16(input){return exact16FromSource(input);}
-  function chineseDescription(input){return autoDescription16(input);}
+  async function chineseDescription(input){return exact16FromSourceTranslated(input);}
   function isLikelyGenericTitle(value){
     const s=text(value).toLowerCase();
     return !s||s.length>30||/^(your next|welcome|home|homepage|untitled|coming soon|the future|we are|we're|won.?t be|will be|github|gitlab|bitbucket|cloudflare|wordpress)$/i.test(s);
@@ -426,72 +454,91 @@
       }
     }catch(e){}
 
-    // 不再读取 .description / .subtitle / .intro / 首屏正文等通用节点。
-    // 页面结构化描述之外的内容一律不能直接成为自动简介候选。
     return out.sort((a,b)=>a.priority-b.priority);
   }
 
-  async function fetchGithubDescription(github){
-    const normalized=normalizeGithubUrl(github); if(!normalized)return "";
-    try{
-      const proxy="https://r.jina.ai/"+normalized;
-      const r=await fetch(proxy,{cache:"no-store",headers:{Accept:"text/plain","x-no-cache":"true"}});
-      if(!r.ok)return "";
-      const raw=await r.text();
-      const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-      const start=lines.findIndex(x=>/^#{1,2}\s+/.test(x));
-      const pool=(start>=0?lines.slice(start+1):lines).filter(x=>!/^#{1,6}\s+/.test(x)&&!/^[-*]\s+/.test(x)&&!/^https?:\/\//i.test(x));
-      const candidate=pool.map(x=>x.replace(/[`*_>#\[\]]/g," ").replace(/\s+/g," ").trim()).find(x=>validDescriptionSource(x)&&x.length>=12&&x.length<=300);
-      return candidate||"";
-    }catch(e){return "";}
+  function withTimeout(promise,ms,message){
+    return Promise.race([
+      promise,
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error(message)),ms))
+    ]);
   }
 
   async function fetchPage(url){
     const clean=text(url);
     if(!/^https?:\/\//i.test(clean))throw new Error("请输入有效网址");
+
     let raw="",source="direct",fetchedUrl=clean;
+    let directError=null;
+
+    // 第一层：直接读取真实 HTML。
     try{
-      const r=await fetch(clean,{mode:"cors",redirect:"follow",cache:"no-store",headers:{"Cache-Control":"no-cache","Pragma":"no-cache"}});
+      const r=await withTimeout(fetch(clean,{mode:"cors",redirect:"follow",cache:"no-store",headers:{"Cache-Control":"no-cache","Pragma":"no-cache"}}),5000,"官网读取超时");
       if(!r.ok)throw new Error("HTTP "+r.status);
-      raw=await r.text(); fetchedUrl=r.url||clean;
+      raw=await r.text();
+      fetchedUrl=r.url||clean;
     }catch(e){
-      const proxy="https://r.jina.ai/"+clean;
-      const r=await fetch(proxy,{cache:"no-store",headers:{Accept:"text/plain","x-no-cache":"true","x-cache-tolerance":"0","DNT":"1"}});
-      if(!r.ok)throw new Error("网页读取失败："+r.status);
-      raw=await r.text(); source="jina";
+      directError=e;
     }
 
-    const looksLikeMarkdown=source==="jina"||!/<html[\s>]/i.test(raw);
+    // 第二层：仅作为读取代理，不负责“猜简介”。
+    if(!raw){
+      const proxy="https://r.jina.ai/"+clean;
+      try{
+        const r=await withTimeout(fetch(proxy,{cache:"no-store",headers:{
+          Accept:"application/json",
+          "x-no-cache":"true",
+          "x-cache-tolerance":"0",
+          "DNT":"1"
+        }}),12000,"网页代理读取超时");
+        if(!r.ok)throw new Error("网页读取失败："+r.status);
+        const ct=(r.headers.get("content-type")||"").toLowerCase();
+        if(ct.includes("application/json")){
+          const payload=await r.json();
+          const data=payload?.data||payload;
+          raw=text(data?.content||"");
+          fetchedUrl=text(data?.url||clean);
+          source="jina-json";
+          var jinaTitle=text(data?.title||"");
+          if(!raw&&!jinaTitle)throw new Error("代理未返回有效内容");
+        }else{
+          raw=await r.text();
+          fetchedUrl=clean;
+          source="jina";
+        }
+      }catch(e){
+        throw new Error(directError?.message||e.message||"网页读取失败");
+      }
+    }
+
+    const looksLikeMarkdown=source.startsWith("jina")||!/<html[\s>]/i.test(raw);
     let title="",description="",keywords="",body="",siteName="",structuredName="",github=extractGithub(raw),thumbnail="",descriptionCandidates=[];
 
     if(looksLikeMarkdown){
       const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
       const fmTitle=raw.match(/^---\s*\n(?:.*\n)*?title:\s*["']?(.+?)["']?\s*\n(?:.*\n)*?---/im)?.[1]||"";
-      const fmDescription=raw.match(/^---\s*\n(?:.*\n)*?description:\s*["']?(.+?)["']?\s*\n(?:.*\n)*?---/im)?.[1]||"";
       const fmUrl=raw.match(/^---\s*\n(?:.*\n)*?url:\s*["']?(.+?)["']?\s*\n(?:.*\n)*?---/im)?.[1]||"";
       if(fmUrl)fetchedUrl=text(fmUrl);
       const heading=lines.find(x=>/^#{1,6}\s+/.test(x));
-      title=text(fmTitle||(heading||"").replace(/^#{1,6}\s+/i,"").replace(/\s+#*$/,""));
+      title=text(fmTitle||heading||jinaTitle||"").replace(/^#{1,6}\s+/i,"").replace(/\s+#*$/,"");
       const blocks=[];
       for(const line of lines){
         if(/^---$/.test(line)||/^#{1,6}\s+/.test(line)||/^[-*]\s+/.test(line)||/^https?:\/\//i.test(line))continue;
-        if(/^(title|description|url|source):\s*/i.test(line))continue;
         const cleaned=line.replace(/[`*_>\[\]]/g," ").replace(/\s+/g," ").trim();
         if(cleaned.length>=12)blocks.push(cleaned);
       }
       body=blocks.join(" ").slice(0,18000);
-      const metaMatch=raw.match(/(?:description|meta description)\s*[:：]\s*(.+)/i);
-      description=text(fmDescription||metaMatch?.[1]||"");
-      if(fmDescription)descriptionCandidates.push({value:fmDescription,source:"frontmatter-description",priority:10});
-      else if(metaMatch?.[1])descriptionCandidates.push({value:metaMatch[1],source:"markdown-description",priority:15});
-      keywords=text(raw.match(/(?:keywords?)\s*[:：]\s*(.+)/i)?.[1]||"");
-      thumbnail=text(raw.match(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/i)?.[1]||"");
+      // 重要：Jina 的正文不是“网页 description”。这里不把正文句子当简介。
+      keywords="";
+      thumbnail="";
     }else{
       const doc=new DOMParser().parseFromString(raw,"text/html");
       const get=(sel,attr)=>{const n=doc.querySelector(sel);return n?(attr?n.getAttribute(attr):n.textContent):""};
       title=text(get("title"));
-      description=text(get('meta[name="description"]',"content")||get('meta[property="og:description"]',"content"));
-      descriptionCandidates=extractDescriptionCandidatesFromDoc(doc);
+      descriptionCandidates=extractDescriptionCandidatesFromDoc(doc).filter(x=>
+        ["meta-description","og-description","twitter-description","meta-item-description","jsonld-description"].includes(x.source)
+      );
+      description=text(descriptionCandidates[0]?.value||"");
       keywords=text(get('meta[name="keywords"]',"content"));
       const og=text(get('meta[property="og:title"]',"content"));
       thumbnail=text(get('meta[property="og:image"]',"content")||get('meta[name="twitter:image"]',"content")||get('meta[name="twitter:image:src"]',"content"));
@@ -499,16 +546,11 @@
       structuredName=extractStructuredName(doc);
       try{
         const data=[...doc.querySelectorAll('script[type="application/ld+json"]')].map(s=>JSON.parse(s.textContent||"")).flatMap(x=>Array.isArray(x)?x:(Array.isArray(x?.["@graph"])?x["@graph"]:[x]));
-        const desc=data.map(x=>x?.description).find(Boolean);
-        const img=data.map(x=>x?.image).find(Boolean);
         const repoCandidates=data.flatMap(x=>{
           const same=Array.isArray(x?.sameAs)?x.sameAs:[x?.sameAs];
           return [x?.codeRepository,x?.repository,...same].flatMap(v=>typeof v==="object"?[v?.url]:[v]);
         });
-        description=description||text(desc);
-        if(desc)descriptionCandidates.push({value:text(desc),source:"jsonld-description",priority:30});
         github=github||repoCandidates.map(normalizeGithubUrl).find(Boolean)||"";
-        thumbnail=thumbnail||(Array.isArray(img)?text(img[0]):typeof img==="object"?text(img?.url):text(img));
       }catch(e){}
       title=title||og;
       body=text(doc.body?.innerText||"").slice(0,18000);
@@ -516,14 +558,12 @@
       github=github||links.map(normalizeGithubUrl).find(Boolean)||"";
     }
 
+    // GitHub 只用于补充真实仓库地址；README 不进入自动简介。
     github=github||extractGithub(raw);
-    if(github){
-      const ghDescription=await fetchGithubDescription(github);
-      if(ghDescription)descriptionCandidates.push({value:ghDescription,source:"github-readme",priority:50});
-    }
     descriptionCandidates=descriptionCandidates.filter((x,i,a)=>a.findIndex(y=>cleanDescriptionCandidate(y.value).toLowerCase()===cleanDescriptionCandidate(x.value).toLowerCase())===i).sort((a,b)=>a.priority-b.priority);
-    if(source==="jina"&&fetchedUrl&&!sameFetchedResource(clean,fetchedUrl)){
-      throw new Error("读取结果与当前 URL 不一致，已拒绝使用旧网页内容，请再次读取");
+
+    if((source==="jina"||source==="jina-json")&&fetchedUrl&&!sameFetchedResource(clean,fetchedUrl)){
+      throw new Error("读取结果与当前 URL 不一致，已拒绝使用");
     }
     const name=nameFromTitle(structuredName,clean)||nameFromTitle(title,clean)||nameFromTitle(siteName,clean);
     return {title,resourceName:name,description,descriptionCandidates,keywords,content:body,github:normalizeGithubUrl(github),thumbnail,siteName,structuredName,source,fetchedUrl};
@@ -711,9 +751,9 @@
       }else state.auto.name="";
 
       if(!current.description||autoDescription){
-        input.description=exact16FromSource({
+        input.description=await exact16FromSourceTranslated({
           name:meta.resourceName||input.name,url,
-          description:meta.description,descriptionCandidates:meta.descriptionCandidates,content:meta.content,title:meta.title,keywords:meta.keywords
+          description:meta.description,descriptionCandidates:meta.descriptionCandidates,title:meta.title,keywords:meta.keywords
         });
         state.descriptionMode="auto";
         markAutoField("description",input.description);
@@ -782,9 +822,9 @@
         }else state.auto.name="";
 
         if(!current.description||autoDescription){
-          const value=exact16FromSource({
+          const value=await exact16FromSourceTranslated({
             name:m.resourceName||$("#resourceName").value,url,
-            description:m.description,descriptionCandidates:m.descriptionCandidates,content:m.content,title:m.title,keywords:m.keywords
+            description:m.description,descriptionCandidates:m.descriptionCandidates,title:m.title,keywords:m.keywords
           });
           $("#resourceDescription").value=value;
           state.descriptionMode="auto";
