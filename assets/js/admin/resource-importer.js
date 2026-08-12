@@ -18,7 +18,29 @@
   const TAGS = window.tags || {capabilities:[],scenarios:[],attributes:{pricing:[],platform:[],language:[],audience:[]}};
   const ALL = window.ResourceEngine?.getAllResources?.() || [];
 
-  const state = { draft:null, meta:{}, warnings:[], autoDescription:"" };
+  const state = { draft:null, meta:{
+    lastFetchedUrl:"",
+    lastAutoDescription:"",
+    descriptionDirty:false
+  }, warnings:[] };
+
+  function normalizeUrl(value){
+    return text(value).toLowerCase().replace(/#.*$/," ").replace(/\/+$/," ").trim();
+  }
+
+  function setAutoDescription(value){
+    const v=limit16(value);
+    $("#resourceDescription").value=v;
+    state.meta.lastAutoDescription=v;
+    state.meta.descriptionDirty=false;
+    return v;
+  }
+
+  function shouldReplaceDescription(url){
+    const current=text($("#resourceDescription")?.value);
+    const clean=normalizeUrl(url);
+    return !state.meta.descriptionDirty && (!current || current===state.meta.lastAutoDescription || state.meta.lastFetchedUrl!==clean);
+  }
 
   const stopWords = new Set("the a an and or of to in on for with from by is are ai tool app platform official online free pro com www https http www io co".split(/\s+/));
   const norm = s => text(s).toLowerCase().replace(/[\s_\-./:：，。！!？?（）()【】\[\],，]/g," ");
@@ -200,6 +222,7 @@
   function chineseDescription(input){
     const hay=currentHay(input);
     const name=text(input.name);
+    if(/weclipper|web.?clip|网页剪藏|剪藏|bookmark|save.?web/.test(hay))return "网页内容剪藏与知识管理工具";
     if(/multica|human.*agent|agent.*team|project management|项目管理|智能体协作/.test(hay))return "人类与AI智能体协作平台";
     if(/chatgpt|claude|gemini|对话|chat|assistant/.test(hay))return "AI智能对话与内容生成助手";
     if(/midjourney|image generation|图片生成|绘图|绘画/.test(hay))return "AI图像生成与创作工具";
@@ -352,6 +375,9 @@
     $("#resourceGithub").value=resource.github||"";
     $("#resourceThumbnail").value=resource.thumbnail||"";
     $("#resourceDescription").value=resource.description||"";
+    state.meta.lastFetchedUrl=normalizeUrl(resource.website);
+    state.meta.lastAutoDescription=resource.description||"";
+    state.meta.descriptionDirty=false;
     $("#resourceId").value=resource.id;
     renderChips($("#capabilityChips"),resource.capabilities,"capabilities");
     renderChips($("#scenarioChips"),resource.scenarios,"scenarios");
@@ -447,20 +473,25 @@
     renderChips($("#capabilityChips"),[],"capabilities");renderChips($("#scenarioChips"),[],"scenarios");renderChips($("#pricingChips"),[],"pricing");renderChips($("#platformChips"),[],"platform");renderChips($("#languageChips"),[],"language");renderChips($("#audienceChips"),[],"audience");loadDrafts();
 
     $("#analyzeBtn").onclick=async()=>{
-      let input={name:text($("#resourceName").value),url:text($("#resourceUrl").value),description:text($("#resourceDescription").value),github:text($("#resourceGithub").value),thumbnail:text($("#resourceThumbnail").value)};
+      const inputUrl=text($("#resourceUrl").value);
+      let input={name:text($("#resourceName").value),url:inputUrl,description:text($("#resourceDescription").value),github:text($("#resourceGithub").value),thumbnail:text($("#resourceThumbnail").value)};
       if(!input.url){setStatus("请先填写 URL");return;}
       setStatus("正在读取并分析…");
       let meta={};
       try{meta=await fetchPage(input.url);}catch(e){meta={};setStatus("网页读取失败，已使用 URL 进行本地分析");}
       if(!input.name)input.name=meta.resourceName||nameFromTitle(meta.title,input.url)||"未命名资源";
-      const shouldRefreshAutoDescription=!input.description||input.description===state.autoDescription;
-      if(shouldRefreshAutoDescription){input.description=limit16(meta.description||chineseDescription({...input,...meta}));state.autoDescription=input.description;}
+      const replaceDescription=shouldReplaceDescription(input.url);
+      if(replaceDescription){
+        input.description=limit16(meta.description||chineseDescription({...input,...meta}));
+        setAutoDescription(input.description);
+      }
       if(!input.github)input.github=meta.github||"";
       if(!input.thumbnail)input.thumbnail=meta.thumbnail||"";
       $("#resourceName").value=input.name;
       $("#resourceDescription").value=input.description;
       $("#resourceGithub").value=input.github;
       $("#resourceThumbnail").value=input.thumbnail;
+      state.meta.lastFetchedUrl=normalizeUrl(input.url);
       const r=analyze({...input,...meta});
       renderDraft(r);setStatus("分析完成，请人工审核后导出",true);
     };
@@ -471,28 +502,29 @@
       try{
         const m=await fetchPage(url);
         if(!$("#resourceName").value)$("#resourceName").value=m.resourceName||nameFromTitle(m.title,url)||"";
-        const currentDescription=text($("#resourceDescription").value);
-        if(!currentDescription||currentDescription===state.autoDescription){
-          const nextDescription=limit16(m.description||chineseDescription({name:$("#resourceName").value,url,...m}));
-          $("#resourceDescription").value=nextDescription;
-          state.autoDescription=nextDescription;
+        if(shouldReplaceDescription(url)){
+          setAutoDescription(m.description||chineseDescription({name:$("#resourceName").value,url,...m}));
         }
         if(!$("#resourceGithub").value)$("#resourceGithub").value=m.github||"";
         if(!$("#resourceThumbnail").value)$("#resourceThumbnail").value=m.thumbnail||"";
-        $("#pageMeta").textContent=`已读取：${m.resourceName||m.title||"无标题"}${m.github?" · 已发现 GitHub 项目":" "}`;
+        state.meta.lastFetchedUrl=normalizeUrl(url);
+        $("#pageMeta").textContent=`已读取：${m.resourceName||m.title||"无标题"}${m.github?" · 已发现 GitHub 项目":""}${m.thumbnail?" · 已读取缩略图":""}`;
         setStatus("网页信息读取完成",true);
       }catch(e){setStatus(e.message||"网页读取失败");}
     };
-    $("#resetBtn").onclick=()=>{state.draft=null;state.autoDescription="";$("#reviewPanel").hidden=true;$("#resourceName").value="";$("#resourceUrl").value="";$("#resourceDescription").value="";$("#resourceGithub").value="";$("#resourceThumbnail").value="";setStatus("已清空");};
+    $("#resetBtn").onclick=()=>{state.draft=null;state.meta.lastFetchedUrl="";state.meta.lastAutoDescription="";state.meta.descriptionDirty=false;$("#reviewPanel").hidden=true;$("#resourceName").value="";$("#resourceUrl").value="";$("#resourceDescription").value="";$("#resourceGithub").value="";$("#resourceThumbnail").value="";setStatus("已清空");};
     $("#clearAllBtn").onclick=()=>{
       if(!window.confirm("确定全部清空当前录入内容吗？\n已保存的历史草稿不会删除。"))return;
       state.draft=null;
-      state.autoDescription="";
+      state.meta.lastFetchedUrl="";
+      state.meta.lastAutoDescription="";
+      state.meta.descriptionDirty=false;
       $("#reviewPanel").hidden=true;
       $("#resourceName").value="";
       $("#resourceUrl").value="";
       $("#resourceDescription").value="";
       $("#resourceGithub").value="";
+      $("#resourceThumbnail").value="";
       $("#resourceId").value="";
       $("#pageMeta").textContent="";
       $("#status").textContent="当前录入已全部清空";
@@ -514,7 +546,20 @@
     $(document).onchange?.();
     document.addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;b.classList.toggle("selected");const r=readForm();$("#jsonPreview").textContent=JSON.stringify(cleanResource(r),null,2);});
     $("#categorySelect").addEventListener("change",()=>{const [parent,sub]=$("#categorySelect").value.split("::");syncExportTarget(parent);if(state.draft){state.draft.category=parent;state.draft.subcategory=sub;}});
-    ["resourceName","resourceUrl","resourceDescription","resourceGithub","resourceThumbnail","resourceId"].forEach(id=>$("#"+id).addEventListener("input",()=>{if(state.draft){const r=readForm();$("#jsonPreview").textContent=JSON.stringify(cleanResource(r),null,2);}}));
+    $("#resourceDescription").addEventListener("input",()=>{
+      const current=text($("#resourceDescription").value);
+      state.meta.descriptionDirty=current!==state.meta.lastAutoDescription;
+      if(state.draft){const r=readForm();$("#jsonPreview").textContent=JSON.stringify(cleanResource(r),null,2);}
+    });
+    $("#resourceUrl").addEventListener("input",()=>{
+      const url=normalizeUrl($("#resourceUrl").value);
+      if(url!==state.meta.lastFetchedUrl && !state.meta.descriptionDirty){
+        $("#resourceDescription").value="";
+        state.meta.lastAutoDescription="";
+      }
+      if(state.draft){const r=readForm();$("#jsonPreview").textContent=JSON.stringify(cleanResource(r),null,2);}
+    });
+    ["resourceName","resourceGithub","resourceThumbnail","resourceId"].forEach(id=>$("#"+id).addEventListener("input",()=>{if(state.draft){const r=readForm();$("#jsonPreview").textContent=JSON.stringify(cleanResource(r),null,2);}}));
   }
   document.addEventListener("DOMContentLoaded",init);
 })();
