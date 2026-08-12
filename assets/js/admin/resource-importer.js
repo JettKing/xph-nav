@@ -670,6 +670,21 @@
     };
   }
 
+  function renderChips(container,items,type){
+    const allowed=vocab(type);
+    container.innerHTML=allowed.map(v=>`<button type="button" class="chip ${items.includes(v)?"selected":""}" data-chip-type="${esc(type)}" data-chip-value="${esc(v)}">${esc(v)}</button>`).join("");
+  }
+  function renderCategoryOptions(sel,selected){
+    const list=categoryList();
+    sel.innerHTML=list.map(x=>`<option value="${esc(x.parent+"::"+x.child)}" ${x.child===selected?"selected":""}>${esc(x.parentName)} / ${esc(x.label)}</option>`).join("");
+  }
+  function syncExportTarget(parent){
+    const sel=$("#exportTarget");
+    if(sel && parent && [...sel.options].some(o=>o.value===parent))sel.value=parent;
+  }
+  function selectedChips(type){return $$(`.chip[data-chip-type="${type}"].selected`).map(x=>x.dataset.chipValue);}
+
+
   function renderDraft(resource){
     state.draft=resource;
     const meta=resource._meta||{};
@@ -801,8 +816,26 @@
 
   async function init(){
     if(!$("#resourceImporter"))return;
-    renderCategoryOptions($("#categorySelect"),"ai_chat");
-    renderChips($("#capabilityChips"),[],"capabilities");renderChips($("#scenarioChips"),[],"scenarios");renderChips($("#pricingChips"),[],"pricing");renderChips($("#platformChips"),[],"platform");renderChips($("#languageChips"),[],"language");renderChips($("#audienceChips"),[],"audience");loadDrafts();
+
+    // P0：初始化阶段必须与按钮事件绑定彻底隔离。
+    // 任一分类/标签/草稿初始化异常，都不能阻断后续按钮绑定。
+    const initErrors=[];
+    const safeInit=(label,fn)=>{
+      try{fn();}
+      catch(e){
+        console.error(`[ResourceImporter] ${label} 初始化失败`,e);
+        initErrors.push(`${label}: ${e?.message||e}`);
+      }
+    };
+
+    safeInit("分类",()=>renderCategoryOptions($("#categorySelect"),"ai_chat"));
+    safeInit("能力标签",()=>renderChips($("#capabilityChips"),[],"capabilities"));
+    safeInit("场景标签",()=>renderChips($("#scenarioChips"),[],"scenarios"));
+    safeInit("价格标签",()=>renderChips($("#pricingChips"),[],"pricing"));
+    safeInit("平台标签",()=>renderChips($("#platformChips"),[],"platform"));
+    safeInit("语言标签",()=>renderChips($("#languageChips"),[],"language"));
+    safeInit("受众标签",()=>renderChips($("#audienceChips"),[],"audience"));
+    safeInit("草稿列表",loadDrafts);
 
     $("#analyzeBtn").onclick=async()=>{
       const url=text($("#resourceUrl").value);
@@ -1009,6 +1042,12 @@
       }
       if(state.draft){const r=readForm();$("#jsonPreview").textContent=JSON.stringify(cleanResource(r),null,2);}
     }));
+
+    // 初始化有局部问题时，只提示诊断，不影响已经绑定完成的按钮。
+    if(initErrors.length){
+      console.error("[ResourceImporter] partial initialization errors:",initErrors);
+      setStatus(`界面初始化有 ${initErrors.length} 项异常，但按钮事件仍已绑定；请查看控制台诊断。`);
+    }
   }
   document.addEventListener("DOMContentLoaded",init);
 })();
