@@ -1,9 +1,9 @@
 /* Resource name policy: preserve the real source name verbatim; translate descriptions only. */
 /**
- * 徐胖虎资源社 V5.3.10.5-FIX1-TEST
- * - 补全 analyze 函数，修复智能分析按钮无法工作的问题
- * - 统一翻译超时注释与实际值
- * - 其他逻辑保持不变
+ * 徐胖虎资源社 V5.3.10.5 Description Reader Clean Baseline
+ * - 只从 V5.2 标准词库中选择标签
+ * - 本地规则推断，不调用第三方 AI API，不暴露密钥
+ * - 支持网页元信息读取、智能分类、人工审核、JSON/JS 导出
  */
 (function(){
   "use strict";
@@ -299,6 +299,37 @@
     if(list.some(x=>x.key===key))return;
     list.push({value:clean,source,priority,key});
   }
+  function defaultIcon(category){
+    const map={ai:"🤖",software:"💻",productivity:"⚡",website:"🌐",digital:"📚",solution:"💎"};
+    return map[text(category)]||"🌐";
+  }
+
+  function analyze(input){
+    const hay=currentHay(input);
+    const c=inferCategory(hay);
+    const group=CATEGORIES[c.cat]||{};
+    const sub=group.children?.[c.sub]?c.sub:Object.keys(group.children||{})[0]||"";
+    const caps=canonical(inferMulti(hay,rules.capabilities,8),TAGS.capabilities);
+    const scs=canonical(inferMulti(hay,rules.scenarios,6),TAGS.scenarios);
+    const attrs=inferAttributes(hay,input.url||"");
+    if(!caps.length)caps.push("文本生成");
+    if(!scs.length)scs.push("个人效率");
+    const id=makeId(input.name,input.url);
+    const existing=ALL.find(x=>String(x.id)===id||String(x.website||"").replace(/\/$/,"")===String(input.url||"").replace(/\/$/,""));
+    const warnings=[];
+    if(!text(input.name))warnings.push("缺少资源名称");
+    if(!/^https?:\/\//i.test(text(input.url)))warnings.push("URL 必须以 http:// 或 https:// 开头");
+    if(existing)warnings.push(`可能重复：已存在「${existing.name}」`);
+    if(c.score<1)warnings.push("分类置信度较低，请人工确认分类/子分类");
+    if(attrs.pricing==="增值")warnings.push("价格为规则推断值，发布前建议人工确认");
+    return {
+      id,name:text(input.name),description:text(input.description)||"",
+      icon:defaultIcon(c.cat),thumbnail:text(input.thumbnail),category:c.cat,subcategory:sub,website:text(input.url),github:text(input.github||input.githubUrl),
+      features:[],capabilities:caps,scenarios:scs,attributes:attrs,official:false,recommend:false,status:"active",
+      _meta:{categoryScore:c.score,warnings}
+    };
+  }
+
   function extractDescriptionCandidatesFromDoc(doc){
     const list=[];
     const meta=(sel,source,priority)=>{const n=doc.querySelector(sel);pushDescriptionCandidate(list,n?.getAttribute('content'),source,priority);};
@@ -332,7 +363,7 @@
   async function translateToChinese(value){
     const source=text(value); if(!source||isChinese(source))return source;
     const q=encodeURIComponent(source.slice(0,900));
-    // 翻译是增强能力，不允许阻塞网页读取；单次最多等待5秒。
+    // 翻译是增强能力，不允许阻塞网页读取；单次最多等待4秒。
     const endpoint=`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q=${q}`;
     try{
       const r=await fetchWithTimeout(endpoint,{mode:'cors'},5000);
@@ -416,7 +447,7 @@
     }
 
     const looksLikeMarkdown=source==='jina'||!/<html[\s>]/i.test(raw);
-    let title='',description='',keywords='',body='',siteName='',structuredName='',github=extractGithub(raw),thumbnail='',descriptionCandidates=[];
+    let title='',description='',keywords='',body='',siteName='',structuredName='',github=extractGithub(raw),thumbnail='',descriptionCandidates=[],resourceNameFromGithub='';
     let homepage='';
 
     if(looksLikeMarkdown){
@@ -463,10 +494,11 @@
         if(gh.description)pushDescriptionCandidate(descriptionCandidates,gh.description,'github-repository-description',35);
         homepage=homepage||gh.homepage||'';
         github=gh.github||github;
+        if(gh.resourceName)resourceNameFromGithub=gh.resourceName;
       }catch(e){}
     }
 
-    const name=nameFromTitle(structuredName||siteName||title,clean);
+    const name=text(resourceNameFromGithub||nameFromTitle(structuredName||siteName||title,clean));
     const description16=await exact16FromSource({name,url:clean,title,description,descriptionCandidates,content:body,keywords});
     return {title,resourceName:name,description:description16,descriptionCandidates,keywords,content:body,github,thumbnail,siteName,structuredName,source,fetchedUrl:clean,homepage:homepage||clean};
   }
@@ -614,62 +646,6 @@
   function copyJS(){navigator.clipboard?.writeText(buildNativeJS()).then(()=>setStatus("原生 JS 数据片段已复制",true));}
   function download(name,content,type){const blob=new Blob([content],{type});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 
-  // ==================== 补全 analyze 函数 ====================
-  /**
-   * 智能分析：根据读取到的页面元数据（meta）和当前表单输入，推断分类、标签、属性。
-   * 不调用任何外部 API，仅使用内置规则。
-   */
-  function analyze(input) {
-    // input 包含从 fetchPage 返回的字段，以及当前表单中的 name, description, github, thumbnail
-    const hay = currentHay(input); // 组合所有可用的文本信息
-    const catResult = inferCategory(hay);
-    const caps = inferMulti(hay, rules.capabilities);
-    const scens = inferMulti(hay, rules.scenarios);
-    const attrs = inferAttributes(hay, input.url || input.website || '');
-
-    // 若输入已有名称，优先保留；否则使用读取结果
-    const name = input.resourceName || input.name || '';
-    // 描述：如果已有且非自动，可能已由读取生成，这里保留；但 analyze 不负责生成简介（由 fetchPage 完成）
-    // 若 description 为空，可尝试从 hay 中提取，但一般 fetchPage 已生成。
-    const description = input.description || '';
-
-    // 构建资源对象
-    const resource = {
-      id: makeId(name, input.url || input.website || ''),
-      name: name,
-      description: description,
-      website: input.url || input.website || '',
-      github: input.github || '',
-      thumbnail: input.thumbnail || '',
-      category: catResult.cat,
-      subcategory: catResult.sub,
-      capabilities: caps,
-      scenarios: scens,
-      attributes: attrs,
-      icon: '🔗',
-      features: [],
-      official: false,
-      recommend: false,
-      status: 'active',
-      _meta: {
-        autoId: '',
-        autoName: '',
-        autoDescription: '',
-        autoGithub: '',
-        autoThumbnail: '',
-        autoUrl: input.url || input.website || '',
-        descriptionMode: 'auto', // 由分析生成，视为自动
-        warnings: []
-      }
-    };
-    // 若 description 为空，尝试从 hay 生成（但已有 fetchPage 生成，一般不会空）
-    if (!resource.description) {
-      resource.description = exact16(hay) || '待补充简介';
-    }
-    return resource;
-  }
-
-  // ==================== 原有初始化代码 ====================
   async function init(){
     if(!$("#resourceImporter"))return;
     renderCategoryOptions($("#categorySelect"),"ai_chat");
@@ -730,7 +706,6 @@
       $("#resourceDescription").value=input.description;
       $("#resourceGithub").value=input.github;
       $("#resourceThumbnail").value=input.thumbnail;
-      // 调用 analyze 进行智能分类和标签
       const r=analyze({...input,...meta});
       r._meta={...(r._meta||{}),descriptionMode:state.descriptionMode,autoDescription:state.descriptionMode==="auto"?exact16(input.description):"",autoId:state.auto.id,autoName:state.auto.name,autoGithub:state.auto.github,autoThumbnail:state.auto.thumbnail,autoUrl:state.autoUrl};
       renderDraft(r);setStatus("分析完成，请人工审核后导出",true);
