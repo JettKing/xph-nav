@@ -1,7 +1,9 @@
 /**
- * 徐胖虎资源社 V5.3.10.5-FIX5-TEST 智能资源录入系统
- * - 只从 V5.2 标准词库中选择标签
- * - 本地规则推断，不调用第三方 AI API，不暴露密钥
+ * 徐胖虎资源社 V5.3 智能资源录入系统
+ * - 只从标准词库中选择标签
+ * - 保留真实网页/GitHub读取层
+ * - 简介生成仅通过 Cloudflare Pages Function 调用 DeepSeek
+ * - 资源名称保持原样，不翻译、不改写
  * - 支持网页元信息读取、智能分类、人工审核、JSON/JS 导出
  */
 (function(){
@@ -24,7 +26,9 @@
     warnings:[],
     auto:{id:"",name:"",description:"",github:"",thumbnail:""},
     autoUrl:"",
-    descriptionMode:"manual"
+    descriptionMode:"manual",
+    pageReadUrl:"",
+    pageData:null
   };
 
   // 自动读取字段的“来源身份”。只有仍然等于自动读取结果的字段，
@@ -33,6 +37,8 @@
     state.auto={id:"",name:"",description:"",github:"",thumbnail:""};
     state.autoUrl="";
     state.descriptionMode="manual";
+    state.pageReadUrl="";
+    state.pageData=null;
   }
   function markAutoField(key,value){
     state.auto[key]=text(value);
@@ -49,6 +55,8 @@
     });
     resetAutoState();
     state.autoUrl="";
+    state.pageReadUrl="";
+    state.pageData=null;
     state.draft=null;
     $("#reviewPanel").hidden=true;
     $("#jsonPreview").textContent="等待智能分析生成。";
@@ -71,6 +79,10 @@
     state.auto={id:"",name:"",description:"",github:"",thumbnail:""};
     state.autoUrl="";
     state.descriptionMode="manual";
+    if(state.pageReadUrl!==url){
+      state.pageReadUrl="";
+      state.pageData=null;
+    }
     state.draft=null;
     $("#reviewPanel").hidden=true;
     $("#jsonPreview").textContent="等待智能分析生成。";
@@ -270,16 +282,17 @@
 
   async function generateDescriptionWithAI(input={}){
     const sourceParts=[
-      input.description,
       ...(Array.isArray(input.descriptionCandidates)?input.descriptionCandidates.map(x=>typeof x==="object"?x.value:x):[]),
+      input.description,
       input.content,
       input.title,
       input.keywords
-    ].filter(Boolean).map(x=>text(x)).filter(Boolean);
-    const sourceText=Array.from(new Set(sourceParts)).join("\n").slice(0,24000);
-    if(!sourceText)return "";
+    ].filter(Boolean).map(x=>normalizeSourceText(x)).filter(validDescriptionSource);
+    const sourceText=Array.from(new Set(sourceParts.map(x=>x.trim()))).join("\n").slice(0,24000);
+    if(!sourceText)throw new Error("没有可供 DeepSeek 分析的真实网页/GitHub内容");
+
     const controller=new AbortController();
-    const timer=setTimeout(()=>controller.abort(),15000);
+    const timer=setTimeout(()=>controller.abort(),30000);
     try{
       const r=await fetch("/api/deepseek-description",{
         method:"POST",
@@ -293,9 +306,14 @@
         cache:"no-store",
         signal:controller.signal
       });
-      if(!r.ok)throw new Error("DeepSeek代理请求失败："+r.status);
-      const data=await r.json();
-      return text(data.description);
+      let data={};
+      try{data=await r.json();}catch(e){}
+      if(!r.ok)throw new Error(data?.error||("DeepSeek代理请求失败："+r.status));
+      const description=text(data.description);
+      if(effectiveDescriptionCount(description)!==16){
+        throw new Error("DeepSeek 返回的简介未达到严格16个有效字符");
+      }
+      return description;
     }finally{clearTimeout(timer);}
   }
 
@@ -362,6 +380,38 @@
       features:[],capabilities:caps,scenarios:scs,attributes:attrs,official:false,recommend:false,status:"active",
       _meta:{categoryScore:c.score,warnings}
     };
+  }
+
+  // 真实网页/GitHub读取层的文本清洗。
+  // 这些函数只负责清理、去重和过滤原始页面内容，不生成简介。
+  function normalizeSourceText(value){
+    return decodeHtmlEntities(value)
+      .replace(/\s+/g," ")
+      .replace(/\u00a0/g," ")
+      .trim();
+  }
+
+  function cleanDescriptionCandidate(value){
+    return normalizeSourceText(value)
+      .replace(/https?:\/\/[^\s]+/gi," ")
+      .replace(/[`*_>#\[\]{}]/g," ")
+      .replace(/\s+/g," ")
+      .trim()
+      .toLowerCase();
+  }
+
+  function validDescriptionSource(value){
+    const raw=normalizeSourceText(value);
+    if(raw.length<12 || raw.length>300)return false;
+    if(/^https?:\/\//i.test(raw))return false;
+    if(/^(home|homepage|menu|navigation|login|sign in|sign up|learn more|read more|click here|github|gitlab|privacy|terms|cookie policy)$/i.test(raw))return false;
+    const cleaned=cleanDescriptionCandidate(raw);
+    const meaningful=Array.from(cleaned).filter(ch=>/[\u3400-\u9fffA-Za-z0-9]/.test(ch)).length;
+    return meaningful>=8;
+  }
+
+  function effectiveDescriptionCount(value){
+    return Array.from(String(value||"")).filter(ch=>/[\u3400-\u9fffA-Za-z0-9]/.test(ch)).length;
   }
 
   function extractDescriptionCandidatesFromDoc(doc){
@@ -723,12 +773,25 @@
       };
       const previousAuto={...state.auto};
       const previousAutoUrl=state.autoUrl;
+      const cachedPage=state.pageReadUrl===url && state.pageData ? state.pageData : null;
       prepareForReadUrl(url);
 
       setStatus("正在读取并分析…");
       let meta={};
-      try{meta=await fetchPage(url);}
-      catch(e){meta={};setStatus("网页读取失败，已使用 URL 进行本地分析");}
+      try{
+        if(cachedPage){
+          meta=cachedPage;
+          state.pageReadUrl=url;
+          state.pageData=meta;
+        }else{
+          meta=await fetchPage(url);
+          state.pageReadUrl=url;
+          state.pageData=meta;
+        }
+      }catch(e){
+        setStatus(e?.message||"网页读取失败");
+        return;
+      }
 
       const autoName=!!previousAuto.name&&current.name===previousAuto.name;
       const autoDescription=!!previousAuto.description&&current.description===previousAuto.description;
@@ -742,7 +805,12 @@
       }else state.auto.name="";
 
       if(!current.description||autoDescription){
-        input.description=await generateDescriptionWithAI({...meta,name:meta.resourceName||input.name,url,github:meta.github||input.github});
+        try{
+          input.description=await generateDescriptionWithAI({...meta,name:meta.resourceName||input.name,url,github:meta.github||input.github});
+        }catch(e){
+          setStatus(e?.message||"DeepSeek 简介生成失败");
+          return;
+        }
         state.descriptionMode="auto";
         markAutoField("description",input.description);
       }else{
@@ -799,6 +867,8 @@
       setStatus("正在读取网页…");
       try{
         const m=await fetchPage(url);
+        state.pageReadUrl=url;
+        state.pageData=m;
         const autoName=!!previousAuto.name&&current.name===previousAuto.name;
         const autoDescription=!!previousAuto.description&&current.description===previousAuto.description;
         const autoGithub=!!previousAuto.github&&current.github===previousAuto.github;
@@ -809,12 +879,14 @@
           $("#resourceName").value=value;markAutoField("name",value);
         }else state.auto.name="";
 
-        if(!current.description||autoDescription){
-          const value=await generateDescriptionWithAI({...m,name:m.resourceName||$("#resourceName").value,url,github:m.github||$("#resourceGithub").value});
-          $("#resourceDescription").value=value;
-          state.descriptionMode="auto";
-          markAutoField("description",value);
+        // “读取网页信息”只负责真实网页/GitHub读取，不调用 AI。
+        // 简介生成统一由“智能分析并生成”完成。
+        if(current.description && !autoDescription){
+          $("#resourceDescription").value=limit32(current.description);
+          state.descriptionMode="manual";
+          state.auto.description="";
         }else{
+          $("#resourceDescription").value="";
           state.descriptionMode="manual";
           state.auto.description="";
         }
