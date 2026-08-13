@@ -3,7 +3,7 @@ const MODEL = 'deepseek-v4-pro';
 const count = value => Array.from(String(value ?? '').trim()).length;
 const clean = value => String(value ?? '').trim().replace(/[\r\n]+/g, ' ').replace(/^['"“”‘’]+|['"“”‘’]+$/g, '').trim();
 const DEEPSEEK_TIMEOUT_MS = 45000;
-const MAX_ATTEMPTS = 4;
+const MAX_ATTEMPTS = 5;
 const isValid16 = value => { const v = clean(value); return count(v) === 16 && /[\u3400-\u9fff]/.test(v) && !/^[A-Za-z0-9\s.,!?;:()\[\]{}+\-_/&%#]+$/.test(v) && !/[\r\n]/.test(v); };
 const isValidManual = value => { const v = clean(value); return count(v) >= 1 && count(v) <= 16 && !/[\r\n]/.test(v); };
 const genericPattern = /(专业|强大|超强|顶级|领先|完美|神器|极速|优质|爆款|必备)/;
@@ -94,18 +94,13 @@ ${content}
 只返回 JSON。`;
 
   let lastError = null;
-  let previousDescription = manualDescription;
-  let previousClassification = '';
-  let lastDescriptionLength = manualDescription ? count(manualDescription) : 0;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       const retryHint = attempt > 1
         ? `\n这是第 ${attempt} 次生成。上一轮结果未通过最终校验。不要返回上一轮原文，也不要机械补字。
-上一轮简介：${previousDescription || '无'}
-上一轮简介实际字符数：${lastDescriptionLength}
-上一轮分类：${previousClassification || '无'}
-请重新根据原始资料提炼；如果分类已经合法，可以保持上一轮分类，只重新写简介。
+上一轮生成未通过最终校验。请完全重新根据原始资料独立生成，不要复用、续写或机械修改任何上一轮答案。
+请重新判断资源核心用途、重新选择合法分类，并重新生成简介。
 【简介硬性验收】AI生成简介必须恰好16个字符（中文、英文字母、数字均按1字符计），必须是自然完整的中文核心简介，中文为主体；不要通过加“工具、平台、软件、专业、强大、实用”等空泛词凑长度。生成后请在输出前自行逐字符计数。`
         : '';
       const controller = new AbortController();
@@ -160,9 +155,6 @@ ${content}
       if (!description) description = clean(parsed?.description_text || parsed?.summary);
       const category = clean(parsed?.category);
       const subcategory = clean(parsed?.subcategory);
-      previousDescription = description;
-      lastDescriptionLength = count(description);
-      previousClassification = `${category}/${subcategory}`;
 
       const descriptionValid = manualDescription
         ? description === manualDescription
