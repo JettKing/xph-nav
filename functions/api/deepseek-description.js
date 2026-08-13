@@ -77,8 +77,7 @@ ${content}
           ],
           thinking: { type: 'enabled' },
           reasoning_effort: 'high',
-          max_tokens: 128,
-          temperature: 0.2,
+          max_tokens: 1024,
           response_format: { type: 'json_object' },
           stream: false
         })
@@ -88,9 +87,14 @@ ${content}
         lastError = new Error(data?.error?.message || `DeepSeek HTTP ${upstream.status}`);
         continue;
       }
-      const contentText = data?.choices?.[0]?.message?.content || '';
+      const choice = data?.choices?.[0];
+      const contentText = choice?.message?.content || '';
       let parsed;
-      try { parsed = JSON.parse(contentText); } catch { lastError = new Error('DeepSeek 返回 JSON 无法解析'); continue; }
+      try { parsed = JSON.parse(contentText); } catch {
+        const reason = choice?.finish_reason ? `（finish_reason=${choice.finish_reason}）` : '';
+        lastError = new Error(`DeepSeek 返回 JSON 无法解析${reason}`);
+        continue;
+      }
       const description = clean(parsed?.description);
       previous = description;
       if (isValid16(description)) return new Response(JSON.stringify({ description, model: data.model || MODEL }), { status: 200, headers });
