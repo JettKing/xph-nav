@@ -11,7 +11,7 @@ const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>Array.from(r.query
 const txt=v=>String(v??'').trim(),uniq=a=>[...new Set((a||[]).map(txt).filter(Boolean))];
 const count=v=>Array.from(txt(v)).length;
 const normalizeUrl=v=>{try{const u=new URL(txt(v));u.hash='';return u.href.replace(/\/$/,'')||u.href}catch{return txt(v).replace(/#.*$/,'').replace(/\/+$/,'')}};
-const normalizeGithub=v=>{const m=txt(v).match(/(?:https?:\/\/)?(?:www\.)?github\.com\/([^/]+)\/([^/#?]+)/i);return m?`https://github.com/${m[1]}/${m[2].replace(/\.git$/i,'')}`:''};
+const normalizeGithub=v=>{const m=txt(v).replace(/[)\]}>.,;]+$/g,'').match(/(?:https?:\/\/)?(?:www\.)?github\.com\/([^/\s)\]]+)\/([^/#?\s)\]]+)/i);return m?`https://github.com/${m[1]}/${m[2].replace(/\.git$/i,'')}`:''};
 const esc=v=>txt(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const CATEGORIES=window.categories||{};const TAGS=window.tags||{capabilities:[],scenarios:[],attributes:{pricing:[],platform:[],language:[],audience:[]}};
 const state={reading:null,resource:null,source:null};
@@ -23,8 +23,43 @@ function renderCategories(selected=''){const s=$('#categorySelect');s.innerHTML=
 function renderChips(id,items,type){const set=new Set(items||[]),allowed=vocab(type);$('#'+id).innerHTML=allowed.map(v=>`<button type="button" class="chip ${set.has(v)?'selected':''}" data-type="${esc(type)}" data-value="${esc(v)}">${esc(v)}</button>`).join('')}
 function selected(type){return $$(`.chip[data-type="${type}"].selected`).map(x=>x.dataset.value)}
 function makeId(name,url){const base=(txt(name)||new URL(normalizeUrl(url)).hostname).toLowerCase().replace(/[^a-z0-9\u3400-\u9fff]+/g,'-').replace(/^-|-$/g,'').slice(0,48);return `${base||'resource'}-${Math.random().toString(36).slice(2,8)}`}
-function githubApi(repo){return timeoutFetch(`https://api.github.com/repos/${repo.split('/').slice(-2).join('/')}`,{headers:{Accept:'application/vnd.github+json'}},10000).then(async r=>{if(!r.ok)throw new Error('GitHub API HTTP '+r.status);return r.json()})}
+async function githubApi(repo){
+  try{
+    const r=await timeoutFetch(`https://api.github.com/repos/${repo.split('/').slice(-2).join('/')}`,{headers:{Accept:'application/vnd.github+json'}},10000);
+    if(!r.ok)return{ok:false,status:r.status,data:null};
+    return{ok:true,status:r.status,data:await r.json()};
+  }catch{return{ok:false,status:0,data:null}}
+}
+function extractGithubLinks(raw){
+  const text=String(raw||'').replace(/&amp;/gi,'&').replace(/\\\//g,'/');
+  const found=[];
+  const patterns=[
+    /https?:\/\/(?:www\.)?github\.com\/[^\s<>\]\)\"']+/gi,
+    /(?:^|[\s(\[<\"'=])(?:www\.)?github\.com\/[^\s<>\]\)\"']+/gi
+  ];
+  for(const re of patterns){for(const m of text.matchAll(re)){const rawUrl=String(m[0]).replace(/^[^hH]*github/i,'github');const u=normalizeGithub(rawUrl);if(u)found.push(u)}}
+  return uniq(found);
+}
+function extractGithubHomepage(raw){
+  const text=String(raw||'').replace(/&amp;/gi,'&').replace(/\\\//g,'/');
+  const labeled=[
+    /(?:homepage|home page|website|官网|项目主页)\s*(?:[:：]|[-–—])?\s*(https?:\/\/(?!github\.com)[^\s<>)\"']+)/i,
+    /(?:homepage|home page|website|官网|项目主页)[^\n]{0,160}?(https?:\/\/(?!github\.com)[^\s<>)\"']+)/i
+  ];
+  for(const re of labeled){const m=text.match(re);if(m){try{return normalizeUrl(m[1])}catch{}}}
+  return '';
+}
 async function githubReadme(repo){try{const m=repo.match(/github\.com\/([^/]+\/[^/]+)/i);if(!m)return '';const r=await timeoutFetch(`https://raw.githubusercontent.com/${m[1]}/HEAD/README.md`,{headers:{Accept:'text/plain'}},10000);return r.ok?(await r.text()).slice(0,18000):''}catch{return ''}}
+async function readGithubPage(repo){
+  try{
+    const r=await timeoutFetch('https://r.jina.ai/'+normalizeUrl(repo),{headers:{Accept:'text/plain'}},18000);
+    if(!r.ok)return{raw:'',website:''};
+    const raw=await r.text();
+    const pageInfo=extractPageInfo(raw,repo);
+    const website=extractGithubHomepage(raw);
+    return{raw:raw.slice(0,18000),website,seoTitle:pageInfo.seoTitle,seoDescription:pageInfo.seoDescription};
+  }catch{return{raw:'',website:''}}
+}
 function cleanText(v){return txt(v).replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/!\[[^\]]*\]\([^)]*\)/g,' ').replace(/[`*_>#~]/g,' ').replace(/\s+/g,' ').trim()}
 function cleanName(v){
   let x=cleanText(v).replace(/^[-–—•·|:：]+|[-–—•·|:：]+$/g,'').trim();
@@ -71,8 +106,35 @@ function extractPageInfo(md,url){
   return{name,seoTitle,seoDescription,hostname};
 }
 function extractTitle(md,url){return extractPageInfo(md,url).name}
-async function readWebsite(url){const clean=normalizeUrl(url);if(!/^https?:\/\//i.test(clean))throw new Error('请输入有效 URL');let r;try{r=await timeoutFetch('https://r.jina.ai/'+clean,{headers:{Accept:'text/plain'}},18000)}catch(e){throw new Error(e.name==='AbortError'?'网页读取超时':'网页读取失败')};if(!r.ok)throw new Error('网页读取失败：HTTP '+r.status);const raw=await r.text();const info=extractPageInfo(raw,clean);const links=[...raw.matchAll(/https?:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+/gi)].map(x=>normalizeGithub(x[0])).filter(Boolean);const thumb=(raw.match(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/i)||[])[1]||'';return{website:clean,name:info.name,seoTitle:info.seoTitle,seoDescription:info.seoDescription,github:uniq(links)[0]||'',thumbnail:thumb,content:raw.slice(0,22000),source:'official-web'} }
-async function readGithub(url){const repo=normalizeGithub(url);if(!repo)throw new Error('GitHub URL 无效');const d=await githubApi(repo);const readme=await githubReadme(repo);return{github:repo,name:txt(d.name)||repo.split('/').pop(),website:txt(d.homepage),thumbnail:'',content:[txt(d.description),readme].filter(Boolean).join('\n\n').slice(0,22000),source:'github',keywords:Array.isArray(d.topics)?d.topics:[]}}
+async function readWebsite(url){
+  const clean=normalizeUrl(url);
+  if(!/^https?:\/\//i.test(clean))throw new Error('请输入有效 URL');
+  let r;
+  try{r=await timeoutFetch('https://r.jina.ai/'+clean,{headers:{Accept:'text/plain'}},18000)}catch(e){throw new Error(e.name==='AbortError'?'网页读取超时':'网页读取失败')}
+  if(!r.ok)throw new Error('网页读取失败：HTTP '+r.status);
+  const raw=await r.text();
+  const info=extractPageInfo(raw,clean);
+  const links=extractGithubLinks(raw);
+  const thumb=(raw.match(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/i)||[])[1]||'';
+  return{website:clean,name:info.name,seoTitle:info.seoTitle,seoDescription:info.seoDescription,github:links[0]||'',thumbnail:thumb,content:raw.slice(0,22000),source:'official-web'};
+}
+async function readGithub(url){
+  const repo=normalizeGithub(url);
+  if(!repo)throw new Error('GitHub URL 无效');
+  // GitHub 网页与 raw README 是主通道；REST API 只作为可选补充，避免 403/限流阻断整个读取流程。
+  const page=await readGithubPage(repo);
+  const readme=await githubReadme(repo);
+  let api={ok:false,status:0,data:null};
+  // 仅在网页层缺少关键元数据时尝试 API；API 失败绝不向用户抛出 403。
+  if(!page.raw || !page.website){api=await githubApi(repo)}
+  const d=api.data||{};
+  const name=txt(d.name)||repo.split('/').pop();
+  const website=txt(d.homepage)||txt(page.website)||'';
+  const description=txt(d.description);
+  const pageInfo=[txt(page.raw),description,readme].filter(Boolean).join('\n\n--- GitHub README ---\n').slice(0,22000);
+  if(!pageInfo)throw new Error('GitHub 真实内容读取失败，请稍后重试');
+  return{github:repo,name,website,thumbnail:'',seoTitle:txt(page.seoTitle)||'',seoDescription:txt(page.seoDescription)||'',content:pageInfo,source:'github',keywords:Array.isArray(d.topics)?d.topics:[],apiStatus:api.status||0};
+}
 async function readRealSources(){const url=normalizeUrl($('#resourceUrl').value),githubInput=normalizeGithub($('#resourceGithub').value),inputGithub=githubInput||normalizeGithub(url);if(!url&&!inputGithub)throw new Error('请至少填写资源 URL 或 GitHub URL');let web=null,gh=null;
 if(url&&!normalizeGithub(url)){try{web=await readWebsite(url)}catch(e){if(!inputGithub)throw e}}
 if(inputGithub){gh=await readGithub(inputGithub)}
