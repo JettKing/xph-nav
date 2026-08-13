@@ -5,7 +5,7 @@ window.ResourceRenderer = {
     render({container="#resource-list",data=[]}={}){
         const el=document.querySelector(container); if(!el)return;
         const normalized=this.normalizeData(data); el.innerHTML=normalized.length?normalized.map(ResourceTemplates.card.bind(ResourceTemplates)).join(""):ResourceTemplates.empty("没有找到符合条件的资源");
-        this.updateCount(ResourceStore.resources.length);
+        this.updateCount(ResourceStore.getFilteredCount());
         this.renderPagination(); this.refresh();
     },
     updateCount(count){const el=document.getElementById("resourceCount");if(el)el.textContent=`${Number(count)||0} 个资源`;},
