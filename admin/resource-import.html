@@ -11,14 +11,14 @@
 <script src="/assets/js/admin-auth.js"></script></head>
 <body>
 <div class="wrap" id="resourceImporter">
-  <div class="head"><div><div style="margin-bottom:10px"><a href="/admin/index.html" style="font-size:12px;color:#666;text-decoration:none">← 返回后台</a></div><div class="eyebrow">徐胖虎资源社 · V5.3</div><div class="title">智能资源录入系统</div><div class="sub">输入「名称 + URL」，系统从 V5.1 标准词库中推断分类、能力、场景与属性；最终由你审核后导出。</div></div><div class="badge">无运营标签 · 禁止自创标签</div></div>
+  <div class="head"><div><div style="margin-bottom:10px"><a href="/admin/index.html" style="font-size:12px;color:#666;text-decoration:none">← 返回后台</a></div><div class="eyebrow">徐胖虎资源社 · V5.3</div><div class="title">智能资源录入系统</div><div class="sub">输入资源名称或 URL；系统保留真实网页/GitHub读取层，从标准词库推断分类、能力、场景与属性；简介生成统一通过安全的 DeepSeek 代理完成，最终由你审核后导出。</div></div><div class="badge">无运营标签 · 禁止自创标签</div></div>
   <div class="grid">
     <section class="card">
       <h2>① 基础信息</h2>
       <div class="row"><div><label>资源名称 *</label><input id="resourceName" placeholder="可留空，读取 URL 后自动识别"></div><div><label>资源 URL *</label><input id="resourceUrl" placeholder="https://www.example.com/"></div></div>
       <div class="row" style="margin-top:12px"><div><label>GitHub URL（可选）</label><input id="resourceGithub" placeholder="https://github.com/owner/repo"></div></div>
       <div style="margin-top:12px"><label>资源简介（可选）</label><textarea id="resourceDescription" maxlength="32" placeholder="人工填写最多32字符；留空时自动生成严格16字符中文核心简介"></textarea></div>
-      <div class="hint">官网 URL 与 GitHub URL 分开保存；缩略图由系统自动读取并保留在最终 JSON；人工简介最多32字符；留空时调用 AI 生成严格16字符中文核心简介。</div>
+      <div class="hint">官网 URL 与 GitHub URL 分开保存；缩略图由系统自动读取并保留在最终 JSON；人工简介最多32字符；留空时由 DeepSeek 根据真实网页/GitHub内容生成严格16字符中文核心简介。</div>
       <div class="actions"><button id="fetchBtn">读取网页信息</button><button class="primary" id="analyzeBtn">智能分析并生成</button><button id="resetBtn">清空</button><button id="clearAllBtn" class="danger">全部清空</button></div>
       <div class="meta" id="pageMeta"></div><div class="status" id="status"></div>
     </section>
