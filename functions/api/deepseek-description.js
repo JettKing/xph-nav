@@ -2,13 +2,13 @@ const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
 const MODEL = 'deepseek-v4-pro';
 const count = value => Array.from(String(value ?? '').trim()).length;
 const clean = value => String(value ?? '').trim().replace(/[\r\n]/g, '').replace(/^['"“”‘’]+|['"“”‘’]+$/g, '').trim();
-const isValid16 = value => {
-  const text = clean(value);
-  return count(text) === 16 && /[\u3400-\u9fff]/.test(text) && /^[\u3400-\u9fffA-Za-z0-9\u3000-\u303F\uFF00-\uFF65\-_/+#&%· ]+$/.test(text);
-};
+const isValid16 = value => { const v = clean(value); return count(v) === 16 && /[\u3400-\u9fff]/.test(v) && !/^[A-Za-z0-9\s.,!?;:()\[\]{}+\-_/&%#]+$/.test(v); };
 
 function corsHeaders(origin) {
-  const allowed = new Set(['https://xph.asia', 'https://www.xph.asia']);
+  const allowed = new Set([
+    'https://xph.asia',
+    'https://www.xph.asia'
+  ]);
   return {
     'Access-Control-Allow-Origin': allowed.has(origin) ? origin : 'https://xph.asia',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -34,30 +34,28 @@ export async function onRequestPost({ request, env }) {
   const content = String(body?.content || '').trim().slice(0, 24000);
   if (!name || !content) return new Response(JSON.stringify({ error: '缺少真实资源名称或真实读取内容' }), { status: 400, headers });
 
-  const system = `你是“徐胖虎资源社”的资源简介生成器。你只能根据系统已经读取的真实网页/GitHub内容生成资源卡片核心简介。
-
+  const system = `你是“徐胖虎资源社”的资源简介生成器。你只能根据用户提供的真实网页/GitHub读取内容生成简介。
 严格规则：
-1. description 必须恰好16个字符，按 JavaScript Array.from 计数，一个都不能多，一个都不能少。
-2. 简介必须以中文为主，可以自然使用少量必要的英文字母、英文缩写或数字，例如“AI结合八字生成个人的运势K线图”。禁止输出全英文简介；至少必须包含一个中文汉字。
-3. 允许中文、英文字母、数字以及必要的常用标点和符号；这些字符全部计入16字符长度。
-4. 必须准确概括真实网页/GitHub内容中的功能、用途或核心能力，不得根据名称猜测，不得编造。
-5. 不要营销口号、夸张评价、网址、域名，不要为了凑字数堆砌无意义词语。
-6. 优先使用自然、准确、像资源库卡片的短句。
-7. 只返回 JSON：{"description":"..."}，不要返回 Markdown、解释或其他字段。
-
-生成前必须逐字符检查长度和字符类型。`;
+1. 只输出 JSON，格式必须是 {"description":"16个中文字符"}。
+2. description 必须恰好16个字符，中文为主体；允许自然出现少量英文字母、数字或常用标点，例如“AI”“K线”，但不得整句全英文。
+3. 必须概括真实内容，不能凭资源名称臆测功能。
+4. 禁止输出网址、域名、emoji、营销口号、夸张评价；不要为了凑字数硬塞英文或数字。
+5. 禁止修改、翻译、中文化资源名称；资源名称不是你的输出字段。
+6. 不要引用“官网”“GitHub”“工具”等空泛词作为主要内容，必须体现真实功能/用途。
+7. 如果内容不足以可靠概括，仍只能从已提供内容中选择最明确的真实用途，不得编造。
+JSON 示例：{"description":"AI结合八字生成个人的运势K线图"}`;
 
   const user = `资源真实名称：${name}
 官网：${website}
 GitHub：${github}
 
-以下是系统已经读取并缓存的真实网页/GitHub内容：
+以下是系统已经读取并缓存的真实网页/GitHub内容。不要再次访问 URL，也不要假设没有提供的内容：
 ${content}
 
-只根据以上真实内容生成一个严格16字符的核心简介。`;
+请根据以上真实内容生成严格16个字符的核心简介。先在内部逐字计数，确认正好16个字符后再输出；中文为主体，可自然出现少量英文/数字/常用标点；只返回 JSON。`;
 
   let lastError = null;
-  for (let attempt = 1; attempt <= 4; attempt++) {
+  for (let attempt = 1; attempt <= 5; attempt++) {
     try {
       const upstream = await fetch(DEEPSEEK_API_URL, {
         method: 'POST',
@@ -69,9 +67,9 @@ ${content}
           model: MODEL,
           messages: [
             { role: 'system', content: system },
-            { role: 'user', content: user + (attempt > 1 ? `\n上一次输出未通过程序校验。请重新生成，严格满足：恰好16字符、中文为主、允许少量英文字母/数字、禁止全英文。` : '') }
+            { role: 'user', content: user + (attempt > 1 ? `\n上一次结果不合格，请重新生成。必须通过正则 ^[\\u3400-\\u9fff]{16}$。` : '') }
           ],
-          thinking: { type: 'enabled' },
+          thinking: { type: 'disabled' },
           max_tokens: 64,
           temperature: 0.2,
           response_format: { type: 'json_object' },
