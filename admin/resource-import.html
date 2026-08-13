@@ -15,15 +15,15 @@
 </head>
 <body>
 <main class="wrap" id="resourceImporter">
-<header class="top"><div><a class="back" href="/admin/index.html">← 返回后台</a><div class="eyebrow">徐胖虎资源社 · V5.3</div><div class="title">智能资源录入系统</div><div class="sub">保留真实网页 / GitHub 读取层。资源名称只读取真实来源，绝不翻译、中文化或交给 AI 改名。简介生成单独通过安全的 Cloudflare DeepSeek 代理完成。</div></div><div class="pill">无运营标签 · 禁止自创标签</div></header>
+<header class="top"><div><a class="back" href="/admin/index.html">← 返回后台</a><div class="eyebrow">徐胖虎资源社 · V5.3</div><div class="title">智能资源录入系统</div><div class="sub">保留真实网页 / GitHub 读取层。资源名称支持人工优先：人工填写后始终保留；留空时才自动采用真实来源名称。简介生成单独通过安全的 Cloudflare DeepSeek 代理完成。</div></div><div class="pill">无运营标签 · 禁止自创标签</div></header>
 <div class="grid">
 <section class="card">
 <h2><span class="step">①</span>基础信息</h2>
-<div class="field"><label>资源名称 *</label><input id="resourceName" placeholder="可留空，读取真实网页 / GitHub 后自动识别"></div>
-<div class="field"><label>资源 URL *</label><input id="resourceUrl" inputmode="url" placeholder="https://www.example.com/"></div>
+<div class="field"><label>资源名称 *</label><input id="resourceName" placeholder="可人工填写；人工填写优先，留空后自动识别"></div>
+<div class="field"><label>资源 URL（可选）</label><input id="resourceUrl" inputmode="url" placeholder="https://www.example.com/"></div>
 <div class="field"><label>GitHub URL（可选）</label><input id="resourceGithub" inputmode="url" placeholder="https://github.com/owner/repo"></div>
 <div class="field"><label>资源简介（可选）</label><textarea id="resourceDescription" maxlength="16" placeholder="人工填写最多16字符；留空后点击“智能分析并生成”，由 DeepSeek 根据已读取真实内容生成严格16字符核心简介"></textarea></div>
-<div class="hint">缩略图不再提供后台输入框。读取到的 thumbnail 只保留在最终 JSON；资源名称永远保持真实官方名称。</div>
+<div class="hint">缩略图不再提供后台输入框。读取到的 thumbnail 只保留在最终 JSON；资源名称遵循人工填写优先，留空时使用真实来源名称。</div>
 <div class="actions"><button id="fetchBtn">① 读取网页信息</button><button id="analyzeBtn" class="primary" disabled>② 智能分析并生成简介</button><button id="resetBtn">清空</button><button id="clearAllBtn" class="danger">全部清空</button></div>
 <div id="readBox" class="readbox hidden"><div class="readrow"><span>真实名称</span><span id="readName">—</span></div><div class="readrow"><span>官网读取</span><span id="readSource">—</span></div><div class="readrow"><span>GitHub</span><span id="readGithub">—</span></div><div class="readrow"><span>缩略图</span><span id="readThumb">—</span></div><div class="readrow"><span>真实内容</span><span id="readContent">—</span></div></div>
 <div id="status" class="status"></div>
