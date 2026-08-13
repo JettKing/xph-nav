@@ -1,7 +1,8 @@
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
 const MODEL = 'deepseek-v4-pro';
 const count = value => Array.from(String(value ?? '').trim()).length;
-const clean = value => String(value ?? '').trim().replace(/[\r\n]/g, '').replace(/^['"“”‘’]+|['"“”‘’]+$/g, '').trim();
+const clean = value => String(value ?? '').trim().replace(/[\r\n]+/g, ' ').replace(/^['"“”‘’]+|['"“”‘’]+$/g, '').trim();
+const DEEPSEEK_TIMEOUT_MS = 120000;
 const isValid16 = value => { const v = clean(value); return count(v) === 16 && /[\u3400-\u9fff]/.test(v) && !/^[A-Za-z0-9\s.,!?;:()\[\]{}+\-_/&%#]+$/.test(v) && !/[\r\n]/.test(v); };
 
 function corsHeaders(origin) {
@@ -46,7 +47,7 @@ export async function onRequestPost({ request, env }) {
 5. 资源名称只用于识别对象，不要把资源名称本身当成简介；不要输出域名、网址、官网、GitHub、‘工具’等空泛词。
 6. 禁止营销口号、夸张评价、无依据功能、重复堆词、为了凑16字硬塞英文或数字。
 7. 不要修改、翻译或中文化资源名称；资源名称不是你的输出字段。
-8. 如果原始信息很多，先综合SEO标题、SEO描述、GitHub项目描述、README和正文判断资源最核心的一个真实功能/用途，再进行压缩。SEO标题中的品牌名只用于识别资源；标题后面的定位语、SEO描述和正文中的功能信息都必须纳入理解，不能把整句SEO标题直接当简介。最终文案应像‘开源跨平台视频格式转换与压缩工具’这种高信息密度、自然可读的资源卡片文案，而不是为了16字机械加词。
+8. 如果原始信息很多，先综合SEO标题、SEO描述、GitHub项目描述、README和正文判断资源最核心的一个真实功能/用途，再进行压缩。SEO标题中的品牌名只用于识别资源；标题后面的定位语、SEO描述和正文中的功能信息都必须纳入理解，不能把整句SEO标题直接当简介。最终文案必须是高信息密度、自然可读的资源卡片文案，而不是为了16字机械加词。
 9. 资源名称必须保持原样；绝对不要把“项目管理、文件传输、AI工具”等定位词追加到资源名称。
 10. 生成后必须在内部逐字符检查：长度必须正好16；必须包含中文；语义必须完整自然；不能只是泛泛的营销词或无信息量的形容词堆叠。若不满足，重新改写后再输出。
 11. 最终简介必须能从给定真实资料中解释清楚：它是什么/主要做什么。优先保留真正的核心功能词；如果为了16字符需要取舍，宁可换一种自然表达，也不要机械加字。
@@ -63,41 +64,53 @@ GitHub项目名称：${githubName}
 以下是系统已经读取并缓存的真实网页/GitHub内容。不要再次访问 URL，也不要假设没有提供的内容：
 ${content}
 
-请先理解这个资源真正解决什么问题、最核心的功能和用户价值是什么，再把最核心的信息压缩成一条严格16字符、中文为主体的资源卡片简介。优先保证准确、自然、信息密度高，再满足16字符；不要为了凑字添加‘专业、强大、优质、神器、极速’等无依据词。参考质量标准：HandBrake可概括为‘开源跨平台视频格式转换与压缩工具’这种表达。只返回 JSON。`;
+请先理解这个资源真正解决什么问题、最核心的功能和用户价值是什么，再把最核心的信息压缩成一条严格16字符、中文为主体的资源卡片简介。优先保证准确、自然、信息密度高，再满足16字符；不要为了凑字添加‘专业、强大、优质、神器、极速’等无依据词。只返回 JSON。`;
 
   let lastError = null;
   let previous = '';
-  for (let attempt = 1; attempt <= 5; attempt++) {
+  for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       const retryHint = previous
-        ? `\n上一次生成结果为：“${previous}”。它没有通过最终校验。请不要机械增删一个字，而是重新理解原始内容后重写一条更自然、更准确的16字符核心简介。失败原因：${count(previous)}个字符${/[\u3400-\u9fff]/.test(previous) ? '' : '，缺少中文'}。`
+        ? `\n上一次生成结果为：“${previous}”。它没有通过最终校验。请重新理解原始资料后重写，不要机械增删字符。失败原因：${count(previous)}个字符${/[\u3400-\u9fff]/.test(previous) ? '' : '，缺少中文'}。`
         : '';
-      const upstream = await fetch(DEEPSEEK_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${env.DEEPSEEK_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          messages: [
-            { role: 'system', content: system },
-            { role: 'user', content: baseUser + retryHint }
-          ],
-          thinking: { type: 'enabled' },
-          reasoning_effort: 'high',
-          max_tokens: 1024,
-          response_format: { type: 'json_object' },
-          stream: false
-        })
-      });
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), DEEPSEEK_TIMEOUT_MS);
+      let upstream;
+      try {
+        upstream = await fetch(DEEPSEEK_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${env.DEEPSEEK_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: MODEL,
+            messages: [
+              { role: 'system', content: system },
+              { role: 'user', content: baseUser + retryHint }
+            ],
+            thinking: { type: 'disabled' },
+            max_tokens: 256,
+            response_format: { type: 'json_object' },
+            stream: false
+          }),
+          signal: controller.signal
+        });
+      } finally {
+        clearTimeout(timer);
+      }
       const data = await upstream.json().catch(() => ({}));
       if (!upstream.ok) {
         lastError = new Error(data?.error?.message || `DeepSeek HTTP ${upstream.status}`);
+        if (upstream.status >= 400 && upstream.status < 500 && upstream.status !== 429) break;
         continue;
       }
       const choice = data?.choices?.[0];
       const contentText = choice?.message?.content || '';
+      if (!contentText) {
+        lastError = new Error('DeepSeek 返回内容为空');
+        continue;
+      }
       let parsed;
       try { parsed = JSON.parse(contentText); } catch {
         const reason = choice?.finish_reason ? `（finish_reason=${choice.finish_reason}）` : '';
@@ -111,8 +124,11 @@ ${content}
       const generic = /(专业|强大|超强|顶级|领先|完美|神器|极速|优质|爆款|必备)/.test(description);
       if (isValid16(description) && hasCjk && cjkCount >= 6 && !generic) return new Response(JSON.stringify({ description, model: data.model || MODEL }), { status: 200, headers });
       lastError = new Error(`DeepSeek 返回简介未通过最终质量校验：${count(description)} 字符${cjkCount < 6 ? '，中文信息不足' : ''}${generic ? '，存在泛化营销词' : ''}`);
-    } catch (error) { lastError = error; }
+    } catch (error) {
+      lastError = error?.name === 'AbortError' ? new Error('DeepSeek 请求超时，请稍后重试') : error;
+    }
   }
 
-  return new Response(JSON.stringify({ error: lastError?.message || 'DeepSeek 简介生成失败' }), { status: 422, headers });
+  const status = /超时/.test(lastError?.message || '') ? 504 : 422;
+  return new Response(JSON.stringify({ error: lastError?.message || 'DeepSeek 简介生成失败' }), { status, headers });
 }
