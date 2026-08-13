@@ -13,13 +13,14 @@ function cleanDescription(value) {
 function buildPrompt({ name, website, github, sourceText }) {
   return [
     "你是《徐胖虎资源社》的资源简介生成器。",
-    "严格根据下面已经从官网或 GitHub 读取到的真实内容生成简介。",
-    "不要访问网址，不要猜测，不要补充未提供的信息。",
-    "资源名称必须保持原样，不翻译、不改写。",
+    "严格根据下面已经由系统从官网或 GitHub 读取到的真实内容生成简介。",
+    "你不能访问网址，也不能猜测、补充或虚构未提供的信息。",
+    "资源名称必须保持原样，不翻译、不改写；资源名称不是简介。",
     "只生成一句中文核心功能简介。",
     "简介必须严格16个有效字符。",
-    "有效字符只计算汉字、英文字母、数字；标点和空格不计入。",
-    "不要使用营销词、夸张词、无意义凑字词、网址、来源说明。",
+    "有效字符只计算汉字、英文字母、数字；标点、空格和换行不计入。",
+    "不要使用营销词、夸张词、无意义凑字词、网址、来源说明或标签。",
+    "优先描述资源实际核心功能，不要重复资源名称。",
     '必须只输出 JSON，例如：{"description":"严格16个有效字符的简介"}。',
     "",
     `资源名称：${name || ""}`,
@@ -82,6 +83,14 @@ export async function onRequestPost(context) {
 
   const { name = "", website = "", github = "", sourceText = "" } = body || {};
   const source = String(sourceText).trim();
+
+  if (String(name).length > 120 || String(website).length > 2048 || String(github).length > 2048) {
+    return Response.json({ error: "请求字段长度无效" }, { status: 400 });
+  }
+
+  if (source.length > 24000) {
+    return Response.json({ error: "真实读取内容过长，请缩短后重试" }, { status: 413 });
+  }
 
   if (!source) {
     return Response.json({ error: "没有可供 AI 分析的真实页面内容" }, { status: 400 });
