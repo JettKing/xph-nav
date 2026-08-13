@@ -268,121 +268,36 @@
   function charCount(value){return Array.from(text(value)).length;}
   function limit32(value){return Array.from(text(value)).slice(0,32).join("");}
 
-  // 自动简介候选源：只接受“产品事实来源”，不从整页正文随机取句。
-  // 目标不是给每个 URL 建模板，而是用统一的来源优先级 + 噪声过滤 + 语义压缩。
-  const DESCRIPTION_LEXICON = [
-    [/1088\+?\s*pure\s+frontend\s+online\s+tools?/gi,"1088个纯前端在线工具集合平台"],
-    [/\b(?:pure\s+)?frontend\s+(?:online\s+)?tools?\b/gi,"纯前端在线工具"],
-    [/\bprivacy[- ]first\b/gi,"隐私优先"], [/\bonline\s+tools?\b/gi,"在线工具"], [/\btools?\s+collection\b/gi,"工具集合"],
-    [/\bdownload\s+station\b/gi,"下载任务"], [/\bsynology\b|\bDSM\b/gi,"群晖"], [/\bnative\s+app\b/gi,"原生应用"],
-    [/\b(?:free|open[- ]source)\s+(?:svg\s+)?icons?\b/gi,"免费SVG图标"], [/\bbrand\s+logos?\b/gi,"品牌Logo"],
-    [/\bweb\s+clip(?:ping|per)?\b/gi,"网页剪藏"], [/\bclipboard\s+manager\b/gi,"剪贴板管理"], [/\bknowledge\s+(?:base|management)\b/gi,"知识管理"],
-    [/\bproject\s+management\b/gi,"项目管理"], [/\bteam\s+collaboration\b|\bcollaboration\b/gi,"团队协作"],
-    [/\bai\s+(?:agents?|assistant)\b|\bartificial\s+intelligence\b/gi,"AI智能体"], [/\bintelligent\b/gi,"智能"],
-    [/\bassistant\b/gi,"助手"], [/\bcontent\s+generation\b/gi,"内容生成"], [/\bimage\s+generation\b/gi,"图像生成"],
-    [/\bvideo\s+generation\b/gi,"视频生成"], [/\baudio\s+generation\b|\bmusic\s+generation\b/gi,"音频生成"],
-    [/\bvoice\s+synthesis\b|\btext\s+to\s+speech\b/gi,"语音合成"], [/\bsearch\s+engine\b|\bweb\s+search\b/gi,"信息搜索"],
-    [/\bresearch\s+assistant\b/gi,"研究辅助"], [/\bcode\s+generation\b|\bcoding\s+assistant\b/gi,"代码生成"],
-    [/\bversion\s+control\b/gi,"版本控制"], [/\bgit\s+client\b/gi,"Git客户端"], [/\bautomation\s+workflow\b/gi,"自动化工作流"],
-    [/\bnote\s+taking\b/gi,"笔记管理"], [/\btask\s+management\b/gi,"任务管理"], [/\binterface\s+design\b|\bui\/?ux\b/gi,"界面设计"],
-    [/\blearning\s+platform\b/gi,"学习平台"], [/\bdeveloper\s+platform\b|\bapi\s+platform\b/gi,"开发者平台"],
-    [/\bremote\s+control\b/gi,"远程控制"], [/\bdesign\s+tool\b/gi,"设计工具"], [/\bextensions?\b|\bplugins?\b/gi,"插件扩展"],
-    [/\bdatasets?\b/gi,"数据集"], [/\btemplates?\b/gi,"模板素材"], [/\bscreenshots?\b/gi,"截图工具"], [/\bpdf\b/gi,"PDF文档"],
-    [/\bbrowsers?\b/gi,"浏览器"], [/\bicons?\b/gi,"图标"], [/\blogos?\b/gi,"Logo"], [/\blibraries?\b|\bcollections?\b/gi,"资源库"],
-    [/\bassets?\b/gi,"素材"], [/\bresources?\b/gi,"资源"], [/\bbookmarks?\b/gi,"网页收藏"], [/\bagents?\b/gi,"智能体"],
-    [/\bchat|conversations?\b/gi,"对话"], [/\bwriting|writers?\b/gi,"写作"], [/\bprogramming|coding|development\b/gi,"编程开发"],
-    [/\bmarketing\b/gi,"营销"], [/\badvertising\b/gi,"广告创作"], [/\bcourses?|tutorials?\b/gi,"课程教程"],
-    [/\bsoftware\b/gi,"软件"], [/\bplatform\b/gi,"平台"], [/\btools?\b/gi,"工具"], [/\bdevelopers?\b/gi,"开发者"], [/\bservices?\b/gi,"服务"]
-  ];
-  const DESCRIPTION_NOISE=/^(home|homepage|welcome|about|contact|privacy|terms|login|sign\s*(?:in|up)|learn\s+more|read\s+more|get\s+started|start\s+now|official\s+website|menu|navigation|features?|pricing|faq|frequently\s+asked\s+questions?|why\s+choose|how\s+it\s+works?)$/i;
-  const DESCRIPTION_BAD_PATTERNS=/(privacy policy|terms of (?:use|service)|cookie policy|all rights reserved|免责声明|隐私政策|服务条款|用户协议|常见问题|faq|传统(?:算命|方法).*?(?:主观|偏差)|主观偏差|联系我们|登录|注册|导航|价格方案|立即开始|为什么选择|工作原理)/i;
-  const DESCRIPTION_MARKETING_PREFIX=/(?:^|[。！？!?；;])\s*(?:作为|欢迎来到|欢迎使用|最佳|首选|免费替代|替代(?:方案|品)?|discover|introducing|meet|the\s+best|the\s+ultimate|your\s+new|your\s+next|built\s+for|designed\s+for)[^。！？!?；;]{0,80}(?:[。！？!?；;]|，|,)?/i;
-  const DESCRIPTION_FILLERS=/^(?:一个|一种|基于|通过|用于|可以|帮助|支持|提供|专为|旨在|结合|采用|全新|现代|最佳|完美|简单|轻松|强大|免费|在线|专业|智能|原生|凭直觉|more|best|free|online|easy|simple|powerful|modern|new|built|designed|powered)$/i;
-
-  function normalizeSourceText(value){
-    return text(value).replace(/https?:\/\/\S+/gi," ").replace(/\[[^\]]*\]\([^)]*\)/g," ")
-      .replace(/[`*_>#|{}]/g," ").replace(/[\r\n]+/g,"。 ").replace(/\s+/g," ").trim();
+  async function generateDescriptionWithAI(input={}){
+    const sourceParts=[
+      input.description,
+      ...(Array.isArray(input.descriptionCandidates)?input.descriptionCandidates.map(x=>typeof x==="object"?x.value:x):[]),
+      input.content,
+      input.title,
+      input.keywords
+    ].filter(Boolean).map(x=>text(x)).filter(Boolean);
+    const sourceText=Array.from(new Set(sourceParts)).join("\n").slice(0,24000);
+    if(!sourceText)return "";
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),15000);
+    try{
+      const r=await fetch("/api/deepseek-description",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          name:text(input.name),
+          website:text(input.url||input.website),
+          github:text(input.github),
+          sourceText
+        }),
+        cache:"no-store",
+        signal:controller.signal
+      });
+      if(!r.ok)throw new Error("DeepSeek代理请求失败："+r.status);
+      const data=await r.json();
+      return text(data.description);
+    }finally{clearTimeout(timer);}
   }
-  function splitDescriptionClauses(value){
-    return normalizeSourceText(value).split(/(?<=[。！？!?；;])|(?<=[，,])(?=\s*(?:AI|DeepSeek|ChatGPT|Claude|Gemini|Swift|Git|群晖|八字|下载|在线|隐私|支持|提供|结合|专为|用于))/u)
-      .map(x=>x.trim()).filter(Boolean);
-  }
-  function translateSourceText(value){
-    let out=normalizeSourceText(value);
-    for(const [re,zh] of DESCRIPTION_LEXICON)out=out.replace(re,` ${zh} `);
-    out=out.replace(/\b(?:is|are|the|a|an|and|or|for|with|to|of|on|in|from|by|your|our|this|that|you|we|it|as|at|into|using|used|use|powered|built|modern|next|best|easy|simple|free|online|download|learn|more|official|website|home|welcome|about|contact|login|sign|get|start|manage|create|help)\b/gi," ");
-    return out.replace(/[,:;，、；：]+/g," ").replace(/\s+/g," ").trim();
-  }
-  function cleanDescriptionCandidate(value){return text(value).replace(/\s+/g,"").replace(/[。！？!?.,，、；：:;“”‘’"'()（）\[\]{}<>《》\-–—]/g,"");}
-  function validDescriptionSource(value){
-    const raw=normalizeSourceText(value);
-    if(!raw||DESCRIPTION_NOISE.test(raw)||DESCRIPTION_BAD_PATTERNS.test(raw)||/^https?:\/\//i.test(raw))return false;
-    if(raw.length<8||raw.length>500)return false;
-    if(/^[A-Za-z][A-Za-z0-9_-]{8,}$/.test(raw))return false;
-    return true;
-  }
-  function semanticDescriptionVariants(value){
-    const raw=normalizeSourceText(value);
-    if(!validDescriptionSource(raw))return [];
-    const clauses=splitDescriptionClauses(raw);
-    const variants=[];
-    clauses.forEach(clause=>{
-      if(DESCRIPTION_BAD_PATTERNS.test(clause))return;
-      let cleaned=clause.replace(DESCRIPTION_MARKETING_PREFIX," ").trim();
-      if(!cleaned)return;
-      variants.push(cleaned);
-      const translated=translateSourceText(cleaned);
-      if(translated&&translated!==cleaned)variants.push(translated);
-    });
-    const translated=translateSourceText(raw);
-    if(translated)variants.push(translated);
-    return uniq(variants);
-  }
-  function sourceCandidates(input){
-    const candidates=[];
-    const add=(value,source,priority)=>{
-      const raw=normalizeSourceText(value); if(!validDescriptionSource(raw))return;
-      const variants=semanticDescriptionVariants(raw); if(!variants.length)return;
-      const key=cleanDescriptionCandidate(variants[0]).toLowerCase();
-      if(!key||candidates.some(x=>cleanDescriptionCandidate(x.value).toLowerCase()===key))return;
-      candidates.push({value:raw,variants,source,priority});
-    };
-    (input.descriptionCandidates||[]).forEach(x=>add(x?.value||x,x?.source||"unknown",Number(x?.priority||90)));
-    if(input.description)add(input.description,"meta-description",10);
-    return candidates.sort((a,b)=>a.priority-b.priority);
-  }
-  function exact16FromSource(input){
-    const candidates=sourceCandidates(input);
-    const pool=[];
-    candidates.forEach(c=>c.variants.forEach(v=>{
-      const translated=translateSourceText(v);
-      const primary=(translated&&/[\u4e00-\u9fff]/.test(translated))?translated:v;
-      const cleaned=cleanDescriptionCandidate(primary);
-      if(!cleaned||DESCRIPTION_BAD_PATTERNS.test(cleaned))return;
-      pool.push({value:cleaned,source:c.source,priority:c.priority});
-    }));
-    const unique=pool.filter((x,i,a)=>a.findIndex(y=>y.value===x.value)===i);
-    const exact=unique.find(x=>charCount(x.value)===16);
-    if(exact)return exact.value;
-
-    // 统一语义压缩：先去掉泛化修饰词，再优先保留产品/能力核心词。
-    const reduced=unique.map(x=>{
-      let v=x.value;
-      const parts=Array.from(v);
-      const compact=parts.join("").replace(/一个|一种|基于|通过|用于|可以|帮助|支持|提供|专为|旨在|结合|采用|全新|最佳|完美|简单|轻松|强大|免费|在线|专业|智能|凭直觉|与/g,"");
-      return {...x,value:compact};
-    }).filter(x=>charCount(x.value)>=16);
-    const exactReduced=reduced.find(x=>charCount(x.value)===16); if(exactReduced)return exactReduced.value;
-    const long=reduced.sort((a,b)=>a.priority-b.priority||charCount(a.value)-charCount(b.value));
-    if(long.length){
-      // 不从整页正文随机截断，只从最高优先级的产品语义候选中取连续16字。
-      const v=long[0].value;
-      if(charCount(v)>16)return Array.from(v).slice(0,16).join("");
-    }
-    return "";
-  }
-  function autoDescription16(input){return exact16FromSource(input);}
-  function chineseDescription(input){return autoDescription16(input);}
 
   function isLikelyGenericTitle(value){
     const s=text(value).toLowerCase();
@@ -442,7 +357,7 @@
     if(c.score<1)warnings.push("分类置信度较低，请人工确认分类/子分类");
     if(attrs.pricing==="增值")warnings.push("价格为规则推断值，发布前建议人工确认");
     return {
-      id,name:text(input.name),description:text(input.description)||exact16FromSource(input),
+      id,name:text(input.name),description:text(input.description),
       icon:defaultIcon(c.cat),thumbnail:text(input.thumbnail),category:c.cat,subcategory:sub,website:text(input.url),github:text(input.github||input.githubUrl),
       features:[],capabilities:caps,scenarios:scs,attributes:attrs,official:false,recommend:false,status:"active",
       _meta:{categoryScore:c.score,warnings}
@@ -508,6 +423,60 @@
   async function fetchPage(url){
     const clean=text(url);
     if(!/^https?:\/\//i.test(clean))throw new Error("请输入有效网址");
+  async function fetchGithubEntry(githubUrl){
+    const github=normalizeGithubUrl(githubUrl);
+    if(!github)return null;
+    const m=github.match(/^https?:\/\/github\.com\/([^/]+)\/([^/?#]+)(?:[/?#].*)?$/i);
+    if(!m)return null;
+    const owner=m[1],repo=m[2].replace(/\.git$/i,"");
+    let api={};
+    try{
+      const r=await fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,{cache:"no-store",headers:{Accept:"application/vnd.github+json"}});
+      if(r.ok)api=await r.json();
+    }catch(e){}
+    const homepage=text(api.homepage||"");
+    let readme="";
+    try{
+      const r=await fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/readme`,{cache:"no-store",headers:{Accept:"application/vnd.github.raw"}});
+      if(r.ok)readme=await r.text();
+    }catch(e){}
+    const jina=await fetchGithubDescription(github);
+    const content=[api.description,readme,jina].filter(Boolean).join("\n").slice(0,18000);
+    let website="";
+    let webMeta={};
+    if(homepage){
+      try{
+        webMeta=await fetchPage(homepage);
+        website=text(webMeta.website||homepage);
+      }catch(e){website=homepage;}
+    }
+    const resourceName=text(api.name)||text(webMeta.resourceName)||nameFromTitle(webMeta.title,homepage||github)||repo;
+    const descriptionCandidates=[
+      api.description&&{value:api.description,source:"github-api-description",priority:10},
+      jina&&{value:jina,source:"github-readme",priority:20},
+      ...(webMeta.descriptionCandidates||[])
+    ].filter(Boolean);
+    return {
+      ...(webMeta||{}),
+      title:webMeta.title||resourceName,
+      resourceName,
+      description:text(api.description||webMeta.description),
+      descriptionCandidates,
+      keywords:text(webMeta.keywords),
+      content:content||text(webMeta.content),
+      github,
+      thumbnail:text(webMeta.thumbnail),
+      website,
+      source:"github",
+      fetchedUrl:github
+    };
+  }
+
+
+    if(/^https?:\/\/github\.com\//i.test(clean)){
+      const entry=await fetchGithubEntry(clean);
+      if(entry)return entry;
+    }
     let raw="",source="direct",fetchedUrl=clean;
     try{
       const r=await fetch(clean,{mode:"cors",redirect:"follow",cache:"no-store",headers:{"Cache-Control":"no-cache","Pragma":"no-cache"}});
@@ -586,7 +555,7 @@
       throw new Error("读取结果与当前 URL 不一致，已拒绝使用旧网页内容，请再次读取");
     }
     const name=nameFromTitle(structuredName,clean)||nameFromTitle(title,clean)||nameFromTitle(siteName,clean);
-    return {title,resourceName:name,description,descriptionCandidates,keywords,content:body,github:normalizeGithubUrl(github),thumbnail,siteName,structuredName,source,fetchedUrl};
+    return {title,resourceName:name,description,descriptionCandidates,keywords,content:body,github:normalizeGithubUrl(github),thumbnail,siteName,structuredName,source,fetchedUrl,website:(fetchedUrl&&/^https?:\/\//i.test(fetchedUrl)&&!/^https?:\/\/github\.com\//i.test(fetchedUrl))?fetchedUrl:""};
   }
 
   function renderChips(container,items,type){
@@ -603,6 +572,8 @@
   }
   function selectedChips(type){return $$(`.chip[data-chip-type="${type}"].selected`).map(x=>x.dataset.chipValue);}
 
+  function getThumbnailField(){const el=$("#resourceThumbnail");return el?text(el.value):text(state.draft?.thumbnail||"");}
+  function setThumbnailField(value){const el=$("#resourceThumbnail");if(el)el.value=text(value);}
   function renderDraft(resource){
     state.draft=resource;
     const meta=resource._meta||{};
@@ -612,7 +583,7 @@
     $("#resourceName").value=resource.name;
     $("#resourceUrl").value=resource.website;
     $("#resourceGithub").value=resource.github||"";
-    $("#resourceThumbnail").value=resource.thumbnail||"";
+    setThumbnailField(resource.thumbnail||"");
     $("#resourceDescription").value=resource.description||"";
     state.descriptionMode=meta.descriptionMode||"manual";
     state.auto={id:meta.autoId||"",name:meta.autoName||"",description:meta.autoDescription||"",github:meta.autoGithub||"",thumbnail:meta.autoThumbnail||""};
@@ -637,7 +608,7 @@
     if(!currentId)state.auto.id=r.id;
     r.name=text($("#resourceName").value);
     r.website=text($("#resourceUrl").value);
-    r.description=state.descriptionMode==="auto" ? charCount($("#resourceDescription").value)===16 ? text($("#resourceDescription").value) : exact16FromSource({name:r.name,url:r.website}) : limit32($("#resourceDescription").value);
+    r.description=state.descriptionMode==="auto" ? text($("#resourceDescription").value) : limit32($("#resourceDescription").value);
     r.github=text($("#resourceGithub").value);
     r.thumbnail=text($("#resourceThumbnail").value);
     r.category=parent;r.subcategory=sub;
@@ -748,7 +719,7 @@
         name:text($("#resourceName").value),
         description:text($("#resourceDescription").value),
         github:text($("#resourceGithub").value),
-        thumbnail:text($("#resourceThumbnail").value)
+        thumbnail:getThumbnailField()
       };
       const previousAuto={...state.auto};
       const previousAutoUrl=state.autoUrl;
@@ -771,10 +742,7 @@
       }else state.auto.name="";
 
       if(!current.description||autoDescription){
-        input.description=exact16FromSource({
-          name:meta.resourceName||input.name,url,
-          description:meta.description,descriptionCandidates:meta.descriptionCandidates,content:meta.content,title:meta.title,keywords:meta.keywords
-        });
+        input.description=await generateDescriptionWithAI({...meta,name:meta.resourceName||input.name,url,github:meta.github||input.github});
         state.descriptionMode="auto";
         markAutoField("description",input.description);
       }else{
@@ -800,7 +768,7 @@
       $("#resourceName").value=input.name;
       $("#resourceDescription").value=input.description;
       $("#resourceGithub").value=input.github;
-      $("#resourceThumbnail").value=input.thumbnail;
+      setThumbnailField(input.thumbnail);
 
       const r=analyze({...input,...meta});
       r._meta={...(r._meta||{}),
@@ -822,7 +790,7 @@
         name:text($("#resourceName").value),
         description:text($("#resourceDescription").value),
         github:text($("#resourceGithub").value),
-        thumbnail:text($("#resourceThumbnail").value)
+        thumbnail:getThumbnailField()
       };
       const previousAuto={...state.auto};
       const previousAutoUrl=state.autoUrl;
@@ -842,10 +810,7 @@
         }else state.auto.name="";
 
         if(!current.description||autoDescription){
-          const value=exact16FromSource({
-            name:m.resourceName||$("#resourceName").value,url,
-            description:m.description,descriptionCandidates:m.descriptionCandidates,content:m.content,title:m.title,keywords:m.keywords
-          });
+          const value=await generateDescriptionWithAI({...m,name:m.resourceName||$("#resourceName").value,url,github:m.github||$("#resourceGithub").value});
           $("#resourceDescription").value=value;
           state.descriptionMode="auto";
           markAutoField("description",value);
@@ -857,11 +822,12 @@
         if(!current.github||autoGithub){
           const value=text(m.github||"");
           $("#resourceGithub").value=value;markAutoField("github",value);
+           if(m.website && !/^https?:\/\/github\.com\//i.test(m.website)){ $("#resourceUrl").value=m.website; markAutoField("url",m.website); }
         }else state.auto.github="";
 
         if(!current.thumbnail||autoThumbnail){
           const value=text(m.thumbnail||"");
-          $("#resourceThumbnail").value=value;markAutoField("thumbnail",value);
+          setThumbnailField(value);markAutoField("thumbnail",value);
         }else state.auto.thumbnail="";
 
         state.autoUrl=url;
@@ -874,7 +840,7 @@
       }catch(e){setStatus(e.message||"网页读取失败");}
     };
 
-    $("#resetBtn").onclick=()=>{state.draft=null;resetAutoState();$("#reviewPanel").hidden=true;$("#resourceName").value="";$("#resourceUrl").value="";$("#resourceDescription").value="";$("#resourceGithub").value="";$("#resourceThumbnail").value="";setStatus("已清空");};
+    $("#resetBtn").onclick=()=>{state.draft=null;resetAutoState();$("#reviewPanel").hidden=true;$("#resourceName").value="";$("#resourceUrl").value="";$("#resourceDescription").value="";$("#resourceGithub").value="";setThumbnailField("");setStatus("已清空");};
     $("#clearAllBtn").onclick=()=>{
       if(!window.confirm("确定全部清空当前录入内容吗？\n已保存的历史草稿不会删除。"))return;
       state.draft=null;
@@ -884,7 +850,7 @@
       $("#resourceUrl").value="";
       $("#resourceDescription").value="";
       $("#resourceGithub").value="";
-      $("#resourceThumbnail").value="";
+      setThumbnailField("");
       $("#resourceId").value="";
       $("#pageMeta").textContent="";
       $("#status").textContent="当前录入已全部清空";
@@ -925,7 +891,7 @@
       }
       setStatus(`已人工切换分类：${group?.name||parent}`,true);
     });
-    ["resourceName","resourceUrl","resourceDescription","resourceGithub","resourceThumbnail","resourceId"].forEach(id=>$("#"+id).addEventListener("input",()=>{
+    ["resourceName","resourceUrl","resourceDescription","resourceGithub","resourceId"].forEach(id=>$("#"+id).addEventListener("input",()=>{
       const el=$("#"+id);
       if(id==="resourceDescription")el.value=limit32(el.value);
       if(id==="resourceDescription" && state.descriptionMode==="auto" && el.value!==state.auto.description){
@@ -935,7 +901,6 @@
       if(id==="resourceId" && el.value!==state.auto.id)state.auto.id="";
       if(id==="resourceName" && el.value!==state.auto.name)state.auto.name="";
       if(id==="resourceGithub" && el.value!==state.auto.github)state.auto.github="";
-      if(id==="resourceThumbnail" && el.value!==state.auto.thumbnail)state.auto.thumbnail="";
       if(id==="resourceUrl"){
         const nextUrl=text(el.value);
         if(state.autoUrl && nextUrl!==state.autoUrl)invalidateForUrlChange(nextUrl);
