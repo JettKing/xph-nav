@@ -2,7 +2,8 @@ const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
 const MODEL = 'deepseek-v4-pro';
 const count = value => Array.from(String(value ?? '').trim()).length;
 const clean = value => String(value ?? '').trim().replace(/[\r\n]+/g, ' ').replace(/^['"“”‘’]+|['"“”‘’]+$/g, '').trim();
-const DEEPSEEK_TIMEOUT_MS = 120000;
+const DEEPSEEK_TIMEOUT_MS = 45000;
+const MAX_ATTEMPTS = 4;
 const isValid16 = value => { const v = clean(value); return count(v) === 16 && /[\u3400-\u9fff]/.test(v) && !/^[A-Za-z0-9\s.,!?;:()\[\]{}+\-_/&%#]+$/.test(v) && !/[\r\n]/.test(v); };
 const isValidManual = value => { const v = clean(value); return count(v) >= 1 && count(v) <= 16 && !/[\r\n]/.test(v); };
 const genericPattern = /(专业|强大|超强|顶级|领先|完美|神器|极速|优质|爆款|必备)/;
@@ -86,16 +87,26 @@ GitHub项目名称：${githubName}
 以下是系统已经读取并缓存的真实网页/GitHub内容。不要再次访问 URL，也不要假设没有提供的内容：
 ${content}
 
-请先判断资源真正解决什么问题、最核心的功能和主要用途，再从合法词库中选择唯一最匹配的 category + subcategory。若没有人工简介，再生成严格16字符核心简介；若有人工简介，原样保留。只返回 JSON。`;
+请先判断资源真正解决什么问题、最核心的功能和主要用途，再从合法词库中选择唯一最匹配的 category + subcategory。
+若没有人工简介：先在内部拟定候选简介并逐字符计数，最终只输出恰好16字符的核心简介。严禁为了凑16字在末尾添加“工具、平台、软件、资源、应用、专业、强大、实用”等空泛词。
+若有人工简介，原样保留。
+输出前再次检查：description 是否正好16字符、是否中文为主体、是否来自真实资料、是否自然完整；category/subcategory 是否是词库中的真实组合。
+只返回 JSON。`;
 
   let lastError = null;
   let previousDescription = manualDescription;
   let previousClassification = '';
+  let lastDescriptionLength = manualDescription ? count(manualDescription) : 0;
 
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
       const retryHint = attempt > 1
-        ? `\n上一次结果未通过最终校验。请重新理解原始资料，不要机械修改。上一次简介：${previousDescription || '无'}；上一次分类：${previousClassification || '无'}。` 
+        ? `\n这是第 ${attempt} 次生成。上一轮结果未通过最终校验。不要返回上一轮原文，也不要机械补字。
+上一轮简介：${previousDescription || '无'}
+上一轮简介实际字符数：${lastDescriptionLength}
+上一轮分类：${previousClassification || '无'}
+请重新根据原始资料提炼；如果分类已经合法，可以保持上一轮分类，只重新写简介。
+【简介硬性验收】AI生成简介必须恰好16个字符（中文、英文字母、数字均按1字符计），必须是自然完整的中文核心简介，中文为主体；不要通过加“工具、平台、软件、专业、强大、实用”等空泛词凑长度。生成后请在输出前自行逐字符计数。`
         : '';
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), DEEPSEEK_TIMEOUT_MS);
@@ -115,6 +126,7 @@ ${content}
             ],
             thinking: { type: 'disabled' },
             max_tokens: 320,
+            temperature: 0.1,
             response_format: { type: 'json_object' },
             stream: false
           }),
@@ -143,10 +155,13 @@ ${content}
         continue;
       }
 
-      const description = clean(parsed?.description);
+      let description = clean(parsed?.description);
+      // 兼容模型偶尔把简介放在 description_text / summary 字段。
+      if (!description) description = clean(parsed?.description_text || parsed?.summary);
       const category = clean(parsed?.category);
       const subcategory = clean(parsed?.subcategory);
       previousDescription = description;
+      lastDescriptionLength = count(description);
       previousClassification = `${category}/${subcategory}`;
 
       const descriptionValid = manualDescription
@@ -159,7 +174,7 @@ ${content}
       }
 
       const errors = [];
-      if (!descriptionValid) errors.push(manualDescription ? '人工简介未原样保留' : `简介未通过16字符质量校验：${count(description)}字符`);
+      if (!descriptionValid) errors.push(manualDescription ? '人工简介未原样保留' : `简介未通过16字符质量校验：${count(description)}字符（必须恰好16字符）`);
       if (!classificationValid) errors.push('分类不在合法词库或父子分类不匹配');
       lastError = new Error(`DeepSeek 返回结果未通过最终校验：${errors.join('；')}`);
     } catch (error) {
