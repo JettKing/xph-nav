@@ -33,36 +33,78 @@ async function githubApi(repo){
 function extractGithubLinks(raw){
   const text=String(raw||'').replace(/&amp;/gi,'&').replace(/\\\//g,'/');
   const found=[];
-  const patterns=[
-    /https?:\/\/(?:www\.)?github\.com\/[^\s<>\]\)\"']+/gi,
-    /(?:^|[\s(\[<\"'=])(?:www\.)?github\.com\/[^\s<>\]\)\"']+/gi
-  ];
-  for(const re of patterns){for(const m of text.matchAll(re)){const rawUrl=String(m[0]).replace(/^[^hH]*github/i,'github');const u=normalizeGithub(rawUrl);if(u)found.push(u)}}
+  const add=v=>{const u=normalizeGithub(v);if(u)found.push(u)};
+  // Markdown links: [GitHub](https://github.com/owner/repo)
+  for(const m of text.matchAll(/\[[^\]]{0,120}\]\((https?:\/\/(?:www\.)?github\.com\/[^)\s]+)\)/gi)) add(m[1]);
+  // HTML hrefs and plain absolute URLs.
+  for(const m of text.matchAll(/(?:href\s*=\s*[\"']|^|[\s(<\"'=])(https?:\/\/(?:www\.)?github\.com\/[^\s<>\]\)\"']+)/gim)) add(m[1]);
+  // Bare github.com/owner/repo forms.
+  for(const m of text.matchAll(/(?:^|[\s(<\"'=])((?:www\.)?github\.com\/[^\s<>\]\)\"']+)/gim)) add(m[1]);
   return uniq(found);
 }
-function extractGithubHomepage(raw){
+function extractExternalLinks(raw){
+  const text=String(raw||'').replace(/&amp;/gi,'&').replace(/\\\//g,'/');
+  const found=[];
+  const add=v=>{try{const u=normalizeUrl(v);const host=new URL(u).hostname.toLowerCase();if(/^https?:\/\//i.test(u)&&host&&!/^(?:www\.)?github\.com$/.test(host))found.push(u)}catch{}};
+  for(const m of text.matchAll(/\[[^\]]{0,160}\]\((https?:\/\/[^)\s]+)\)/gi)) add(m[1]);
+  for(const m of text.matchAll(/(?:href\s*=\s*[\"']|^|[\s(<\"'=])(https?:\/\/[^\s<>\]\)\"']+)/gim)) add(m[1]);
+  for(const m of text.matchAll(/https?:\/\/[^\s<>\]\)\"']+/gi)) add(m[0]);
+  return uniq(found);
+}
+function extractGithubHomepage(raw,repo=''){
   const text=String(raw||'').replace(/&amp;/gi,'&').replace(/\\\//g,'/');
   const labeled=[
-    /(?:homepage|home page|website|官网|项目主页)\s*(?:[:：]|[-–—])?\s*(https?:\/\/(?!github\.com)[^\s<>)\"']+)/i,
-    /(?:homepage|home page|website|官网|项目主页)[^\n]{0,160}?(https?:\/\/(?!github\.com)[^\s<>)\"']+)/i
+    /(?:homepage|home page|website|官网|项目主页)\s*(?:[:：]|[-–—])?\s*(https?:\/\/(?!github\.com)[^\s<>)"']+)/i,
+    /(?:homepage|home page|website|官网|项目主页)[^\n]{0,200}?(https?:\/\/(?!github\.com)[^\s<>)"']+)/i
   ];
   for(const re of labeled){const m=text.match(re);if(m){try{return normalizeUrl(m[1])}catch{}}}
-  return '';
+  const links=extractExternalLinks(text);
+  if(!links.length)return '';
+  let target='';
+  try{target=(repo.match(/github\.com\/[^/]+\/([^/?#]+)/i)?.[1]||'').toLowerCase().replace(/[^a-z0-9]+/g,'')}catch{}
+  const scored=links.map(u=>{
+    let score=0;
+    try{
+      const host=new URL(u).hostname.toLowerCase().replace(/^www\./,'');
+      const root=host.split('.').slice(-2).join('.').replace(/[^a-z0-9]+/g,'');
+      if(target && root.includes(target))score+=100;
+      if(target && host.replace(/[^a-z0-9]+/g,'').includes(target))score+=40;
+      if(/^(?:docs|doc|developer|developers|careers|blog|status|support)\./.test(host))score-=35;
+      if(/(?:discord\.(?:gg|com)|twitter\.com|x\.com|linkedin\.com|youtube\.com|twitch\.tv|npmjs\.com|pypi\.org)/.test(host))score-=100;
+    }catch{}
+    return{u,score};
+  }).sort((a,b)=>b.score-a.score);
+  return scored[0]?.u||'';
 }
 async function githubReadme(repo){try{const m=repo.match(/github\.com\/([^/]+\/[^/]+)/i);if(!m)return '';const r=await timeoutFetch(`https://raw.githubusercontent.com/${m[1]}/HEAD/README.md`,{headers:{Accept:'text/plain'}},10000);return r.ok?(await r.text()).slice(0,18000):''}catch{return ''}}
+async function discoverGithubBySearch(name,website){
+  const q=txt(name)||(()=>{try{return new URL(website).hostname.replace(/^www\./,'')}catch{return ''}})();
+  if(!q)return '';
+  try{
+    const searchUrl=`https://github.com/search?q=${encodeURIComponent(q)}&type=repositories`;
+    const r=await timeoutFetch('https://r.jina.ai/'+searchUrl,{headers:{Accept:'text/plain'}},18000);
+    if(!r.ok)return '';
+    const raw=await r.text();
+    const links=extractGithubLinks(raw);
+    const target=q.toLowerCase().replace(/[^a-z0-9]+/g,'');
+    const scored=links.map(u=>{const repo=u.split('/').pop().toLowerCase().replace(/[^a-z0-9]+/g,'');let score=0;if(repo===target)score+=100;if(repo.includes(target)||target.includes(repo))score+=25;return{u,score}}).sort((a,b)=>b.score-a.score);
+    return scored[0]?.score>=100?scored[0].u:'';
+  }catch{return ''}
+}
+
 async function readGithubPage(repo){
   try{
     const r=await timeoutFetch('https://r.jina.ai/'+normalizeUrl(repo),{headers:{Accept:'text/plain'}},18000);
     if(!r.ok)return{raw:'',website:''};
     const raw=await r.text();
     const pageInfo=extractPageInfo(raw,repo);
-    const website=extractGithubHomepage(raw);
-    return{raw:raw.slice(0,18000),website,seoTitle:pageInfo.seoTitle,seoDescription:pageInfo.seoDescription};
+    const website=extractGithubHomepage(raw,repo);
+    return{raw:raw.slice(0,18000),website,name:pageInfo.name,seoTitle:pageInfo.seoTitle,seoDescription:pageInfo.seoDescription};
   }catch{return{raw:'',website:''}}
 }
 function cleanText(v){return txt(v).replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/!\[[^\]]*\]\([^)]*\)/g,' ').replace(/[`*_>#~]/g,' ').replace(/\s+/g,' ').trim()}
 function cleanName(v){
-  let x=cleanText(v).replace(/^[-–—•·|:：]+|[-–—•·|:：]+$/g,'').trim();
+  let x=cleanText(v).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,' ').replace(/^[-–—•·|:：]+|[-–—•·|:：]+$/g,'').trim();
   const parts=x.split(/\s+(?:—|–|\||·)\s+|\s*[:：]\s+(?=\S)|\s+-\s+/).map(t=>t.trim()).filter(Boolean);
   if(parts.length>1){
     const generic=/\b(?:the\s+)?(?:best|free|open[- ]?source|official|website|homepage|platform|tool|software|project|app|workspace|alternative|for|powered|built|made)\b|(?:截图|转码|文件传输|项目管理|协作|视频|rss|阅读器|工具|平台|软件|工作台)/i;
@@ -118,38 +160,53 @@ async function readWebsite(url){
   const thumb=(raw.match(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/i)||[])[1]||'';
   return{website:clean,name:info.name,seoTitle:info.seoTitle,seoDescription:info.seoDescription,github:links[0]||'',thumbnail:thumb,content:raw.slice(0,22000),source:'official-web'};
 }
+function githubDisplayName(repo){
+  const slug=txt(repo).match(/github\.com\/[^/]+\/([^/?#]+)/i)?.[1]||'';
+  return cleanName(slug.replace(/[-_]+/g,' '));
+}
 async function readGithub(url){
   const repo=normalizeGithub(url);
   if(!repo)throw new Error('GitHub URL 无效');
-  // GitHub 网页与 raw README 是主通道；REST API 只作为可选补充，避免 403/限流阻断整个读取流程。
+  // GitHub网页 + README 是主通道；REST API 仅补充，不再成为单点故障。
   const page=await readGithubPage(repo);
   const readme=await githubReadme(repo);
   let api={ok:false,status:0,data:null};
-  // 仅在网页层缺少关键元数据时尝试 API；API 失败绝不向用户抛出 403。
-  if(!page.raw || !page.website){api=await githubApi(repo)}
+  if(!page.raw || !page.website || !page.name) api=await githubApi(repo);
   const d=api.data||{};
-  const name=txt(d.name)||repo.split('/').pop();
-  const website=txt(d.homepage)||txt(page.website)||'';
+  const readmeName=extractPageInfo(readme,repo).name;
+  const name=txt(d.name)||txt(readmeName)||txt(page.name)||githubDisplayName(repo)||repo.split('/').pop();
+  const website=txt(d.homepage)||txt(page.website)||extractGithubHomepage(readme,repo)||'';
   const description=txt(d.description);
   const pageInfo=[txt(page.raw),description,readme].filter(Boolean).join('\n\n--- GitHub README ---\n').slice(0,22000);
   if(!pageInfo)throw new Error('GitHub 真实内容读取失败，请稍后重试');
   return{github:repo,name,website,thumbnail:'',seoTitle:txt(page.seoTitle)||'',seoDescription:txt(page.seoDescription)||'',content:pageInfo,source:'github',keywords:Array.isArray(d.topics)?d.topics:[],apiStatus:api.status||0};
 }
-async function readRealSources(){const url=normalizeUrl($('#resourceUrl').value),githubInput=normalizeGithub($('#resourceGithub').value),inputGithub=githubInput||normalizeGithub(url);if(!url&&!inputGithub)throw new Error('请至少填写资源 URL 或 GitHub URL');let web=null,gh=null;
-if(url&&!normalizeGithub(url)){try{web=await readWebsite(url)}catch(e){if(!inputGithub)throw e}}
-if(inputGithub){gh=await readGithub(inputGithub)}
-if(!web&&gh?.website){try{web=await readWebsite(gh.website)}catch{}}
-if(!gh&&web?.github){try{gh=await readGithub(web.github)}catch{}}
-const isHostnameName=(name,url)=>{const n=txt(name).toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/$/,'');try{return !!url&&n===new URL(url).hostname.replace(/^www\./,'').toLowerCase()}catch{return false}};
-const webName=txt(web?.name);
-const ghName=txt(gh?.name);
-const webNameLooksGeneric=/^(?:home|homepage|official website|website|open source|open-source|the open source|free|welcome)$/i.test(webName)||/\b(?:best|free|open[- ]?source)\b.*\b(?:tool|software|platform|website)\b/i.test(webName);
-const preferredName=(webName && !isHostnameName(webName,web?.website) && !webNameLooksGeneric)
-  ? webName
-  : (ghName && !isHostnameName(ghName,gh?.github))
-    ? ghName
-    : (webName||ghName||'');
-const source={website:txt(web?.website)||'',name:preferredName,github:txt(gh?.github)||txt(web?.github)||inputGithub||'',thumbnail:txt(web?.thumbnail)||'',seoTitle:txt(web?.seoTitle)||'',seoDescription:txt(web?.seoDescription)||'',githubName:ghName,content:[web?.content,gh?.content].filter(Boolean).join('\n\n--- GitHub ---\n').slice(0,24000),source:web?'official-web':'github',githubContent:gh?.content||'',keywords:uniq([...(web?.keywords||[]),...(gh?.keywords||[])])};if(!source.name)throw new Error('真实来源未读取到资源名称');if(!source.website&&!source.github)throw new Error('真实来源读取失败');return source}
+async function readRealSources(){
+  const url=normalizeUrl($('#resourceUrl').value);
+  const githubInput=normalizeGithub($('#resourceGithub').value);
+  const inputGithub=githubInput||normalizeGithub(url);
+  if(!url&&!inputGithub)throw new Error('请至少填写资源 URL 或 GitHub URL');
+  let web=null,gh=null;
+  if(url&&!normalizeGithub(url)){try{web=await readWebsite(url)}catch(e){if(!inputGithub)throw e}}
+  if(inputGithub){gh=await readGithub(inputGithub)}
+  // 官网 -> GitHub：先用页面真实链接；页面解析不到时，再用 GitHub 公共搜索按真实名称发现仓库。
+  if(!gh&&web){
+    let discovered=normalizeGithub(web.github);
+    if(!discovered) discovered=await discoverGithubBySearch(web.name||web.seoTitle,web.website);
+    if(discovered){try{gh=await readGithub(discovered)}catch{}}
+  }
+  // GitHub -> 官网：优先仓库 About/API，其次 README；成功发现后再读取官网真实内容。
+  if(gh?.website&&!web){try{web=await readWebsite(gh.website)}catch{}}
+  const isHostnameName=(name,url)=>{const n=txt(name).toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/$/,'');try{return !!url&&n===new URL(url).hostname.replace(/^www\./,'').toLowerCase()}catch{return false}};
+  const webName=txt(web?.name);
+  const ghName=txt(gh?.name);
+  const webNameLooksGeneric=/^(?:home|homepage|official website|website|open source|open-source|the open source|free|welcome)$/i.test(webName)||/\b(?:best|free|open[- ]?source)\b.*\b(?:tool|software|platform|website)\b/i.test(webName);
+  const preferredName=(webName && !isHostnameName(webName,web?.website) && !webNameLooksGeneric)?webName:(ghName&&!isHostnameName(ghName,gh?.github)?ghName:(webName||ghName||''));
+  const source={website:txt(web?.website)||txt(gh?.website)||'',name:preferredName,github:txt(gh?.github)||txt(web?.github)||inputGithub||'',thumbnail:txt(web?.thumbnail)||'',seoTitle:txt(web?.seoTitle)||txt(gh?.seoTitle)||'',seoDescription:txt(web?.seoDescription)||txt(gh?.seoDescription)||'',githubName:ghName,content:[web?.content,gh?.content].filter(Boolean).join('\n\n--- GitHub ---\n').slice(0,24000),source:web?'official-web':'github',githubContent:gh?.content||'',keywords:uniq([...(web?.keywords||[]),...(gh?.keywords||[])])};
+  if(!source.name)throw new Error('真实来源未读取到资源名称');
+  if(!source.website&&!source.github)throw new Error('真实来源读取失败');
+  return source;
+}
 function showRead(source){$('#readBox').classList.remove('hidden');$('#readName').textContent=source.name||'—';$('#readSource').textContent=source.website||'—';$('#readGithub').textContent=source.github||'未发现';$('#readThumb').textContent=source.thumbnail?'已读取':'未读取';$('#readContent').textContent=`已缓存 ${count(source.content)} 字符真实内容`;}
 function buildResource(extra={}){const [cat,sub]=txt($('#categorySelect').value).split('::');const r=state.resource||{};const manualName=txt($('#resourceName').value);const sourceName=txt(state.source?.name);const finalName=manualName||sourceName;r.id=txt($('#resourceId').value)||r.id||makeId(finalName,$('#resourceUrl').value||$('#resourceGithub').value);r.name=finalName;r.website=normalizeUrl($('#resourceUrl').value)||txt(state.source?.website);r.github=normalizeGithub($('#resourceGithub').value)||txt(state.source?.github);r.thumbnail=state.source?.thumbnail||r.thumbnail||'';r.description=txt($('#resourceDescription').value);r.category=cat||'website';r.subcategory=sub||'website_tool';r.capabilities=selected('capabilities');r.scenarios=selected('scenarios');r.attributes={pricing:selected('pricing')[0]||'增值',platform:selected('platform'),language:selected('language'),audience:selected('audience')};r.audience=r.attributes.audience?.[0]||'';r.icon=r.icon||'🔗';r.features=r.features||[];r.official=!!r.official;r.recommend=!!r.recommend;r.status=r.status||'active';return r}
 function renderResource(r){state.resource=r;renderCategories(r.subcategory);$('#resourceId').value=r.id||'';$('#resourceName').value=r.name||'';$('#resourceUrl').value=r.website||'';$('#resourceGithub').value=r.github||'';$('#resourceDescription').value=r.description||'';renderChips('capabilityChips',r.capabilities,'capabilities');renderChips('scenarioChips',r.scenarios,'scenarios');renderChips('pricingChips',[r.attributes?.pricing].filter(Boolean),'pricing');renderChips('platformChips',r.attributes?.platform,'platform');renderChips('languageChips',r.attributes?.language,'language');renderChips('audienceChips',r.attributes?.audience,'audience');$('#reviewPanel').classList.remove('hidden');$('#jsonPreview').textContent=JSON.stringify(r,null,2);}
