@@ -47,10 +47,23 @@ function extractGithubLinks(raw){
   for(const m of text.matchAll(/(?:^|[\s(<\"'=])((?:www\.)?github\.com\/[^\s<>\]\)\"']+)/gim)) add(m[1]);
   return uniq(found);
 }
+function isGithubAssetHost(host){
+  const h=String(host||'').toLowerCase().replace(/^www\./,'');
+  return /^(?:camo\.githubusercontent\.com|raw\.githubusercontent\.com|objects\.githubusercontent\.com|user-images\.githubusercontent\.com|avatars\.githubusercontent\.com|githubassets\.com|github\.com|gist\.github\.com)$/.test(h);
+}
+function isValidHomepageUrl(value){
+  try{
+    const u=new URL(normalizeUrl(value));
+    const host=u.hostname.toLowerCase().replace(/^www\./,'');
+    if(!/^https?:$/.test(u.protocol) || !host || isGithubAssetHost(host)) return false;
+    if(/(?:^|\.)githubusercontent\.com$/.test(host)) return false;
+    return true;
+  }catch{return false}
+}
 function extractExternalLinks(raw){
   const text=String(raw||'').replace(/&amp;/gi,'&').replace(/\\\//g,'/');
   const found=[];
-  const add=v=>{try{const u=normalizeUrl(v);const host=new URL(u).hostname.toLowerCase();if(/^https?:\/\//i.test(u)&&host&&!/^(?:www\.)?github\.com$/.test(host))found.push(u)}catch{}};
+  const add=v=>{try{const u=normalizeUrl(v);if(isValidHomepageUrl(u))found.push(u)}catch{}};
   for(const m of text.matchAll(/\[[^\]]{0,160}\]\((https?:\/\/[^)\s]+)\)/gi)) add(m[1]);
   for(const m of text.matchAll(/(?:href\s*=\s*[\"']|^|[\s(<\"'=])(https?:\/\/[^\s<>\]\)\"']+)/gim)) add(m[1]);
   for(const m of text.matchAll(/https?:\/\/[^\s<>\]\)\"']+/gi)) add(m[0]);
@@ -59,10 +72,13 @@ function extractExternalLinks(raw){
 function extractGithubHomepage(raw,repo=''){
   const text=String(raw||'').replace(/&amp;/gi,'&').replace(/\\\//g,'/');
   const labeled=[
-    /(?:homepage|home page|website|官网|项目主页)\s*(?:[:：]|[-–—])?\s*(https?:\/\/(?!github\.com)[^\s<>)"']+)/i,
-    /(?:homepage|home page|website|官网|项目主页)[^\n]{0,200}?(https?:\/\/(?!github\.com)[^\s<>)"']+)/i
+    /(?:homepage|home page|website|官网|项目主页|official website|official site)\s*(?:[:：]|[-–—])?\s*(https?:\/\/(?!github\.com)[^\s<>)"']+)/i,
+    /(?:homepage|home page|website|官网|项目主页|official website|official site)[^\n]{0,200}?(https?:\/\/(?!github\.com)[^\s<>)"']+)/i
   ];
-  for(const re of labeled){const m=text.match(re);if(m){try{return normalizeUrl(m[1])}catch{}}}
+  for(const re of labeled){
+    const m=text.match(re);
+    if(m && isValidHomepageUrl(m[1])) return normalizeUrl(m[1]);
+  }
   const links=extractExternalLinks(text);
   if(!links.length)return '';
   let target='';
@@ -71,15 +87,18 @@ function extractGithubHomepage(raw,repo=''){
     let score=0;
     try{
       const host=new URL(u).hostname.toLowerCase().replace(/^www\./,'');
+      const compactHost=host.replace(/[^a-z0-9]+/g,'');
       const root=host.split('.').slice(-2).join('.').replace(/[^a-z0-9]+/g,'');
-      if(target && root.includes(target))score+=100;
-      if(target && host.replace(/[^a-z0-9]+/g,'').includes(target))score+=40;
+      if(target && root===target)score+=140;
+      else if(target && root.includes(target))score+=100;
+      if(target && compactHost.includes(target))score+=40;
       if(/^(?:docs|doc|developer|developers|careers|blog|status|support)\./.test(host))score-=35;
-      if(/(?:discord\.(?:gg|com)|twitter\.com|x\.com|linkedin\.com|youtube\.com|twitch\.tv|npmjs\.com|pypi\.org)/.test(host))score-=100;
+      if(/(?:discord\.(?:gg|com)|twitter\.com|x\.com|linkedin\.com|youtube\.com|twitch\.tv|npmjs\.com|pypi\.org|medium\.com)/.test(host))score-=100;
     }catch{}
     return{u,score};
   }).sort((a,b)=>b.score-a.score);
-  return scored[0]?.u||'';
+  // Never choose an arbitrary external asset/link from a GitHub page.
+  return scored[0]?.score>=80 ? scored[0].u : '';
 }
 async function githubReadme(repo){try{const m=repo.match(/github\.com\/([^/]+\/[^/]+)/i);if(!m)return '';const r=await timeoutFetch(`https://raw.githubusercontent.com/${m[1]}/HEAD/README.md`,{headers:{Accept:'text/plain'}},10000);return r.ok?(await r.text()).slice(0,18000):''}catch{return ''}}
 async function discoverGithubBySearch(name,website){
@@ -172,15 +191,30 @@ function githubDisplayName(repo){
 async function readGithub(url){
   const repo=normalizeGithub(url);
   if(!repo)throw new Error('GitHub URL 无效');
-  // GitHub网页 + README 是主通道；REST API 仅补充，不再成为单点故障。
+  // GitHub网页 + README 是主通道；REST API 只做补充，403/限流不能阻断反向读取。
   const page=await readGithubPage(repo);
   const readme=await githubReadme(repo);
   let api={ok:false,status:0,data:null};
   if(!page.raw || !page.website || !page.name) api=await githubApi(repo);
   const d=api.data||{};
-  const readmeName=extractPageInfo(readme,repo).name;
-  const name=txt(d.name)||txt(readmeName)||txt(page.name)||githubDisplayName(repo)||repo.split('/').pop();
-  const website=txt(d.homepage)||txt(page.website)||extractGithubHomepage(readme,repo)||'';
+  const readmeInfo=extractPageInfo(readme,repo);
+  const readmeName=readmeInfo.name;
+  const slugName=githubDisplayName(repo);
+  const pageName=txt(page.name);
+  // GitHub 页面偶尔会被 Jina 的页面导航/图片元数据误识别成“Published Time”等无关文本。
+  // 对明显导航/时间/图片类候选直接回退到仓库 slug，而不是把错误名称传给 AI。
+  const suspiciousGithubName=/^(?:published time|updated time|created time|release time|commit time|view raw|raw|source|image|download|home|homepage|website|menu|navigation)$/i;
+  const safeName=v=>{
+    const x=txt(v);
+    return x && !suspiciousGithubName.test(x) && x.length<=80 ? x : '';
+  };
+  const name=safeName(d.name)||safeName(readmeName)||safeName(pageName)||slugName||repo.split('/').pop();
+  // 官网识别顺序：API homepage → README 明确/高置信外链 → GitHub 页面明确/高置信外链。
+  // 严禁把 camo/raw.githubusercontent.com 等图片/资源地址当官网。
+  const apiHomepage=isValidHomepageUrl(d.homepage)?normalizeUrl(d.homepage):'';
+  const readmeHomepage=extractGithubHomepage(readme,repo);
+  const pageHomepage=extractGithubHomepage(page.raw,repo);
+  const website=apiHomepage||readmeHomepage||pageHomepage||'';
   const description=txt(d.description);
   const pageInfo=[txt(page.raw),description,readme].filter(Boolean).join('\n\n--- GitHub README ---\n').slice(0,22000);
   if(!pageInfo)throw new Error('GitHub 真实内容读取失败，请稍后重试');
@@ -217,7 +251,7 @@ function buildResource(extra={}){const [cat,sub]=txt($('#categorySelect').value)
 function renderResource(r){state.resource=r;renderCategories(r.subcategory,r.category);$('#resourceId').value=r.id||'';$('#resourceName').value=r.name||'';$('#resourceUrl').value=r.website||'';$('#resourceGithub').value=r.github||'';$('#resourceDescription').value=r.description||'';renderChips('capabilityChips',r.capabilities,'capabilities');renderChips('scenarioChips',r.scenarios,'scenarios');renderChips('pricingChips',[r.attributes?.pricing].filter(Boolean),'pricing');renderChips('platformChips',r.attributes?.platform,'platform');renderChips('languageChips',r.attributes?.language,'language');renderChips('audienceChips',r.attributes?.audience,'audience');$('#reviewPanel').classList.remove('hidden');$('#jsonPreview').textContent=JSON.stringify(r,null,2);}
 async function readStep(){const name=txt($('#resourceName').value);status('正在读取真实网页 / GitHub…','busy');$('#fetchBtn').disabled=true;$('#analyzeBtn').disabled=true;try{const s=await readRealSources();state.source=s;if(name)$('#resourceName').value=name;else $('#resourceName').value=s.name;$('#resourceUrl').value=txt($('#resourceUrl').value)||s.website;$('#resourceGithub').value=txt($('#resourceGithub').value)||s.github;showRead(s);$('#jsonPreview').textContent='真实内容已读取并缓存。现在可以点击“智能分析并生成简介”。';$('#analyzeBtn').disabled=false;status('真实内容读取完成；尚未调用 DeepSeek。','ok')}catch(e){status(e.message||'读取失败')}finally{$('#fetchBtn').disabled=false}}
 function isValidDescription(value){const v=txt(value);if(count(v)!==16||!/[\u3400-\u9fff]/.test(v)||/^[A-Za-z0-9\s.,!?;:()\[\]{}+\-_/&%#]+$/.test(v)||/[\r\n]/.test(v))return false;const cjk=count(v.replace(/[^\u3400-\u9fff]/g,''));if(cjk<6)return false;return !/(专业|强大|超强|顶级|领先|完美|神器|极速|优质|爆款|必备)/.test(v)}
-async function aiStep(){if(!state.source){status('请先点击“读取网页信息”');return}const manual=txt($('#resourceDescription').value);status('正在让 DeepSeek 分析简介与标准分类…','busy');$('#analyzeBtn').disabled=true;try{const payload={name:state.source.name,website:state.source.website,github:state.source.github,seoTitle:state.source.seoTitle,seoDescription:state.source.seoDescription,githubName:state.source.githubName,content:state.source.content,manualDescription:manual,taxonomy:categoryTaxonomy()};const r=await timeoutFetch('/api/deepseek-description',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},300000);const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||`DeepSeek 代理 HTTP ${r.status}`);const desc=txt(data.description);if(manual){if(desc!==manual)throw new Error('AI 未按规则原样保留人工简介')}else if(!isValidDescription(desc))throw new Error(`DeepSeek 返回简介长度/格式不合格：${count(desc)} 字符`);if(!validClassification(data.category,data.subcategory))throw new Error('DeepSeek 返回的分类不在现有合法分类词库中');if(!manual)$('#resourceDescription').value=desc;const resource=applyClassification(data.category,data.subcategory);resource.description=manual||desc;resource.icon=iconForSubcategory(data.subcategory)||parentIcon(data.category)||resource.icon||'🔗';renderResource(resource);status(`AI分析完成：${CATEGORIES[data.category]?.name||data.category} / ${CATEGORIES[data.category]?.children?.[data.subcategory]||data.subcategory} · Icon ${resource.icon}`,'ok')}catch(e){status(e.message||'DeepSeek 分析失败')}finally{$('#analyzeBtn').disabled=false}}
+async function aiStep(){if(!state.source){status('请先点击“读取网页信息”');return}const manual=txt($('#resourceDescription').value);status('正在让 DeepSeek 分析简介与标准分类（最多自动生成5次）…','busy');$('#analyzeBtn').disabled=true;try{const payload={name:state.source.name,website:state.source.website,github:state.source.github,seoTitle:state.source.seoTitle,seoDescription:state.source.seoDescription,githubName:state.source.githubName,content:state.source.content,manualDescription:manual,taxonomy:categoryTaxonomy()};const r=await timeoutFetch('/api/deepseek-description',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},300000);const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||`DeepSeek 代理 HTTP ${r.status}`);const desc=txt(data.description);if(manual){if(desc!==manual)throw new Error('AI 未按规则原样保留人工简介')}else if(!isValidDescription(desc))throw new Error(`DeepSeek 返回简介长度/格式不合格：${count(desc)} 字符`);if(!validClassification(data.category,data.subcategory))throw new Error('DeepSeek 返回的分类不在现有合法分类词库中');if(!manual)$('#resourceDescription').value=desc;const resource=applyClassification(data.category,data.subcategory);resource.description=manual||desc;resource.icon=iconForSubcategory(data.subcategory)||parentIcon(data.category)||resource.icon||'🔗';renderResource(resource);status(`AI分析完成：${CATEGORIES[data.category]?.name||data.category} / ${CATEGORIES[data.category]?.children?.[data.subcategory]||data.subcategory} · Icon ${resource.icon}`,'ok')}catch(e){status(e.message||'DeepSeek 分析失败')}finally{$('#analyzeBtn').disabled=false}}
 function clean(r){const x=JSON.parse(JSON.stringify(r));delete x._meta;return x}
 function saveDraft(){const r=buildResource(),all=JSON.parse(localStorage.getItem(KEY)||'[]'),i=all.findIndex(x=>x.id===r.id);if(i>=0)all[i]=r;else all.unshift(r);localStorage.setItem(KEY,JSON.stringify(all));loadDrafts();status('审核草稿已保存。','ok')}
 function loadDrafts(){const all=JSON.parse(localStorage.getItem(KEY)||'[]');$('#draftSelect').innerHTML='<option value="">选择已保存草稿…</option>'+all.map(x=>`<option value="${esc(x.id)}">${esc(x.name||x.id)}</option>`).join('')}
