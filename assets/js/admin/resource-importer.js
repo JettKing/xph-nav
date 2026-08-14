@@ -191,7 +191,15 @@ function githubDisplayName(repo){
 async function readGithub(url){
   const repo=normalizeGithub(url);
   if(!repo)throw new Error('GitHub URL 无效');
-  // GitHub网页 + README 是主通道；REST API 只做补充，403/限流不能阻断反向读取。
+  // V18：优先走 Cloudflare 服务端 GitHub 读取层，避免浏览器/Jina/API 403造成偶发失败。
+  try{
+    const r=await timeoutFetch(`/api/github-read?repo=${encodeURIComponent(repo)}`,{headers:{Accept:'application/json'}},30000);
+    const data=await r.json().catch(()=>({}));
+    if(r.ok && data?.content && data?.name){
+      return {github:repo,name:txt(data.name),website:txt(data.website),thumbnail:'',seoTitle:txt(data.seoTitle),seoDescription:txt(data.seoDescription),content:txt(data.content).slice(0,24000),source:'github',keywords:Array.isArray(data.keywords)?data.keywords:[],apiStatus:data.apiStatus||0};
+    }
+  }catch{}
+  // 兼容旧环境：服务端读取层不可用时保留原有读取链路。
   const page=await readGithubPage(repo);
   const readme=await githubReadme(repo);
   let api={ok:false,status:0,data:null};
@@ -201,16 +209,9 @@ async function readGithub(url){
   const readmeName=readmeInfo.name;
   const slugName=githubDisplayName(repo);
   const pageName=txt(page.name);
-  // GitHub 页面偶尔会被 Jina 的页面导航/图片元数据误识别成“Published Time”等无关文本。
-  // 对明显导航/时间/图片类候选直接回退到仓库 slug，而不是把错误名称传给 AI。
   const suspiciousGithubName=/^(?:published time|updated time|created time|release time|commit time|view raw|raw|source|image|download|home|homepage|website|menu|navigation)$/i;
-  const safeName=v=>{
-    const x=txt(v);
-    return x && !suspiciousGithubName.test(x) && x.length<=80 ? x : '';
-  };
+  const safeName=v=>{const x=txt(v);return x&&!suspiciousGithubName.test(x)&&x.length<=80?x:''};
   const name=safeName(d.name)||safeName(readmeName)||safeName(pageName)||slugName||repo.split('/').pop();
-  // 官网识别顺序：API homepage → README 明确/高置信外链 → GitHub 页面明确/高置信外链。
-  // 严禁把 camo/raw.githubusercontent.com 等图片/资源地址当官网。
   const apiHomepage=isValidHomepageUrl(d.homepage)?normalizeUrl(d.homepage):'';
   const readmeHomepage=extractGithubHomepage(readme,repo);
   const pageHomepage=extractGithubHomepage(page.raw,repo);
