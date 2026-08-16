@@ -1,4 +1,4 @@
-/** 徐胖虎资源社 V5.3.6.6 隐藏后台入口 */
+/** 徐胖虎资源社 V5.3 隐藏后台入口 */
 (function(){
 "use strict";
 function init(){
