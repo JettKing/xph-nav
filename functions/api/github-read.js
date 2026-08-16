@@ -24,35 +24,52 @@ const stripHtml = html => String(html||'').replace(/<script[\s\S]*?<\/script>/gi
 const cleanText = value => String(value||'').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/!\[[^\]]*\]\([^)]*\)/g,' ').replace(/[`*_>#~]/g,' ').replace(/\s+/g,' ').trim();
 const suspicious = /(?:camo\.githubusercontent\.com|raw\.githubusercontent\.com|objects\.githubusercontent\.com|user-images\.githubusercontent\.com|avatars\.githubusercontent\.com|githubassets\.com)/i;
 function externalLinks(text){
-  const found=[];
-  const add=v=>{try{const u=normalizeUrl(v);if(u&&validHomepage(u)&&!suspicious.test(u))found.push(u)}catch{}};
-  const s=String(text||'').replace(/&amp;/gi,'&');
-  for(const m of s.matchAll(/https?:\/\/[^\s<>)"']+/gi)) add(m[0]);
-  for(const m of s.matchAll(/href=["'](https?:\/\/[^"']+)["']/gi)) add(m[1]);
+  const found=[]; const add=v=>{try{const u=normalizeUrl(v);if(u&&validHomepage(u)&&!suspicious.test(u))found.push(u)}catch{}};
+  const s=String(text||'').replace(/&amp;/gi,'&').replace(/\\\//g,'/');
+  for(const m of s.matchAll(/(?:href|data-url|data-href)\s*=\s*["'](https?:\/\/[^"']+)["']/gi)) add(m[1]);
+  for(const m of s.matchAll(/\[[^\]]{0,180}\]\((https?:\/\/[^)\s]+)\)/gi)) add(m[1]);
+  for(const m of s.matchAll(/https?:\/\/[^\s<>\]\\)"']+/gi)) add(m[0]);
   return [...new Set(found)];
 }
-function pickHomepage(readme, html, repo, apiHomepage){
-  if(validHomepage(apiHomepage)) return normalizeUrl(apiHomepage);
+function labeledHomepages(text){
+  const s=String(text||'').replace(/&amp;/gi,'&'); const out=[];
+  const add=v=>{const u=validHomepage(v);if(u&&!suspicious.test(u))out.push(u)};
+  const label=/(?:homepage|home page|website|official website|official site|é¡¹ç®ä¸»é¡µ|å®ç½|å®æ¹ç½ç«|ä¸»é¡µ)/i;
+  for(const m of s.matchAll(/(?:homepage|home page|website|official website|official site|é¡¹ç®ä¸»é¡µ|å®ç½|å®æ¹ç½ç«|ä¸»é¡µ)[^\n]{0,260}?(https?:\/\/[^\s<>\]\\)"']+)/gi)) add(m[1]);
+  for(const m of s.matchAll(/(?:href|data-url|data-href)\s*=\s*["'](https?:\/\/[^"']+)["'][^>]{0,260}(?:homepage|website|official|å®ç½|ä¸»é¡µ)/gi)) add(m[1]);
+  return [...new Set(out)];
+}
+function homepageCandidates(readme,html,repo,apiHomepage){
+  const out=[]; const add=(u,score,reason)=>{const x=validHomepage(u);if(x&&!suspicious.test(x))out.push({u:x,score,reason})};
+  if(validHomepage(apiHomepage)) add(apiHomepage,1000,'github-api-homepage');
+  for(const u of labeledHomepages(readme)) add(u,900,'readme-labeled');
+  for(const u of labeledHomepages(html)) add(u,880,'github-page-labeled');
   const repoName=(repo.match(/github\.com\/[^/]+\/([^/?#]+)/i)?.[1]||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
   const all=[...externalLinks(readme),...externalLinks(html)];
-  const scored=all.map(u=>{
+  for(const u of all){
     let score=0;
     try{
       const host=new URL(u).hostname.toLowerCase().replace(/^www\./,'');
       const compact=host.replace(/[^a-z0-9]+/g,'');
       const root=host.split('.').slice(-2).join('.').replace(/[^a-z0-9]+/g,'');
-      if(repoName && compact===repoName) score+=220;
-      if(repoName && root===repoName) score+=200;
-      if(repoName && (compact.includes(repoName)||repoName.includes(compact))) score+=100;
-      if(/(?:^|\.)gitdesktop\.app$/.test(host) && repoName==='gitdesktop') score+=300;
-      if(/(?:docs?|blog|status|support|careers|developer|developers)\./.test(host)) score-=50;
-      if(/(?:discord\.(?:gg|com)|twitter\.com|x\.com|linkedin\.com|youtube\.com|twitch\.tv|npmjs\.com|pypi\.org|medium\.com|buymeacoffee\.com)/.test(host)) score-=120;
-      if(/(?:badge|shields|githubusercontent|googleapis|fonts\.|jsdelivr|unpkg)/.test(host)) score-=180;
+      if(repoName && compact===repoName)score+=420;
+      else if(repoName && root===repoName)score+=400;
+      else if(repoName && compact.includes(repoName))score+=260;
+      else if(repoName && root.includes(repoName))score+=240;
+      if(/(?:docs?|blog|status|support|careers|developer|developers)\./.test(host))score-=90;
+      if(/(?:discord\.(?:gg|com)|twitter\.com|x\.com|linkedin\.com|youtube\.com|twitch\.tv|npmjs\.com|pypi\.org|medium\.com|buymeacoffee\.com)/.test(host))score-=220;
+      if(/(?:badge|shields|googleapis|fonts\.|jsdelivr|unpkg)/.test(host))score-=260;
+      if(/\/(?:issues|pulls|releases|actions|commit|blob|tree|raw)(?:\/|$)/i.test(new URL(u).pathname))score-=400;
     }catch{}
-    return {u,score};
-  }).sort((a,b)=>b.score-a.score);
-  return scored[0]?.score>=120 ? scored[0].u : '';
+    add(u,score,'external-link');
+  }
+  return [...new Map(out.map(x=>[x.u,x])).values()].sort((a,b)=>b.score-a.score);
 }
+function pickHomepage(readme,html,repo,apiHomepage){
+  const candidates=homepageCandidates(readme,html,repo,apiHomepage);
+  return candidates[0]?.score>=240 ? candidates[0].u : '';
+}
+
 function extractName(api, html, readme, repo){
   const candidates=[];
   const add=(v,score)=>{const x=cleanText(v).replace(/^#+\s*/,'').trim();if(x&&x.length<=100)candidates.push({x,score});};
@@ -77,11 +94,12 @@ export async function onRequestGet({request}){
   const [api,html,readme]=await Promise.all([apiPromise,htmlPromise,readmePromise]);
   const d=api.data||{};
   const name=extractName(d,html.text,readme.text,repo);
-  const website=pickHomepage(readme.text,html.text,repo,d.homepage);
+  const homepageList=homepageCandidates(readme.text,html.text,repo,d.homepage);
+  const website=homepageList[0]?.score>=240 ? homepageList[0].u : '';
   const htmlText=stripHtml(html.text).slice(0,10000);
   const readmeText=cleanText(readme.text).slice(0,16000);
   const description=cleanText(d.description||'');
   const content=[`GitHubä»åºï¼${repo}`,`é¡¹ç®åç§°ï¼${name}`,description?`é¡¹ç®æè¿°ï¼${description}`:'',website?`å®æ¹ä¸»é¡µï¼${website}`:'',readmeText?`READMEï¼${readmeText}`:'',htmlText?`GitHubé¡µé¢ï¼${htmlText}`:''].filter(Boolean).join('\n\n').slice(0,24000);
   if(!content || content.length<30) return new Response(JSON.stringify({error:'GitHub çå®åå®¹è¯»åå¤±è´¥',apiStatus:api.status,htmlStatus:html.status,readmeStatus:readme.status}),{status:502,headers:{'Content-Type':'application/json'}});
-  return new Response(JSON.stringify({github:repo,name,website,thumbnail:'',seoTitle:name,seoDescription:description,content,keywords:Array.isArray(d.topics)?d.topics:[],apiStatus:api.status,htmlStatus:html.status,readmeStatus:readme.status}),{status:200,headers:{'Content-Type':'application/json','Cache-Control':'no-store','Access-Control-Allow-Origin':'*'}});
+  return new Response(JSON.stringify({github:repo,name,website,websiteCandidates:homepageList.slice(0,12),thumbnail:'',seoTitle:name,seoDescription:description,content,keywords:Array.isArray(d.topics)?d.topics:[],apiStatus:api.status,htmlStatus:html.status,readmeStatus:readme.status}),{status:200,headers:{'Content-Type':'application/json','Cache-Control':'no-store','Access-Control-Allow-Origin':'*'}});
 }
