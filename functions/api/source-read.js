@@ -51,12 +51,32 @@ function extractGithubLinks(raw) {
   const text = String(raw || '').replace(/&amp;/gi, '&').replace(/\\\//g, '/');
   const found = [];
   const add = value => { const repo = normalizeGithub(value); if (repo) found.push(repo); };
-  for (const m of text.matchAll(/(?:href|data-href|data-url|data-link|data-target)\s*=\s*["']([^"']*github\.com\/[^"']+)["']/gi)) add(m[1]);
+  for (const m of text.matchAll(/(?:href|data-href|data-url|data-link|data-target|content)\s*=\s*["']([^"']*github\.com\/[^"']+)["']/gi)) add(m[1]);
   for (const m of text.matchAll(/\[[^\]]{0,160}\]\((https?:\/\/(?:www\.)?github\.com\/[^)\s]+)\)/gi)) add(m[1]);
-  for (const m of text.matchAll(/(?:^|[\s(<"'=])(https?:\/\/(?:www\.)?github\.com\/[^^\s<>\]\)"']+)/gim)) add(m[1]);
-  for (const m of text.matchAll(/(?:^|[\s(<"'=])((?:www\.)?github\.com\/[^\s<>\]\)"']+)/gim)) add(m[1]);
+  // é¡µé¢æºç ä¸­çæ®éç»å¯¹ GitHub URLãJSON/JS è½¬ä¹ URL ä¸å¹¶è¯å«ã
+  for (const m of text.matchAll(/https?:\/\/(?:www\.)?github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+/gi)) add(m[0]);
+  for (const m of text.matchAll(/(?:^|[\s(<"'=])((?:www\.)?github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)/gim)) add(m[1]);
   return unique(found);
 }
+function scoreGithub(repo, name, website) {
+  let score = 0;
+  const slug = String(repo).split('/').pop().toLowerCase().replace(/[^a-z0-9]+/g, '');
+  const baseName = cleanText(name).toLowerCase().replace(/[^a-z0-9]+/g, '');
+  try {
+    const host = new URL(website).hostname.toLowerCase().replace(/^www\./, '').replace(/[^a-z0-9]+/g, '');
+    if (baseName && slug === baseName) score += 120;
+    if (baseName && (slug.includes(baseName) || baseName.includes(slug))) score += 55;
+    if (host && slug && host.includes(slug)) score += 40;
+  } catch {}
+  if (/^(docs?|blog|support|status|community|awesome|demo)-/i.test(slug)) score -= 25;
+  return score;
+}
+function chooseGithub(raw, name, website) {
+  const links = extractGithubLinks(raw);
+  return links.map(repo => ({repo, score: scoreGithub(repo, name, website)}))
+    .sort((a,b)=>b.score-a.score)[0]?.repo || links[0] || '';
+}
+
 function extractMeta(html, key) {
   const re = new RegExp(`<meta[^>]+(?:property|name)=["']${key}["'][^>]+content=["']([^"']*)["'][^>]*>|<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["']${key}["'][^>]*>`, 'i');
   const m = String(html || '').match(re);
@@ -101,26 +121,6 @@ function extractDescription(html) {
 function extractThumbnail(html) {
   return validExternal(extractMeta(html, 'og:image') || extractMeta(html, 'twitter:image'));
 }
-function extractExternalCandidates(html) {
-  const text = String(html || '').replace(/&amp;/gi, '&').replace(/\\\//g, '/');
-  const found = [];
-  const add = value => { const u = validExternal(value); if (u) found.push(u); };
-  for (const m of text.matchAll(/(?:href|data-href|data-url|data-link|data-target)\s*=\s*["']([^"']+)["']/gi)) add(m[1]);
-  for (const m of text.matchAll(/(?:https?:\/\/)[^\s<>"']+/gi)) add(m[0]);
-  return unique(found);
-}
-function scoreGithubCandidate(repo, sourceName, website) {
-  let score = 0;
-  const slug = repo.split('/').pop().toLowerCase().replace(/[^a-z0-9]+/g, '');
-  const name = clean(sourceName).toLowerCase().replace(/[^a-z0-9]+/g, '');
-  if (name && slug === name) score += 120;
-  if (name && (slug.includes(name) || name.includes(slug))) score += 60;
-  try {
-    const host = new URL(website).hostname.toLowerCase().replace(/^www\./, '').replace(/[^a-z0-9]+/g, '');
-    if (host && slug && host.includes(slug)) score += 30;
-  } catch {}
-  return score;
-}
 async function fetchText(url, ms = 18000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ms);
@@ -128,7 +128,7 @@ async function fetchText(url, ms = 18000) {
     const response = await fetch(url, {
       headers: {
         'Accept': 'text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8',
-        'User-Agent': 'XPH-Resource-Importer/18.2'
+        'User-Agent': 'XPH-Resource-Importer/19'
       },
       signal: controller.signal,
       redirect: 'follow'
@@ -165,8 +165,7 @@ export async function onRequestGet({ request }) {
   const description = extractDescription(raw);
   const canonical = extractCanonical(raw);
   const thumbnail = extractThumbnail(raw);
-  const github = extractGithubLinks(raw)[0] || '';
-  const externalCandidates = extractExternalCandidates(raw).filter(u => u !== input && u !== canonical).slice(0, 80);
+  const github = chooseGithub(raw, name, input);
   const content = [
     `å®æ¹ç½ç«ï¼${input}`,
     name ? `çå®åç§°åéï¼${name}` : '',
@@ -186,7 +185,6 @@ export async function onRequestGet({ request }) {
     canonical: typeof canonical === 'string' ? canonical : '',
     github: typeof github === 'string' ? github : '',
     thumbnail: typeof thumbnail === 'string' ? thumbnail : '',
-    externalCandidates,
     content,
     source: 'official-web-server'
   }), { status: 200, headers: {
