@@ -175,14 +175,23 @@ function extractTitle(md,url){return extractPageInfo(md,url).name}
 async function readWebsite(url){
   const clean=normalizeUrl(url);
   if(!/^https?:\/\//i.test(clean))throw new Error('请输入有效 URL');
+  // V18.1：优先由 Cloudflare 服务端直接读取官网，避免浏览器/Jina 单一路径导致 GitHub 链接偶发丢失。
+  try{
+    const r=await timeoutFetch(`/api/source-read?url=${encodeURIComponent(clean)}`,{headers:{Accept:'application/json'}},30000);
+    const data=await r.json().catch(()=>({}));
+    if(r.ok && data?.content && data?.website){
+      return {website:clean,name:txt(data.name),seoTitle:txt(data.seoTitle),seoDescription:txt(data.seoDescription),github:normalizeGithub(data.github),githubCandidates:Array.isArray(data.githubCandidates)?data.githubCandidates.map(normalizeGithub).filter(Boolean):[],thumbnail:txt(data.thumbnail),content:txt(data.content).slice(0,22000),source:'official-web',mode:data.mode||'server'};
+    }
+  }catch{}
+  // 兼容旧环境：服务端读取层不可用时再回退 Jina。
   let r;
-  try{r=await timeoutFetch('https://r.jina.ai/'+clean,{headers:{Accept:'text/plain'}},18000)}catch(e){throw new Error(e.name==='AbortError'?'网页读取超时':'网页读取失败')}
+  try{r=await timeoutFetch('https://r.jina.ai/'+clean,{headers:{Accept:'text/plain'}},20000)}catch(e){throw new Error(e.name==='AbortError'?'网页读取超时':'网页读取失败')}
   if(!r.ok)throw new Error('网页读取失败：HTTP '+r.status);
   const raw=await r.text();
   const info=extractPageInfo(raw,clean);
   const links=extractGithubLinks(raw);
   const thumb=(raw.match(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/i)||[])[1]||'';
-  return{website:clean,name:info.name,seoTitle:info.seoTitle,seoDescription:info.seoDescription,github:links[0]||'',thumbnail:thumb,content:raw.slice(0,22000),source:'official-web'};
+  return{website:clean,name:info.name,seoTitle:info.seoTitle,seoDescription:info.seoDescription,github:links[0]||'',githubCandidates:links,thumbnail:thumb,content:raw.slice(0,22000),source:'official-web',mode:'jina'};
 }
 function githubDisplayName(repo){
   const slug=txt(repo).match(/github\.com\/[^/]+\/([^/?#]+)/i)?.[1]||'';
@@ -196,7 +205,9 @@ async function readGithub(url){
     const r=await timeoutFetch(`/api/github-read?repo=${encodeURIComponent(repo)}`,{headers:{Accept:'application/json'}},30000);
     const data=await r.json().catch(()=>({}));
     if(r.ok && data?.content && data?.name){
-      return {github:repo,name:txt(data.name),website:txt(data.website),thumbnail:'',seoTitle:txt(data.seoTitle),seoDescription:txt(data.seoDescription),content:txt(data.content).slice(0,24000),source:'github',keywords:Array.isArray(data.keywords)?data.keywords:[],apiStatus:data.apiStatus||0};
+      const candidates=Array.isArray(data.websiteCandidates)?data.websiteCandidates:[];
+      const trustedWebsite=txt(data.website)||txt(candidates[0]?.u);
+      return {github:repo,name:txt(data.name),website:trustedWebsite,websiteCandidates:candidates,thumbnail:'',seoTitle:txt(data.seoTitle),seoDescription:txt(data.seoDescription),content:txt(data.content).slice(0,24000),source:'github',keywords:Array.isArray(data.keywords)?data.keywords:[],apiStatus:data.apiStatus||0};
     }
   }catch{}
   // 兼容旧环境：服务端读取层不可用时保留原有读取链路。
@@ -227,22 +238,31 @@ async function readRealSources(){
   const inputGithub=githubInput||normalizeGithub(url);
   if(!url&&!inputGithub)throw new Error('请至少填写资源 URL 或 GitHub URL');
   let web=null,gh=null;
-  if(url&&!normalizeGithub(url)){try{web=await readWebsite(url)}catch(e){if(!inputGithub)throw e}}
-  if(inputGithub){gh=await readGithub(inputGithub)}
-  // 官网 -> GitHub：先用页面真实链接；页面解析不到时，再用 GitHub 公共搜索按真实名称发现仓库。
-  if(!gh&&web){
-    let discovered=normalizeGithub(web.github);
-    if(!discovered) discovered=await discoverGithubBySearch(web.name||web.seoTitle,web.website);
-    if(discovered){try{gh=await readGithub(discovered)}catch{}}
+  if(url&&!normalizeGithub(url)){
+    try{web=await readWebsite(url)}catch(e){if(!inputGithub)throw e}
   }
-  // GitHub -> 官网：优先仓库 About/API，其次 README；成功发现后再读取官网真实内容。
-  if(gh?.website&&!web){try{web=await readWebsite(gh.website)}catch{}}
+  if(inputGithub){gh=await readGithub(inputGithub)}
+  // 官网 → GitHub：优先使用官网真实链接；没有时再按真实名称/域名进行公共仓库搜索。
+  if(!gh&&web){
+    const candidates=uniq([...(web.githubCandidates||[]),normalizeGithub(web.github)]);
+    for(const candidate of candidates){
+      try{gh=await readGithub(candidate);if(gh)break}catch{}
+    }
+    if(!gh){
+      const discovered=await discoverGithubBySearch(web.name||web.seoTitle,web.website);
+      if(discovered){try{gh=await readGithub(discovered)}catch{}}
+    }
+  }
+  // GitHub → 官网：只接受 GitHub 可信主页；成功后再读取官网真实内容。
+  if(gh?.website&&!web){
+    try{web=await readWebsite(gh.website)}catch{}
+  }
   const isHostnameName=(name,url)=>{const n=txt(name).toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/$/,'');try{return !!url&&n===new URL(url).hostname.replace(/^www\./,'').toLowerCase()}catch{return false}};
   const webName=txt(web?.name);
   const ghName=txt(gh?.name);
   const webNameLooksGeneric=/^(?:home|homepage|official website|website|open source|open-source|the open source|free|welcome)$/i.test(webName)||/\b(?:best|free|open[- ]?source)\b.*\b(?:tool|software|platform|website)\b/i.test(webName);
   const preferredName=(webName && !isHostnameName(webName,web?.website) && !webNameLooksGeneric)?webName:(ghName&&!isHostnameName(ghName,gh?.github)?ghName:(webName||ghName||''));
-  const source={website:txt(web?.website)||txt(gh?.website)||'',name:preferredName,github:txt(gh?.github)||txt(web?.github)||inputGithub||'',thumbnail:txt(web?.thumbnail)||'',seoTitle:txt(web?.seoTitle)||txt(gh?.seoTitle)||'',seoDescription:txt(web?.seoDescription)||txt(gh?.seoDescription)||'',githubName:ghName,content:[web?.content,gh?.content].filter(Boolean).join('\n\n--- GitHub ---\n').slice(0,24000),source:web?'official-web':'github',githubContent:gh?.content||'',keywords:uniq([...(web?.keywords||[]),...(gh?.keywords||[])])};
+  const source={website:txt(web?.website)||txt(gh?.website)||'',name:preferredName,github:txt(gh?.github)||txt(web?.github)||inputGithub||'',thumbnail:txt(web?.thumbnail)||txt(gh?.thumbnail)||'',seoTitle:txt(web?.seoTitle)||txt(gh?.seoTitle)||'',seoDescription:txt(web?.seoDescription)||txt(gh?.seoDescription)||'',githubName:ghName,content:[web?.content,gh?.content].filter(Boolean).join('\n\n--- GitHub ---\n').slice(0,24000),source:web?'official-web':'github',githubContent:gh?.content||'',keywords:uniq([...(web?.keywords||[]),...(gh?.keywords||[])])};
   if(!source.name)throw new Error('真实来源未读取到资源名称');
   if(!source.website&&!source.github)throw new Error('真实来源读取失败');
   return source;
