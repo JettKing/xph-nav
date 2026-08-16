@@ -1,84 +1,197 @@
-const clean = v => String(v ?? '').trim();
-const normalizeUrl = value => { try { const u = new URL(clean(value)); u.hash = ''; return u.href.replace(/\/$/,''); } catch { return ''; } };
-const normalizeGithub = value => {
-  const m = clean(value).replace(/[)\]}>.,;]+$/g,'').match(/(?:https?:\/\/)?(?:www\.)?github\.com\/([^/\s)\]]+)\/([^/#?\s)\]]+)/i);
-  return m ? `https://github.com/${m[1]}/${m[2].replace(/\.git$/i,'')}` : '';
-};
-const stripHtml = html => String(html||'').replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<svg[\s\S]*?<\/svg>/gi,' ').replace(/<noscript[\s\S]*?<\/noscript>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&#39;/g,"'").replace(/&quot;/gi,'"').replace(/&#x2F;/gi,'/').replace(/\s+/g,' ').trim();
-const decode = s => clean(s).replace(/&amp;/gi,'&').replace(/&quot;/gi,'"').replace(/&#39;/gi,"'").replace(/&#x2F;/gi,'/');
-const fetchText = async (url, ms=15000) => {
-  const c = new AbortController(); const t = setTimeout(()=>c.abort(),ms);
+const clean = value => typeof value === 'string' ? value.trim() : '';
+const normalizeUrl = value => {
+  const raw = clean(value);
+  if (!raw) return '';
   try {
-    const r = await fetch(url,{headers:{'User-Agent':'XPH-Resource-Importer/18.1','Accept':'text/html,text/plain;q=0.9,*/*;q=0.8'},signal:c.signal});
-    const text = r.ok ? await r.text() : '';
-    return {ok:r.ok,status:r.status,text};
-  } catch { return {ok:false,status:0,text:''}; }
-  finally { clearTimeout(t); }
+    const u = new URL(raw);
+    if (!/^https?:$/.test(u.protocol)) return '';
+    u.hash = '';
+    return u.href.replace(/\/$/, '') || u.href;
+  } catch { return ''; }
 };
-const jina = async url => {
-  const r = await fetchText('https://r.jina.ai/'+normalizeUrl(url),18000);
-  return r.ok ? r.text : '';
+const normalizeGithub = value => {
+  const raw = clean(value).replace(/[)\]}>.,;]+$/g, '');
+  const m = raw.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/([^/\s)\]]+)\/([^/#?\s)\]]+)/i);
+  return m ? `https://github.com/${m[1]}/${m[2].replace(/\.git$/i, '')}` : '';
 };
-const isBadHost = host => {
-  const h=clean(host).toLowerCase().replace(/^www\./,'');
-  return /(?:^|\.)github(?:usercontent)?\.com$/.test(h) || /^(?:github\.com|gist\.github\.com|githubassets\.com)$/.test(h) || /(?:googleapis|gstatic|jsdelivr|unpkg|cdnjs|cloudflare|gravatar)\./.test(h);
-};
+const stripHtml = html => String(html || '')
+  .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+  .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+  .replace(/<svg[\s\S]*?<\/svg>/gi, ' ')
+  .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
+  .replace(/<[^>]+>/g, ' ')
+  .replace(/&nbsp;/gi, ' ')
+  .replace(/&amp;/gi, '&')
+  .replace(/&quot;/gi, '"')
+  .replace(/&#39;/gi, "'")
+  .replace(/&#x27;/gi, "'")
+  .replace(/\s+/g, ' ')
+  .trim();
+const cleanText = value => String(value || '')
+  .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+  .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+  .replace(/[`*_>#~]/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+const isGithubHost = host => /(?:^|\.)github\.com$/i.test(host) || /(?:^|\.)githubusercontent\.com$/i.test(host);
+const isBadExternalHost = host => /(?:^|\.)(?:githubusercontent\.com|githubassets\.com)$/i.test(host) || /^(?:github\.com|gist\.github\.com)$/i.test(host);
 const validExternal = value => {
-  try { const u=new URL(normalizeUrl(value)); if(!/^https?:$/.test(u.protocol)||!u.hostname||isBadHost(u.hostname)) return false; return u.href; } catch { return ''; }
+  const u = normalizeUrl(value);
+  if (!u) return '';
+  try {
+    const parsed = new URL(u);
+    if (isBadExternalHost(parsed.hostname)) return '';
+    if (isGithubHost(parsed.hostname)) return '';
+    return u;
+  } catch { return ''; }
 };
-function githubLinks(text){
-  const s=decode(text), out=[];
-  const add=v=>{const u=normalizeGithub(v);if(u)out.push(u)};
-  for(const m of s.matchAll(/(?:href|data-url|data-href)\s*=\s*["']([^"']+github\.com\/[^"']+)["']/gi)) add(m[1]);
-  for(const m of s.matchAll(/\[[^\]]{0,160}\]\((https?:\/\/(?:www\.)?github\.com\/[^)\s]+)\)/gi)) add(m[1]);
-  for(const m of s.matchAll(/(?:^|[\s(<"'=])(https?:\/\/(?:www\.)?github\.com\/[^\s<>\]\\)"']+)/gim)) add(m[1]);
-  for(const m of s.matchAll(/(?:^|[\s(<"'=])((?:www\.)?github\.com\/[^\s<>\]\\)"']+)/gim)) add(m[1]);
-  return [...new Set(out)];
+const unique = values => [...new Set(values.map(clean).filter(Boolean))];
+
+function extractGithubLinks(raw) {
+  const text = String(raw || '').replace(/&amp;/gi, '&').replace(/\\\//g, '/');
+  const found = [];
+  const add = value => { const repo = normalizeGithub(value); if (repo) found.push(repo); };
+  for (const m of text.matchAll(/(?:href|data-href|data-url|data-link|data-target)\s*=\s*["']([^"']*github\.com\/[^"']+)["']/gi)) add(m[1]);
+  for (const m of text.matchAll(/\[[^\]]{0,160}\]\((https?:\/\/(?:www\.)?github\.com\/[^)\s]+)\)/gi)) add(m[1]);
+  for (const m of text.matchAll(/(?:^|[\s(<"'=])(https?:\/\/(?:www\.)?github\.com\/[^^\s<>\]\)"']+)/gim)) add(m[1]);
+  for (const m of text.matchAll(/(?:^|[\s(<"'=])((?:www\.)?github\.com\/[^\s<>\]\)"']+)/gim)) add(m[1]);
+  return unique(found);
 }
-function externalLinks(text){
-  const s=decode(text),out=[]; const add=v=>{const u=validExternal(v);if(u)out.push(u)};
-  for(const m of s.matchAll(/(?:href|data-url|data-href)\s*=\s*["'](https?:\/\/[^"']+)["']/gi)) add(m[1]);
-  for(const m of s.matchAll(/\[[^\]]{0,160}\]\((https?:\/\/[^)\s]+)\)/gi)) add(m[1]);
-  for(const m of s.matchAll(/https?:\/\/[^\s<>\]\\)"']+/gi)) add(m[0]);
-  return [...new Set(out)];
+function extractMeta(html, key) {
+  const re = new RegExp(`<meta[^>]+(?:property|name)=["']${key}["'][^>]+content=["']([^"']*)["'][^>]*>|<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["']${key}["'][^>]*>`, 'i');
+  const m = String(html || '').match(re);
+  return clean(m?.[1] || m?.[2] || '');
 }
-function meta(html,name,property){
-  const re=new RegExp(`<meta[^>]+(?:${name})=["']${property}["'][^>]+content=["']([^"']+)["']|<meta[^>]+content=["']([^"']+)["'][^>]+(?:${name})=["']${property}["']`,'i');
-  const m=String(html||'').match(re); return decode(m?.[1]||m?.[2]||'');
+function extractTitle(html) {
+  const m = String(html || '').match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  return cleanText(m?.[1] || '');
 }
-function pageInfo(html,url){
-  const title=(String(html||'').match(/<title[^>]*>([\s\S]*?)<\/title>/i)||[])[1]||'';
-  const site=meta(html,'property','og:site_name')||meta(html,'name','application-name');
-  const og=meta(html,'property','og:title');
-  const desc=meta(html,'name','description')||meta(html,'property','og:description')||meta(html,'name','twitter:description');
-  const h1=(String(html||'').match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)||[])[1]||'';
-  const name=(site||og||h1||title).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
-  return {name,seoTitle:clean(og||title),seoDescription:clean(desc)};
+function extractCanonical(html) {
+  const m = String(html || '').match(/<link[^>]+rel=["'][^"']*canonical[^"']*["'][^>]+href=["']([^"']+)["'][^>]*>/i) || String(html || '').match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["'][^"']*canonical[^"']*["'][^>]*>/i);
+  return validExternal(m?.[1] || '');
 }
-async function discoverGithub(name,website){
-  const q=clean(name)||(()=>{try{return new URL(website).hostname.replace(/^www\./,'')}catch{return ''}})();
-  if(!q)return '';
-  const raw=await jina(`https://github.com/search?q=${encodeURIComponent(q)}&type=repositories`);
-  if(!raw)return '';
-  const links=githubLinks(raw); const target=q.toLowerCase().replace(/[^a-z0-9]+/g,'');
-  const scored=links.map(u=>{const repo=u.split('/').pop().toLowerCase().replace(/[^a-z0-9]+/g,'');let score=0;if(repo===target)score+=200;if(repo.includes(target)||target.includes(repo))score+=70;return{u,score};}).sort((a,b)=>b.score-a.score);
-  return scored[0]?.score>=200 ? scored[0].u : '';
+function extractH1(html) {
+  const m = String(html || '').match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+  return cleanText(stripHtml(m?.[1] || ''));
 }
-export async function onRequestOptions({request}){return new Response(null,{status:204,headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Methods':'GET,OPTIONS','Access-Control-Allow-Headers':'Content-Type'}})}
-export async function onRequestGet({request}){
-  const url=new URL(request.url); const target=normalizeUrl(url.searchParams.get('url'));
-  if(!target)return new Response(JSON.stringify({error:'URLæ æ'}),{status:400,headers:{'Content-Type':'application/json'}});
-  let html='',status=0,mode='direct';
-  const direct=await fetchText(target,15000);
-  if(direct.ok){html=direct.text;status=direct.status;}
-  else {mode='jina';html=await jina(target);status=html?200:direct.status;}
-  if(!html)return new Response(JSON.stringify({error:'å®ç½è¯»åå¤±è´¥',status}),{status:502,headers:{'Content-Type':'application/json'}});
-  const info=pageInfo(html,target);
-  const githubs=githubLinks(html);
-  let github=githubs[0]||'';
-  if(!github)github=await discoverGithub(info.name,target);
-  const links=externalLinks(html);
-  const thumbnail=(()=>{const m=String(html).match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)||String(html).match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);return validExternal(m?.[1]||'')||''})();
-  const content=(mode==='jina'?html:stripHtml(html)).slice(0,22000);
-  return new Response(JSON.stringify({website:target,name:info.name,github,githubCandidates:githubs.slice(0,10),seoTitle:info.seoTitle,seoDescription:info.seoDescription,thumbnail,content,externalLinks:links.slice(0,30),mode,status}),{status:200,headers:{'Content-Type':'application/json','Cache-Control':'no-store','Access-Control-Allow-Origin':'*'}});
+function chooseName(html, url) {
+  const candidates = [
+    [extractMeta(html, 'og:site_name'), 130],
+    [extractMeta(html, 'application-name'), 125],
+    [extractMeta(html, 'og:title'), 120],
+    [extractTitle(html), 100],
+    [extractH1(html), 90]
+  ].filter(([v]) => v);
+  const host = (() => { try { return new URL(url).hostname.replace(/^www\./i, ''); } catch { return ''; } })();
+  const bad = /^(home|homepage|official website|website|welcome|login|sign in|sign up|menu|navigation|search|untitled|é¦é¡µ|ä¸»é¡µ|ç»å½|æ³¨å)$/i;
+  const scored = candidates.map(([value, score]) => {
+    let s = score;
+    const x = cleanText(value).replace(/^[-ââ|:ï¼]+|[-ââ|:ï¼]+$/g, '').trim();
+    if (!x || bad.test(x)) s -= 200;
+    if (host && x.toLowerCase().replace(/\s+/g, '') === host.toLowerCase().replace(/\s+/g, '')) s -= 100;
+    if (x.length > 80) s -= 40;
+    if (/^(best|free|official|the official|open source|open-source)\b/i.test(x)) s -= 30;
+    return { value: x, score: s };
+  }).sort((a, b) => b.score - a.score);
+  return scored[0]?.score > 0 ? scored[0].value : '';
+}
+function extractDescription(html) {
+  return cleanText(extractMeta(html, 'description') || extractMeta(html, 'og:description') || extractMeta(html, 'twitter:description'));
+}
+function extractThumbnail(html) {
+  return validExternal(extractMeta(html, 'og:image') || extractMeta(html, 'twitter:image'));
+}
+function extractExternalCandidates(html) {
+  const text = String(html || '').replace(/&amp;/gi, '&').replace(/\\\//g, '/');
+  const found = [];
+  const add = value => { const u = validExternal(value); if (u) found.push(u); };
+  for (const m of text.matchAll(/(?:href|data-href|data-url|data-link|data-target)\s*=\s*["']([^"']+)["']/gi)) add(m[1]);
+  for (const m of text.matchAll(/(?:https?:\/\/)[^\s<>"']+/gi)) add(m[0]);
+  return unique(found);
+}
+function scoreGithubCandidate(repo, sourceName, website) {
+  let score = 0;
+  const slug = repo.split('/').pop().toLowerCase().replace(/[^a-z0-9]+/g, '');
+  const name = clean(sourceName).toLowerCase().replace(/[^a-z0-9]+/g, '');
+  if (name && slug === name) score += 120;
+  if (name && (slug.includes(name) || name.includes(slug))) score += 60;
+  try {
+    const host = new URL(website).hostname.toLowerCase().replace(/^www\./, '').replace(/[^a-z0-9]+/g, '');
+    if (host && slug && host.includes(slug)) score += 30;
+  } catch {}
+  return score;
+}
+async function fetchText(url, ms = 18000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8',
+        'User-Agent': 'XPH-Resource-Importer/18.2'
+      },
+      signal: controller.signal,
+      redirect: 'follow'
+    });
+    const text = response.ok ? await response.text() : '';
+    return { status: response.status, ok: response.ok, text, url: response.url || url };
+  } finally { clearTimeout(timer); }
+}
+
+export async function onRequestOptions() {
+  return new Response(null, { status: 204, headers: {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  }});
+}
+export async function onRequestGet({ request }) {
+  const requestUrl = new URL(request.url);
+  const input = normalizeUrl(requestUrl.searchParams.get('url'));
+  if (!input) return new Response(JSON.stringify({ error: 'å®ç½ URL æ æ' }), { status: 400, headers: { 'Content-Type': 'application/json' }});
+  let parsed;
+  try { parsed = new URL(input); } catch { return new Response(JSON.stringify({ error: 'å®ç½ URL æ æ' }), { status: 400, headers: { 'Content-Type': 'application/json' }}); }
+  if (isGithubHost(parsed.hostname)) return new Response(JSON.stringify({ error: 'GitHub URL åºèµ° GitHub ä¸ç¨è¯»åå±' }), { status: 400, headers: { 'Content-Type': 'application/json' }});
+
+  let response;
+  try { response = await fetchText(input); } catch (error) {
+    return new Response(JSON.stringify({ error: error?.name === 'AbortError' ? 'å®ç½è¯»åè¶æ¶' : 'å®ç½è¯»åå¤±è´¥' }), { status: 504, headers: { 'Content-Type': 'application/json' }});
+  }
+  if (!response.ok || !response.text) return new Response(JSON.stringify({ error: `å®ç½è¯»åå¤±è´¥ï¼HTTP ${response.status || 0}` }), { status: 502, headers: { 'Content-Type': 'application/json' }});
+
+  const raw = response.text;
+  const name = chooseName(raw, input);
+  const title = extractTitle(raw);
+  const description = extractDescription(raw);
+  const canonical = extractCanonical(raw);
+  const thumbnail = extractThumbnail(raw);
+  const github = extractGithubLinks(raw)[0] || '';
+  const externalCandidates = extractExternalCandidates(raw).filter(u => u !== input && u !== canonical).slice(0, 80);
+  const content = [
+    `å®æ¹ç½ç«ï¼${input}`,
+    name ? `çå®åç§°åéï¼${name}` : '',
+    title ? `ç½é¡µæ é¢ï¼${title}` : '',
+    description ? `SEOæè¿°ï¼${description}` : '',
+    canonical ? `Canonicalï¼${canonical}` : '',
+    github ? `GitHubï¼${github}` : '',
+    `ç½é¡µçå®åå®¹ï¼${stripHtml(raw).slice(0, 22000)}`
+  ].filter(Boolean).join('\n\n').slice(0, 26000);
+
+  return new Response(JSON.stringify({
+    website: input,
+    finalUrl: normalizeUrl(response.url) || input,
+    name: typeof name === 'string' ? name : '',
+    seoTitle: typeof title === 'string' ? title : '',
+    seoDescription: typeof description === 'string' ? description : '',
+    canonical: typeof canonical === 'string' ? canonical : '',
+    github: typeof github === 'string' ? github : '',
+    thumbnail: typeof thumbnail === 'string' ? thumbnail : '',
+    externalCandidates,
+    content,
+    source: 'official-web-server'
+  }), { status: 200, headers: {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+    'Access-Control-Allow-Origin': '*'
+  }});
 }
