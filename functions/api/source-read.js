@@ -1,7 +1,7 @@
 import { XPH_RESOURCE_CONTRACT } from '../../shared/resource-contract.js';
 const clean = value => typeof value === 'string' ? value.trim() : '';
 const json = (payload, status=200, extra={}) => new Response(JSON.stringify(payload), { status, headers: { 'Content-Type':'application/json; charset=utf-8', 'Cache-Control':'no-store', 'Access-Control-Allow-Origin':'*', ...extra } });
-const ok = (data, stage='reading_source') => json({ ok:true, status:'completed', stage, data, error:null });
+const ok = (data, stage='reading_source') => json({ ok:true, status:XPH_RESOURCE_CONTRACT.statuses[0], stage, data:{ contractVersion:XPH_RESOURCE_CONTRACT.version, ...data }, error:null });
 const fail = (code, message, status=422, stage='reading_source', details=null) => json({ ok:false, status:'error', stage, data:null, error:{ code, message, details } }, status);
 
 const normalizeUrl = value => {
