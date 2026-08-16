@@ -37,18 +37,46 @@ function extractGithubCandidates(html) {
   for (const m of s.matchAll(/https?:\/\/(?:www\.)?github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+/gi)) add(m[0]);
   return unique(found);
 }
+
+function normalizeProjectName(value) {
+  let x = cleanText(value)
+    .replace(/\s*(?:[|ï½]|â|â|-|Â·|â¢)\s*(?:the\s+)?(?:official\s+)?(?:website|github|gitlab|bitbucket)\s*$/i, '')
+    .trim();
+  // å¸¸è§ç½é¡µæ é¢ï¼åçå â ä¸å¥è¯å®ä½ / åçå: äº§åæè¿°ã
+  // åªåç¬¬ä¸ä¸ªæç¡®çåç/é¡¹ç®æ®µï¼é¿åæSEOå¯æ é¢å¸¦è¿çå®åç§°ã
+  const parts = x.split(/\s*(?:â|â|Â·|â¢|\s+-\s+|\||ï½)\s*|\s*:\s+/).map(v => v.trim()).filter(Boolean);
+  if (parts.length > 1 && parts[0].length >= 2 && parts[0].length <= 48) x = parts[0];
+  x = x.replace(/\s+(?:[-ââ|ï½:ï¼]\s*)?(?:your|the|a)\s+(?:private|open[- ]source|free|online)\b.*$/i, '').trim();
+  return x;
+}
+function nameSignal(value) {
+  const x = normalizeProjectName(value);
+  if (!x) return { value: '', score: -999 };
+  const bad = /^(home|homepage|official website|website|welcome|login|sign in|sign up|menu|navigation|search|untitled|é¦é¡µ|ä¸»é¡µ|ç»å½|æ³¨å)$/i;
+  let score = 0;
+  if (bad.test(x)) score -= 300;
+  if (x.length > 80) score -= 100;
+  if (/^(best|free|official|the official|open source|open-source)\b/i.test(x)) score -= 30;
+  return { value: x, score };
+}
 function chooseName(html, url) {
   const host = (() => { try { return new URL(url).hostname.replace(/^www\./, '').toLowerCase(); } catch { return ''; } })();
-  const bad = /^(home|homepage|official website|website|welcome|login|sign in|sign up|menu|navigation|search|untitled|首页|主页|登录|注册)$/i;
-  const candidates = [[extractMeta(html, 'og:site_name'), 140], [extractMeta(html, 'application-name'), 135], [extractMeta(html, 'og:title'), 125], [extractTitle(html), 110], [extractH1(html), 90]].filter(x => x[0]);
-  return candidates.map(([value, score]) => {
-    const x = cleanText(value).replace(/^[-–—|:：]+|[-–—|:：]+$/g, '').trim(); let s = score;
-    if (!x || bad.test(x)) s -= 200;
-    if (host && x.toLowerCase().replace(/\s+/g, '') === host.replace(/\s+/g, '')) s -= 100;
-    if (x.length > 80) s -= 50;
-    if (/^(best|free|official|the official|open source|open-source)\b/i.test(x)) s -= 30;
-    return { x, s };
-  }).sort((a, b) => b.s - a.s)[0]?.x || '';
+  const candidates = [
+    [extractMeta(html, 'og:site_name'), 180],
+    [extractMeta(html, 'application-name'), 175],
+    [extractMeta(html, 'og:title'), 160],
+    [extractH1(html), 150],
+    [extractTitle(html), 140]
+  ].filter(x => x[0]).map(([value, base]) => {
+    const signal = nameSignal(value);
+    let score = base + signal.score;
+    const compactHost = host.replace(/[^a-z0-9]+/g, '');
+    const compactName = signal.value.toLowerCase().replace(/[^a-z0-9]+/g, '');
+    if (compactHost && compactName === compactHost) score += 40;
+    if (compactName && compactHost.includes(compactName)) score += 20;
+    return { x: signal.value, s: score };
+  }).sort((a, b) => b.s - a.s);
+  return candidates[0]?.x || '';
 }
 function extractDescription(html) { return cleanText(extractMeta(html, 'description') || extractMeta(html, 'og:description') || extractMeta(html, 'twitter:description')); }
 function extractThumbnail(html) { return validExternal(extractMeta(html, 'og:image') || extractMeta(html, 'twitter:image')); }
@@ -60,11 +88,11 @@ async function fetchText(url, ms = 18000) {
 export async function onRequestOptions() { return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' } }); }
 export async function onRequestGet({ request }) {
   const input = normalizeUrl(new URL(request.url).searchParams.get('url'));
-  if (!input) return new Response(JSON.stringify({ error: '官网 URL 无效' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-  try { if (isGithubHost(new URL(input).hostname)) throw new Error('GitHub URL 应走 GitHub 专用读取层'); } catch (e) { return new Response(JSON.stringify({ error: e.message || '官网 URL 无效' }), { status: 400, headers: { 'Content-Type': 'application/json' } }); }
+  if (!input) return new Response(JSON.stringify({ error: 'å®ç½ URL æ æ' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+  try { if (isGithubHost(new URL(input).hostname)) throw new Error('GitHub URL åºèµ° GitHub ä¸ç¨è¯»åå±'); } catch (e) { return new Response(JSON.stringify({ error: e.message || 'å®ç½ URL æ æ' }), { status: 400, headers: { 'Content-Type': 'application/json' } }); }
   let response;
-  try { response = await fetchText(input); } catch (e) { return new Response(JSON.stringify({ error: e?.name === 'AbortError' ? '官网读取超时' : '官网读取失败' }), { status: 504, headers: { 'Content-Type': 'application/json' } }); }
-  if (!response.ok || !response.text) return new Response(JSON.stringify({ error: `官网读取失败：HTTP ${response.status || 0}` }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+  try { response = await fetchText(input); } catch (e) { return new Response(JSON.stringify({ error: e?.name === 'AbortError' ? 'å®ç½è¯»åè¶æ¶' : 'å®ç½è¯»åå¤±è´¥' }), { status: 504, headers: { 'Content-Type': 'application/json' } }); }
+  if (!response.ok || !response.text) return new Response(JSON.stringify({ error: `å®ç½è¯»åå¤±è´¥ï¼HTTP ${response.status || 0}` }), { status: 502, headers: { 'Content-Type': 'application/json' } });
   const raw = response.text;
   const name = chooseName(raw, input);
   const title = extractTitle(raw);
@@ -72,6 +100,6 @@ export async function onRequestGet({ request }) {
   const canonical = extractCanonical(raw);
   const thumbnail = extractThumbnail(raw);
   const githubCandidates = extractGithubCandidates(raw);
-  const content = [`官方网站：${normalizeUrl(response.url) || input}`, name ? `真实名称候选：${name}` : '', title ? `网页标题：${title}` : '', description ? `SEO描述：${description}` : '', canonical ? `Canonical：${canonical}` : '', githubCandidates.length ? `GitHub候选：${githubCandidates.join(' | ')}` : '', `网页真实内容：${stripHtml(raw).slice(0, 22000)}`].filter(Boolean).join('\n\n').slice(0, 26000);
+  const content = [`å®æ¹ç½ç«ï¼${normalizeUrl(response.url) || input}`, name ? `çå®åç§°åéï¼${name}` : '', title ? `ç½é¡µæ é¢ï¼${title}` : '', description ? `SEOæè¿°ï¼${description}` : '', canonical ? `Canonicalï¼${canonical}` : '', githubCandidates.length ? `GitHubåéï¼${githubCandidates.join(' | ')}` : '', `ç½é¡µçå®åå®¹ï¼${stripHtml(raw).slice(0, 22000)}`].filter(Boolean).join('\n\n').slice(0, 26000);
   return new Response(JSON.stringify({ website: normalizeUrl(response.url) || input, name, seoTitle: title, seoDescription: description, canonical, github: githubCandidates[0] || '', githubCandidates, thumbnail, content, source: 'official-web-server' }), { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' } });
 }
