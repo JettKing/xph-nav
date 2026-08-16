@@ -12,6 +12,8 @@ const txt=v=>String(v??'').trim(),uniq=a=>[...new Set((a||[]).map(txt).filter(Bo
 const count=v=>Array.from(txt(v)).length;
 const normalizeUrl=v=>{try{const u=new URL(txt(v));u.hash='';return u.href.replace(/\/$/,'')||u.href}catch{return txt(v).replace(/#.*$/,'').replace(/\/+$/,'')}};
 const normalizeGithub=v=>{const m=txt(v).replace(/[)\]}>.,;]+$/g,'').match(/(?:https?:\/\/)?(?:www\.)?github\.com\/([^/\s)\]]+)\/([^/#?\s)\]]+)/i);return m?`https://github.com/${m[1]}/${m[2].replace(/\.git$/i,'')}`:''};
+const isGithubUrl=v=>!!normalizeGithub(v);
+const normalizeWebsite=v=>{if(typeof v!=='string')return '';const u=normalizeUrl(v);if(!u)return '';try{const host=new URL(u).hostname.toLowerCase().replace(/^www\./,'');if(/(?:^|\.)github(?:usercontent)?\.com$/.test(host)||host==='github.com'||host==='gist.github.com'||host==='githubassets.com')return '';return u}catch{return ''}};
 const esc=v=>txt(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const CATEGORIES=window.categories||{};const TAGS=window.tags||{capabilities:[],scenarios:[],attributes:{pricing:[],platform:[],language:[],audience:[]}};const RESOURCE_ICONS=window.XPH_RESOURCE_ICONS||{};
 const state={reading:null,resource:null,source:null};
@@ -173,25 +175,35 @@ function extractPageInfo(md,url){
 }
 function extractTitle(md,url){return extractPageInfo(md,url).name}
 async function readWebsite(url){
-  const clean=normalizeUrl(url);
-  if(!/^https?:\/\//i.test(clean))throw new Error('请输入有效 URL');
-  // V18.1：优先由 Cloudflare 服务端直接读取官网，避免浏览器/Jina 单一路径导致 GitHub 链接偶发丢失。
+  const clean=normalizeWebsite(url);
+  if(!clean)throw new Error('请输入有效官网 URL');
   try{
     const r=await timeoutFetch(`/api/source-read?url=${encodeURIComponent(clean)}`,{headers:{Accept:'application/json'}},30000);
     const data=await r.json().catch(()=>({}));
-    if(r.ok && data?.content && data?.website){
-      return {website:clean,name:txt(data.name),seoTitle:txt(data.seoTitle),seoDescription:txt(data.seoDescription),github:normalizeGithub(data.github),githubCandidates:Array.isArray(data.githubCandidates)?data.githubCandidates.map(normalizeGithub).filter(Boolean):[],thumbnail:txt(data.thumbnail),content:txt(data.content).slice(0,22000),source:'official-web',mode:data.mode||'server'};
+    if(r.ok && typeof data?.website==='string' && data.website && typeof data?.content==='string' && data.content){
+      return {
+        website:normalizeWebsite(data.website),
+        name:txt(data.name),
+        github:normalizeGithub(data.github),
+        thumbnail:normalizeWebsite(data.thumbnail),
+        seoTitle:txt(data.seoTitle),
+        seoDescription:txt(data.seoDescription),
+        content:txt(data.content).slice(0,24000),
+        externalCandidates:Array.isArray(data.externalCandidates)?data.externalCandidates.map(normalizeWebsite).filter(Boolean):[],
+        source:'official-web-server'
+      };
     }
   }catch{}
-  // 兼容旧环境：服务端读取层不可用时再回退 Jina。
-  let r;
-  try{r=await timeoutFetch('https://r.jina.ai/'+clean,{headers:{Accept:'text/plain'}},20000)}catch(e){throw new Error(e.name==='AbortError'?'网页读取超时':'网页读取失败')}
-  if(!r.ok)throw new Error('网页读取失败：HTTP '+r.status);
-  const raw=await r.text();
-  const info=extractPageInfo(raw,clean);
-  const links=extractGithubLinks(raw);
-  const thumb=(raw.match(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/i)||[])[1]||'';
-  return{website:clean,name:info.name,seoTitle:info.seoTitle,seoDescription:info.seoDescription,github:links[0]||'',githubCandidates:links,thumbnail:thumb,content:raw.slice(0,22000),source:'official-web',mode:'jina'};
+  // 旧链路只作为读取层故障时的兼容回退，不改变最终数据结构。
+  try{
+    const r=await timeoutFetch('https://r.jina.ai/'+clean,{headers:{Accept:'text/plain'}},18000);
+    if(!r.ok)throw new Error('网页读取失败：HTTP '+r.status);
+    const raw=await r.text();
+    const info=extractPageInfo(raw,clean);
+    const links=extractGithubLinks(raw);
+    const thumb=(raw.match(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/i)||[])[1]||'';
+    return{website:clean,name:info.name,seoTitle:info.seoTitle,seoDescription:info.seoDescription,github:links[0]||'',thumbnail:normalizeWebsite(thumb),content:raw.slice(0,22000),source:'official-web'};
+  }catch(e){throw new Error(e?.message||'官网读取失败')}
 }
 function githubDisplayName(repo){
   const slug=txt(repo).match(/github\.com\/[^/]+\/([^/?#]+)/i)?.[1]||'';
@@ -205,9 +217,7 @@ async function readGithub(url){
     const r=await timeoutFetch(`/api/github-read?repo=${encodeURIComponent(repo)}`,{headers:{Accept:'application/json'}},30000);
     const data=await r.json().catch(()=>({}));
     if(r.ok && data?.content && data?.name){
-      const candidates=Array.isArray(data.websiteCandidates)?data.websiteCandidates:[];
-      const trustedWebsite=txt(data.website)||txt(candidates[0]?.u);
-      return {github:repo,name:txt(data.name),website:trustedWebsite,websiteCandidates:candidates,thumbnail:'',seoTitle:txt(data.seoTitle),seoDescription:txt(data.seoDescription),content:txt(data.content).slice(0,24000),source:'github',keywords:Array.isArray(data.keywords)?data.keywords:[],apiStatus:data.apiStatus||0};
+      return {github:repo,name:txt(data.name),website:normalizeWebsite(data.website),thumbnail:'',seoTitle:txt(data.seoTitle),seoDescription:txt(data.seoDescription),content:txt(data.content).slice(0,24000),source:'github',keywords:Array.isArray(data.keywords)?data.keywords:[],apiStatus:data.apiStatus||0};
     }
   }catch{}
   // 兼容旧环境：服务端读取层不可用时保留原有读取链路。
@@ -223,56 +233,79 @@ async function readGithub(url){
   const suspiciousGithubName=/^(?:published time|updated time|created time|release time|commit time|view raw|raw|source|image|download|home|homepage|website|menu|navigation)$/i;
   const safeName=v=>{const x=txt(v);return x&&!suspiciousGithubName.test(x)&&x.length<=80?x:''};
   const name=safeName(d.name)||safeName(readmeName)||safeName(pageName)||slugName||repo.split('/').pop();
-  const apiHomepage=isValidHomepageUrl(d.homepage)?normalizeUrl(d.homepage):'';
+  const apiHomepage=typeof d.homepage==='string'&&isValidHomepageUrl(d.homepage)?normalizeUrl(d.homepage):'';
   const readmeHomepage=extractGithubHomepage(readme,repo);
   const pageHomepage=extractGithubHomepage(page.raw,repo);
-  const website=apiHomepage||readmeHomepage||pageHomepage||'';
+  const website=normalizeWebsite(apiHomepage||readmeHomepage||pageHomepage||'');
   const description=txt(d.description);
   const pageInfo=[txt(page.raw),description,readme].filter(Boolean).join('\n\n--- GitHub README ---\n').slice(0,22000);
   if(!pageInfo)throw new Error('GitHub 真实内容读取失败，请稍后重试');
   return{github:repo,name,website,thumbnail:'',seoTitle:txt(page.seoTitle)||'',seoDescription:txt(page.seoDescription)||'',content:pageInfo,source:'github',keywords:Array.isArray(d.topics)?d.topics:[],apiStatus:api.status||0};
 }
 async function readRealSources(){
-  const url=normalizeUrl($('#resourceUrl').value);
+  const rawUrl=txt($('#resourceUrl').value);
+  const url=normalizeUrl(rawUrl);
   const githubInput=normalizeGithub($('#resourceGithub').value);
-  const inputGithub=githubInput||normalizeGithub(url);
-  if(!url&&!inputGithub)throw new Error('请至少填写资源 URL 或 GitHub URL');
+  const inputGithub=githubInput||normalizeGithub(rawUrl);
+  const websiteInput=url && !isGithubUrl(url) ? normalizeWebsite(url) : '';
+  if(!websiteInput&&!inputGithub)throw new Error('请至少填写资源 URL 或 GitHub URL');
   let web=null,gh=null;
-  if(url&&!normalizeGithub(url)){
-    try{web=await readWebsite(url)}catch(e){if(!inputGithub)throw e}
+
+  if(websiteInput){
+    try{web=await readWebsite(websiteInput)}catch(e){
+      if(!inputGithub)throw e;
+    }
   }
-  if(inputGithub){gh=await readGithub(inputGithub)}
-  // 官网 → GitHub：优先使用官网真实链接；没有时再按真实名称/域名进行公共仓库搜索。
+
+  if(inputGithub){
+    gh=await readGithub(inputGithub);
+  }
+
+  // 官网 → GitHub：先使用官网原始HTML中发现的真实仓库；再使用名称/域名搜索作为最后发现层。
   if(!gh&&web){
-    const candidates=uniq([...(web.githubCandidates||[]),normalizeGithub(web.github)]);
-    for(const candidate of candidates){
-      try{gh=await readGithub(candidate);if(gh)break}catch{}
-    }
-    if(!gh){
-      const discovered=await discoverGithubBySearch(web.name||web.seoTitle,web.website);
-      if(discovered){try{gh=await readGithub(discovered)}catch{}}
-    }
+    let discovered=normalizeGithub(web.github);
+    if(!discovered) discovered=await discoverGithubBySearch(web.name||web.seoTitle,web.website);
+    if(discovered){try{gh=await readGithub(discovered)}catch{}}
   }
-  // GitHub → 官网：只接受 GitHub 可信主页；成功后再读取官网真实内容。
+
+  // GitHub → 官网：只有明确、可验证的官方主页才进入官网字段；发现后再读取官网真实内容。
   if(gh?.website&&!web){
-    try{web=await readWebsite(gh.website)}catch{}
+    const officialWebsite=normalizeWebsite(gh.website);
+    if(officialWebsite){try{web=await readWebsite(officialWebsite)}catch{}}
   }
+
   const isHostnameName=(name,url)=>{const n=txt(name).toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/$/,'');try{return !!url&&n===new URL(url).hostname.replace(/^www\./,'').toLowerCase()}catch{return false}};
   const webName=txt(web?.name);
   const ghName=txt(gh?.name);
   const webNameLooksGeneric=/^(?:home|homepage|official website|website|open source|open-source|the open source|free|welcome)$/i.test(webName)||/\b(?:best|free|open[- ]?source)\b.*\b(?:tool|software|platform|website)\b/i.test(webName);
   const preferredName=(webName && !isHostnameName(webName,web?.website) && !webNameLooksGeneric)?webName:(ghName&&!isHostnameName(ghName,gh?.github)?ghName:(webName||ghName||''));
-  const source={website:txt(web?.website)||txt(gh?.website)||'',name:preferredName,github:txt(gh?.github)||txt(web?.github)||inputGithub||'',thumbnail:txt(web?.thumbnail)||txt(gh?.thumbnail)||'',seoTitle:txt(web?.seoTitle)||txt(gh?.seoTitle)||'',seoDescription:txt(web?.seoDescription)||txt(gh?.seoDescription)||'',githubName:ghName,content:[web?.content,gh?.content].filter(Boolean).join('\n\n--- GitHub ---\n').slice(0,24000),source:web?'official-web':'github',githubContent:gh?.content||'',keywords:uniq([...(web?.keywords||[]),...(gh?.keywords||[])])};
+  const officialWebsite=normalizeWebsite(web?.website)||normalizeWebsite(gh?.website)||'';
+  const officialGithub=normalizeGithub(gh?.github)||normalizeGithub(web?.github)||inputGithub||'';
+  const source={
+    website:officialWebsite,
+    name:preferredName,
+    github:officialGithub,
+    thumbnail:normalizeWebsite(web?.thumbnail)||'',
+    seoTitle:txt(web?.seoTitle)||txt(gh?.seoTitle)||'',
+    seoDescription:txt(web?.seoDescription)||txt(gh?.seoDescription)||'',
+    githubName:ghName,
+    content:[web?.content,gh?.content].filter(x=>typeof x==='string'&&x.trim()).join('\n\n--- GitHub ---\n').slice(0,24000),
+    source:web?'official-web':'github',
+    githubContent:typeof gh?.content==='string'?gh.content:'',
+    keywords:uniq([...(web?.keywords||[]),...(gh?.keywords||[])])
+  };
   if(!source.name)throw new Error('真实来源未读取到资源名称');
   if(!source.website&&!source.github)throw new Error('真实来源读取失败');
+  if(typeof source.website!=='string'||typeof source.github!=='string')throw new Error('来源字段类型异常，已阻止写入最终数据');
   return source;
 }
 function showRead(source){$('#readBox').classList.remove('hidden');$('#readName').textContent=source.name||'—';$('#readSource').textContent=source.website||'—';$('#readGithub').textContent=source.github||'未发现';$('#readThumb').textContent=source.thumbnail?'已读取':'未读取';$('#readContent').textContent=`已缓存 ${count(source.content)} 字符真实内容`;}
-function buildResource(extra={}){const [cat,sub]=txt($('#categorySelect').value).split('::');const r=state.resource||{};const manualName=txt($('#resourceName').value);const sourceName=txt(state.source?.name);const finalName=manualName||sourceName;r.id=txt($('#resourceId').value)||r.id||makeId(finalName,$('#resourceUrl').value||$('#resourceGithub').value);r.name=finalName;r.website=normalizeUrl($('#resourceUrl').value)||txt(state.source?.website);r.github=normalizeGithub($('#resourceGithub').value)||txt(state.source?.github);r.thumbnail=state.source?.thumbnail||r.thumbnail||'';r.description=txt($('#resourceDescription').value);r.category=cat||'website';r.subcategory=sub||'website_tool';r.capabilities=selected('capabilities');r.scenarios=selected('scenarios');r.attributes={pricing:selected('pricing')[0]||'增值',platform:selected('platform'),language:selected('language'),audience:selected('audience')};r.audience=r.attributes.audience?.[0]||'';r.icon=iconForSubcategory(sub)||r.icon||parentIcon(cat)||'🔗';r.features=r.features||[];r.official=!!r.official;r.recommend=!!r.recommend;r.status=r.status||'active';return r}
+function inputGithubSafe(){return normalizeGithub($('#resourceGithub').value)||normalizeGithub($('#resourceUrl').value)||'';}
+function buildResource(extra={}){const [cat,sub]=txt($('#categorySelect').value).split('::');const r=state.resource||{};const manualName=txt($('#resourceName').value);const sourceName=txt(state.source?.name);const finalName=manualName||sourceName;r.id=txt($('#resourceId').value)||r.id||makeId(finalName,$('#resourceUrl').value||$('#resourceGithub').value);r.name=finalName;const manualWebsiteInput=txt($('#resourceUrl').value);const manualWebsite=!isGithubUrl(manualWebsiteInput)?normalizeWebsite(manualWebsiteInput):'';r.website=manualWebsite||normalizeWebsite(state.source?.website)||'';r.github=normalizeGithub($('#resourceGithub').value)||normalizeGithub(state.source?.github)||inputGithubSafe();r.thumbnail=state.source?.thumbnail||r.thumbnail||'';r.description=txt($('#resourceDescription').value);r.category=cat||'website';r.subcategory=sub||'website_tool';r.capabilities=selected('capabilities');r.scenarios=selected('scenarios');r.attributes={pricing:selected('pricing')[0]||'增值',platform:selected('platform'),language:selected('language'),audience:selected('audience')};r.audience=r.attributes.audience?.[0]||'';r.icon=iconForSubcategory(sub)||r.icon||parentIcon(cat)||'🔗';r.features=r.features||[];r.official=!!r.official;r.recommend=!!r.recommend;r.status=r.status||'active';return r}
 function renderResource(r){state.resource=r;renderCategories(r.subcategory,r.category);$('#resourceId').value=r.id||'';$('#resourceName').value=r.name||'';$('#resourceUrl').value=r.website||'';$('#resourceGithub').value=r.github||'';$('#resourceDescription').value=r.description||'';renderChips('capabilityChips',r.capabilities,'capabilities');renderChips('scenarioChips',r.scenarios,'scenarios');renderChips('pricingChips',[r.attributes?.pricing].filter(Boolean),'pricing');renderChips('platformChips',r.attributes?.platform,'platform');renderChips('languageChips',r.attributes?.language,'language');renderChips('audienceChips',r.attributes?.audience,'audience');$('#reviewPanel').classList.remove('hidden');$('#jsonPreview').textContent=JSON.stringify(r,null,2);}
 async function readStep(){const name=txt($('#resourceName').value);status('正在读取真实网页 / GitHub…','busy');$('#fetchBtn').disabled=true;$('#analyzeBtn').disabled=true;try{const s=await readRealSources();state.source=s;if(name)$('#resourceName').value=name;else $('#resourceName').value=s.name;$('#resourceUrl').value=txt($('#resourceUrl').value)||s.website;$('#resourceGithub').value=txt($('#resourceGithub').value)||s.github;showRead(s);$('#jsonPreview').textContent='真实内容已读取并缓存。现在可以点击“智能分析并生成简介”。';$('#analyzeBtn').disabled=false;status('真实内容读取完成；尚未调用 DeepSeek。','ok')}catch(e){status(e.message||'读取失败')}finally{$('#fetchBtn').disabled=false}}
 function isValidDescription(value){const v=txt(value);if(count(v)!==16||!/[\u3400-\u9fff]/.test(v)||/^[A-Za-z0-9\s.,!?;:()\[\]{}+\-_/&%#]+$/.test(v)||/[\r\n]/.test(v))return false;const cjk=count(v.replace(/[^\u3400-\u9fff]/g,''));if(cjk<6)return false;return !/(专业|强大|超强|顶级|领先|完美|神器|极速|优质|爆款|必备)/.test(v)}
-async function aiStep(){if(!state.source){status('请先点击“读取网页信息”');return}const manual=txt($('#resourceDescription').value);status('正在让 DeepSeek 分析简介与标准分类（最多自动生成5次）…','busy');$('#analyzeBtn').disabled=true;try{const payload={name:state.source.name,website:state.source.website,github:state.source.github,seoTitle:state.source.seoTitle,seoDescription:state.source.seoDescription,githubName:state.source.githubName,content:state.source.content,manualDescription:manual,taxonomy:categoryTaxonomy()};const r=await timeoutFetch('/api/deepseek-description',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},300000);const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||`DeepSeek 代理 HTTP ${r.status}`);const desc=txt(data.description);if(manual){if(desc!==manual)throw new Error('AI 未按规则原样保留人工简介')}else if(!isValidDescription(desc))throw new Error(`DeepSeek 返回简介长度/格式不合格：${count(desc)} 字符`);if(!validClassification(data.category,data.subcategory))throw new Error('DeepSeek 返回的分类不在现有合法分类词库中');if(!manual)$('#resourceDescription').value=desc;const resource=applyClassification(data.category,data.subcategory);resource.description=manual||desc;resource.icon=iconForSubcategory(data.subcategory)||parentIcon(data.category)||resource.icon||'🔗';renderResource(resource);status(`AI分析完成：${CATEGORIES[data.category]?.name||data.category} / ${CATEGORIES[data.category]?.children?.[data.subcategory]||data.subcategory} · Icon ${resource.icon}`,'ok')}catch(e){status(e.message||'DeepSeek 分析失败')}finally{$('#analyzeBtn').disabled=false}}
+async function aiStep(){if(!state.source){status('请先点击“读取网页信息”');return}const manual=txt($('#resourceDescription').value);status('正在让 DeepSeek 分析真实内容、分类并生成简介（最多5轮 × 5候选）…','busy');$('#analyzeBtn').disabled=true;try{const payload={name:state.source.name,website:state.source.website,github:state.source.github,seoTitle:state.source.seoTitle,seoDescription:state.source.seoDescription,githubName:state.source.githubName,content:state.source.content,manualDescription:manual,taxonomy:categoryTaxonomy()};const r=await timeoutFetch('/api/deepseek-description',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},300000);const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||`DeepSeek 代理 HTTP ${r.status}`);const desc=txt(data.description);if(manual){if(desc!==manual)throw new Error('AI 未按规则原样保留人工简介')}else if(!isValidDescription(desc))throw new Error(`DeepSeek 返回简介长度/格式不合格：${count(desc)} 字符`);if(!validClassification(data.category,data.subcategory))throw new Error('DeepSeek 返回的分类不在现有合法分类词库中');if(!manual)$('#resourceDescription').value=desc;const resource=applyClassification(data.category,data.subcategory);resource.description=manual||desc;resource.icon=iconForSubcategory(data.subcategory)||parentIcon(data.category)||resource.icon||'🔗';renderResource(resource);status(`AI分析完成：${CATEGORIES[data.category]?.name||data.category} / ${CATEGORIES[data.category]?.children?.[data.subcategory]||data.subcategory} · Icon ${resource.icon}`,'ok')}catch(e){status(e.message||'DeepSeek 分析失败')}finally{$('#analyzeBtn').disabled=false}}
 function clean(r){const x=JSON.parse(JSON.stringify(r));delete x._meta;return x}
 function saveDraft(){const r=buildResource(),all=JSON.parse(localStorage.getItem(KEY)||'[]'),i=all.findIndex(x=>x.id===r.id);if(i>=0)all[i]=r;else all.unshift(r);localStorage.setItem(KEY,JSON.stringify(all));loadDrafts();status('审核草稿已保存。','ok')}
 function loadDrafts(){const all=JSON.parse(localStorage.getItem(KEY)||'[]');$('#draftSelect').innerHTML='<option value="">选择已保存草稿…</option>'+all.map(x=>`<option value="${esc(x.id)}">${esc(x.name||x.id)}</option>`).join('')}
