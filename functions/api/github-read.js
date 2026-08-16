@@ -1,4 +1,9 @@
+import { XPH_RESOURCE_CONTRACT } from '../../shared/resource-contract.js';
 const clean = value => typeof value === 'string' ? value.trim() : '';
+const json = (payload, status=200, extra={}) => new Response(JSON.stringify(payload), { status, headers: { 'Content-Type':'application/json; charset=utf-8', 'Cache-Control':'no-store', 'Access-Control-Allow-Origin':'*', ...extra } });
+const ok = (data, stage='reading_source') => json({ ok:true, status:'completed', stage, data, error:null });
+const fail = (code, message, status=422, stage='reading_source', details=null) => json({ ok:false, status:'error', stage, data:null, error:{ code, message, details } }, status);
+
 const normalizeUrl = value => {
   const raw = clean(value);
   if (!raw) return '';
@@ -67,6 +72,7 @@ function normalizeProjectName(value, fallback = '') {
     .trim();
   const parts = x.split(/\s*(?:â|â|\||ï½|Â·|â¢)\s*|:\s+/).map(v => v.trim()).filter(Boolean);
   if (parts.length > 1 && parts[0].length >= 2 && parts[0].length <= 40) x = parts[0];
+  x = x.replace(/\s+(?:community|community forum|official community)$/i, '').trim();
   return x || cleanText(fallback);
 }
 function homepageScore(url, repo, projectName = '') {
@@ -229,9 +235,9 @@ export async function onRequestGet({ request }) {
   const discoverName = clean(url.searchParams.get('discoverName'));
   const discoverWebsite = clean(url.searchParams.get('discoverWebsite'));
   if (!repo && discoverName) repo = await discoverRepo(discoverName, discoverWebsite);
-  if (!repo) return new Response(JSON.stringify({ error: 'æªæ¾å°å¯éªè¯çå®æ¹ GitHub ä»åº' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+  if (!repo) return fail(XPH_RESOURCE_CONTRACT.errors.SOURCE_READ_FAILED, 'æªæ¾å°å¯éªè¯çå®æ¹ GitHub ä»åº', 404);
   const path = repoPath(repo);
-  if (!path) return new Response(JSON.stringify({ error: 'GitHub ä»åºå°åæ æ' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+  if (!path) return fail(XPH_RESOURCE_CONTRACT.errors.INVALID_REQUEST, 'GitHub ä»åºå°åæ æ', 400);
 
   const api = await readJson(`https://api.github.com/repos/${path}`, { Accept: 'application/vnd.github+json', 'User-Agent': 'XPH-Resource-Importer/5.3' }, 10000);
   const html = await readText(repo, { Accept: 'text/html', 'User-Agent': 'XPH-Resource-Importer/5.3' }, 15000);
@@ -243,6 +249,6 @@ export async function onRequestGet({ request }) {
   const readmeText = cleanText(readme.text).slice(0, 16000);
   const htmlText = stripHtml(html.text).slice(0, 10000);
   const content = [`GitHubä»åºï¼${repo}`, `é¡¹ç®åç§°ï¼${name}`, description ? `é¡¹ç®æè¿°ï¼${description}` : '', website ? `å®æ¹ä¸»é¡µï¼${website}` : '', readmeText ? `READMEï¼${readmeText}` : '', htmlText ? `GitHubé¡µé¢ï¼${htmlText}` : ''].filter(Boolean).join('\n\n').slice(0, 24000);
-  if (!content || content.length < 30) return new Response(JSON.stringify({ error: 'GitHubçå®åå®¹è¯»åå¤±è´¥', apiStatus: api.status, htmlStatus: html.status, readmeStatus: readme.status }), { status: 502, headers: { 'Content-Type': 'application/json' } });
-  return new Response(JSON.stringify({ github: repo, name, website: website || '', seoTitle: name, seoDescription: description, thumbnail: '', content, keywords: Array.isArray(d.topics) ? d.topics : [], apiStatus: api.status, htmlStatus: html.status, readmeStatus: readme.status }), { status: 200, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' } });
+  if (!content || content.length < 30) return fail(XPH_RESOURCE_CONTRACT.errors.SOURCE_READ_FAILED, 'GitHubçå®åå®¹è¯»åå¤±è´¥', 502, 'reading_source', { apiStatus: api.status, htmlStatus: html.status, readmeStatus: readme.status });
+  return ok({ github: repo, name, website: website || '', seoTitle: name, seoDescription: description, thumbnail: '', content, keywords: Array.isArray(d.topics) ? d.topics : [], apiStatus: api.status, htmlStatus: html.status, readmeStatus: readme.status });
 }
