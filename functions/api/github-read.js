@@ -34,26 +34,31 @@ function externalLinks(text){
 }
 function pickHomepage(readme, html, repo, apiHomepage){
   if(validHomepage(apiHomepage)) return normalizeUrl(apiHomepage);
-  const labeled = String(readme || '').match(/(?:official\s+(?:website|site)|homepage|home\s*page|website|å®ç½|é¡¹ç®ä¸»é¡µ)[^\n]{0,220}?(https?:\/\/(?!github\.com)[^\s<>)\"']+)/i);
+  const combined=String(readme||'')+'\n'+String(html||'');
+  const labeled=combined.match(/(?:official\s+(?:website|site)|homepage|home\s*page|website|å®ç½|é¡¹ç®ä¸»é¡µ|å®æ¹ç½ç«)[^\n]{0,260}?(https?:\/\/(?!github\.com)[^\s<>)"']+)/i);
   if(labeled && validHomepage(labeled[1])) return normalizeUrl(labeled[1]);
+
   const repoName=(repo.match(/github\.com\/[^/]+\/([^/?#]+)/i)?.[1]||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
   const all=[...externalLinks(readme),...externalLinks(html)];
-  const scored=all.map(u=>{
-    let score=0;
+  const candidates=[];
+  for(const u of all){
     try{
       const host=new URL(u).hostname.toLowerCase().replace(/^www\./,'');
       const compact=host.replace(/[^a-z0-9]+/g,'');
       const root=host.split('.').slice(-2).join('.').replace(/[^a-z0-9]+/g,'');
-      if(repoName && compact===repoName) score+=220;
-      if(repoName && root===repoName) score+=200;
-      if(repoName && (compact.includes(repoName)||repoName.includes(compact))) score+=100;
-      if(/(?:docs?|blog|status|support|careers|developer|developers)\./.test(host)) score-=50;
-      if(/(?:discord\.(?:gg|com)|twitter\.com|x\.com|linkedin\.com|youtube\.com|twitch\.tv|npmjs\.com|pypi\.org|medium\.com|buymeacoffee\.com)/.test(host)) score-=120;
-      if(/(?:badge|shields|githubusercontent|googleapis|fonts\.|jsdelivr|unpkg)/.test(host)) score-=180;
+      let score=0;
+      if(repoName && compact===repoName) score+=280;
+      if(repoName && root===repoName) score+=260;
+      if(repoName && compact.startsWith(repoName)) score+=180;
+      if(repoName && compact.includes(repoName)) score+=100;
+      if(/(?:docs?|blog|status|support|careers|developer|developers)\./.test(host)) score-=70;
+      if(/(?:discord\.(?:gg|com)|twitter\.com|x\.com|linkedin\.com|youtube\.com|twitch\.tv|npmjs\.com|pypi\.org|medium\.com|buymeacoffee\.com|ko-fi\.com)/.test(host)) score-=160;
+      if(/(?:badge|shields|googleapis|fonts\.|jsdelivr|unpkg|cloudflare)/.test(host)) score-=180;
+      candidates.push({u,score});
     }catch{}
-    return {u,score};
-  }).sort((a,b)=>b.score-a.score);
-  return scored[0]?.score>=120 ? scored[0].u : '';
+  }
+  candidates.sort((a,b)=>b.score-a.score);
+  return candidates[0]?.score>=90 ? candidates[0].u : '';
 }
 function extractName(api, html, readme, repo){
   const candidates=[];
