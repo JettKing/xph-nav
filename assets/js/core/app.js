@@ -1,9 +1,9 @@
 /**
- * 徐胖虎资源社 App v5.3.3 FINAL
+ * 徐胖虎资源社 App V5.3 FINAL
  * 资源筛选：场景 / 能力 / 价格；弹窗式、无数量标签。
  */
 window.ResourceApp={
-    version:"5.3.3",
+    version:"5.3",
     _timer:null,
     _bound:false,
     _modalOpen:false,
@@ -27,7 +27,7 @@ window.ResourceApp={
     applyUrlState(){
         const p=new URLSearchParams(location.search);
         ResourceStore.setKeyword(p.get("q")||p.get("keyword")||"");
-        // V5.3.3 前台不再使用分类/平台/语言/受众筛选；兼容旧 URL 时直接忽略这些条件。
+        // V5.3 前台不再使用分类/平台/语言/受众筛选；兼容旧 URL 时直接忽略这些条件。
         ResourceStore.setCategory("all");
         ResourceStore.setSubCategory("all");
         ResourceStore.setCapability(p.get("capability")||"all");
