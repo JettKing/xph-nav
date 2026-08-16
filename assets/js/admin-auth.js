@@ -1,4 +1,4 @@
-/** 徐胖虎资源社 V5.3.6.6 后台页面保护 */
+/** 徐胖虎资源社 V5.3 后台页面保护 */
 (function(){
 "use strict";
 function isLoginPage(){
