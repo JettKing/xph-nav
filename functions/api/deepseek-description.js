@@ -1,50 +1,74 @@
+import { XPH_RESOURCE_CONTRACT } from '../../shared/resource-contract.js';
+
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
 const MODEL = 'deepseek-v4-pro';
 const REQUEST_TIMEOUT_MS = 45000;
+const POLICY = XPH_RESOURCE_CONTRACT.candidatePolicy;
+const ERR = XPH_RESOURCE_CONTRACT.errors;
+
 const clean = value => String(value ?? '').trim().replace(/[\r\n]+/g, ' ').replace(/^['"“”‘’]+|['"“”‘’]+$/g, '').trim();
 const count = value => Array.from(clean(value)).length;
 const cjkCount = value => Array.from(clean(value)).filter(ch => /[\u3400-\u9fff]/.test(ch)).length;
 const banned = /(专业|强大|超强|顶级|领先|完美|神器|极速|优质|爆款|必备|一站式)/;
-const emptyPadding = /(工具|平台|软件|资源|应用|专业|强大|实用|便捷)$/;
-const isValid16 = value => {
-  const v = clean(value);
-  if (count(v) !== 16 || cjkCount(v) < 6) return false;
-  if (/^[A-Za-z0-9\s.,!?;:()[\]{}+\-_/&%#]+$/.test(v)) return false;
-  if (banned.test(v) || emptyPadding.test(v)) return false;
-  return true;
-};
+const filler = /(工具|平台|软件|资源|应用|实用|便捷)$/;
+
+function validation(value) {
+  const v = clean(value), reasons = [];
+  if (count(v) !== 16) reasons.push(`长度${count(v)}`);
+  if (cjkCount(v) < 6) reasons.push(`中文${cjkCount(v)}`);
+  if (/^[A-Za-z0-9\s.,!?;:()[\]{}+\-_/&%#]+$/.test(v)) reasons.push('纯英文/数字');
+  if (banned.test(v)) reasons.push('营销词');
+  if (filler.test(v)) reasons.push('空泛结尾');
+  return { value: v, valid: reasons.length === 0, reasons };
+}
+const isValid16 = value => validation(value).valid;
+
 const normalizeTaxonomy = input => Array.isArray(input)
-  ? input.map(x => ({ category: clean(x?.category), categoryName: clean(x?.categoryName), subcategory: clean(x?.subcategory), subcategoryName: clean(x?.subcategoryName) })).filter(x => x.category && x.subcategory && x.categoryName && x.subcategoryName)
+  ? input.map(x => ({ category: clean(x?.category), categoryName: clean(x?.categoryName), subcategory: clean(x?.subcategory), subcategoryName: clean(x?.subcategoryName) }))
+    .filter(x => x.category && x.subcategory && x.categoryName && x.subcategoryName)
   : [];
-const classificationIsValid = (category, subcategory, taxonomy) => taxonomy.some(x => x.category === category && x.subcategory === subcategory);
+const normalizeIconMap = input => input && typeof input === 'object' && !Array.isArray(input)
+  ? Object.fromEntries(Object.entries(input).map(([k,v]) => [clean(k), clean(v)]).filter(([k,v]) => k && v))
+  : {};
+const norm = value => clean(value).toLowerCase().replace(/[\s_\-–—·•/|｜:：]+/g, '');
 const resolveClassification = (category, subcategory, taxonomy) => {
-  const c = clean(category), sc = clean(subcategory);
-  const exact = taxonomy.find(x => x.category === c && x.subcategory === sc);
+  const c = norm(category), sc = norm(subcategory);
+  if (!c && !sc) return null;
+  const exact = taxonomy.find(x => norm(x.category) === c && norm(x.subcategory) === sc);
   if (exact) return exact;
-  const byLabel = taxonomy.find(x =>
-    (x.categoryName === c || x.category === c) &&
-    (x.subcategoryName === sc || x.subcategory === sc)
-  );
-  if (byLabel) return byLabel;
-  const bySubLabel = taxonomy.find(x => x.subcategoryName === sc);
-  if (bySubLabel) return bySubLabel;
+  const labelPair = taxonomy.find(x => (norm(x.category) === c || norm(x.categoryName) === c) && (norm(x.subcategory) === sc || norm(x.subcategoryName) === sc));
+  if (labelPair) return labelPair;
+  const subOnly = taxonomy.filter(x => norm(x.subcategory) === sc || norm(x.subcategoryName) === sc);
+  if (subOnly.length === 1) return subOnly[0];
+  const catOnly = taxonomy.filter(x => norm(x.category) === c || norm(x.categoryName) === c);
+  if (catOnly.length === 1) return catOnly[0];
   return null;
 };
+
 const cors = origin => ({
   'Content-Type': 'application/json; charset=utf-8',
   'Access-Control-Allow-Origin': ['https://xph.asia', 'https://www.xph.asia'].includes(origin) ? origin : 'https://xph.asia',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
-  'Vary': 'Origin'
+  'Vary': 'Origin',
+  'Cache-Control': 'no-store'
 });
-async function callDeepSeek(env, messages, maxTokens = 700) {
+
+function responseEnvelope({ ok, status, stage, data = null, code = '', message = '', details = null }, headers, httpStatus) {
+  return new Response(JSON.stringify({
+    ok, status, stage, data,
+    error: ok ? null : { code, message, details }
+  }), { status: httpStatus, headers });
+}
+
+async function callDeepSeek(env, messages, maxTokens = 700, temperature = 0.35) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
     const response = await fetch(DEEPSEEK_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.DEEPSEEK_API_KEY}` },
-      body: JSON.stringify({ model: MODEL, messages, thinking: { type: 'disabled' }, max_tokens: maxTokens, temperature: 0.15, response_format: { type: 'json_object' }, stream: false }),
+      body: JSON.stringify({ model: MODEL, messages, thinking: { type: 'disabled' }, max_tokens: maxTokens, temperature, response_format: { type: 'json_object' }, stream: false }),
       signal: controller.signal
     });
     const data = await response.json().catch(() => ({}));
@@ -55,6 +79,7 @@ async function callDeepSeek(env, messages, maxTokens = 700) {
     catch { throw new Error('DeepSeek 返回 JSON 无法解析'); }
   } finally { clearTimeout(timer); }
 }
+
 function sourceBlock(body) {
   return [
     `资源名称：${clean(body.name)}`,
@@ -66,111 +91,127 @@ function sourceBlock(body) {
     '真实来源内容：', clean(body.content).slice(0, 24000)
   ].filter(Boolean).join('\n');
 }
-export async function onRequestOptions({ request }) { return new Response(null, { status: 204, headers: cors(request.headers.get('Origin') || '') }); }
+const taxonomyText = taxonomy => taxonomy.map(x => `${x.category} | ${x.categoryName} | ${x.subcategory} | ${x.subcategoryName}`).join('\n');
+
+export async function onRequestOptions({ request }) {
+  return new Response(null, { status: 204, headers: cors(request.headers.get('Origin') || '') });
+}
+
 export async function onRequestPost({ request, env }) {
   const headers = cors(request.headers.get('Origin') || '');
-  if (!env.DEEPSEEK_API_KEY) return new Response(JSON.stringify({ error: 'Cloudflare 未配置 DEEPSEEK_API_KEY' }), { status: 500, headers });
+  if (!env.DEEPSEEK_API_KEY) return responseEnvelope({ ok:false, status:'error', stage:'error', code:ERR.AI_NOT_CONFIGURED, message:'Cloudflare 未配置 DEEPSEEK_API_KEY' }, headers, 500);
+
   let body;
-  try { body = await request.json(); } catch { return new Response(JSON.stringify({ error: '请求 JSON 无效' }), { status: 400, headers }); }
+  try { body = await request.json(); }
+  catch { return responseEnvelope({ ok:false, status:'error', stage:'error', code:ERR.INVALID_REQUEST, message:'请求 JSON 无效' }, headers, 400); }
+
   const taxonomy = normalizeTaxonomy(body?.taxonomy);
+  const iconMap = normalizeIconMap(body?.iconMap);
   const manualDescription = clean(body?.manualDescription);
-  if (!clean(body?.name) || !clean(body?.content)) return new Response(JSON.stringify({ error: '缺少真实资源名称或真实读取内容' }), { status: 400, headers });
-  if (!taxonomy.length) return new Response(JSON.stringify({ error: '缺少合法分类词库' }), { status: 400, headers });
-  if (manualDescription && (count(manualDescription) > 16 || /[\r\n]/.test(manualDescription))) return new Response(JSON.stringify({ error: '人工简介超过16字符或包含换行' }), { status: 400, headers });
+  if (!clean(body?.name) || !clean(body?.content)) return responseEnvelope({ ok:false, status:'error', stage:'error', code:ERR.MISSING_SOURCE, message:'缺少真实资源名称或真实读取内容' }, headers, 400);
+  if (!taxonomy.length) return responseEnvelope({ ok:false, status:'error', stage:'error', code:ERR.MISSING_TAXONOMY, message:'缺少合法分类词库' }, headers, 400);
+  if (manualDescription && (count(manualDescription) > 16 || /[\r\n]/.test(manualDescription))) return responseEnvelope({ ok:false, status:'error', stage:'error', code:ERR.INVALID_REQUEST, message:'人工简介超过16字符或包含换行' }, headers, 400);
 
   const source = sourceBlock(body);
-  const taxonomyText = taxonomy.map(x => `${x.category}/${x.subcategory} = ${x.categoryName}/${x.subcategoryName}`).join('\n');
-
-  // 第1次AI调用：只做语义理解和标准分类，不生成简介。
-  const semanticSystem = `你是徐胖虎资源社的“资源事实分析器”。你只负责理解真实资料和标准分类，不写营销文案，不生成16字简介。
-输出JSON：{"core":"...","facts":["..."],"category":"...","subcategory":"..."}
-规则：
-1. core只概括第一核心用途，不罗列次要功能。
-2. facts只写原始资料明确支持的事实，最多5条。
-3. category/subcategory只能逐字复制合法词库。
-4. 按资源真正用途分类，不按URL类型分类。
-5. 禁止根据名字猜测不存在的功能。
-合法词库：\n${taxonomyText}`;
+  const taxonomyPrompt = taxonomyText(taxonomy);
   let semantic;
   try {
-    semantic = (await callDeepSeek(env, [{ role: 'system', content: semanticSystem }, { role: 'user', content: `${source}\n\n只返回语义分析JSON。` }], 650)).value;
+    const semanticSystem = `你是徐胖虎资源社资源事实分析器。只理解真实来源，不写营销文案。\n输出JSON：{"core":"...","facts":["..."],"category":"合法分类ID或分类名","subcategory":"合法子分类ID或子分类名"}\n规则：\n1. core只写第一核心用途。\n2. facts最多5条，只允许真实内容明确支持的事实。\n3. 分类必须从下方词库选择，不得创造新词。优先输出ID。\n4. 按真实用途分类，不按URL类型分类。\n合法词库：\n${taxonomyPrompt}`;
+    semantic = (await callDeepSeek(env, [{ role:'system', content:semanticSystem }, { role:'user', content:`${source}\n\n只返回JSON。` }], 650, 0.15)).value;
   } catch (error) {
-    return new Response(JSON.stringify({ error: error?.message || 'DeepSeek语义分析失败' }), { status: 422, headers });
+    return responseEnvelope({ ok:false, status:'error', stage:'understanding_content', code:ERR.AI_SEMANTIC_FAILED, message:error?.message || 'DeepSeek语义分析失败' }, headers, 422);
   }
+
   const core = clean(semantic?.core);
-  const resolved = resolveClassification(semantic?.category, semantic?.subcategory, taxonomy);
-  if (!resolved) return new Response(JSON.stringify({ error: 'AI返回的分类不在现有合法分类词库中' }), { status: 422, headers });
-  const category = resolved.category, subcategory = resolved.subcategory;
   const facts = Array.isArray(semantic?.facts) ? semantic.facts.map(clean).filter(Boolean).slice(0, 5) : [];
-  if (!classificationIsValid(category, subcategory, taxonomy)) return new Response(JSON.stringify({ error: 'AI返回的分类不在现有合法分类词库中' }), { status: 422, headers });
-  if (manualDescription) return new Response(JSON.stringify({ description: manualDescription, category, subcategory, model: MODEL, calls: 1 }), { status: 200, headers });
-
-  // 第2阶段：唯一简介决策。禁止候选池、禁止5×5、禁止让AI从多个候选中再挑一个。
-  // AI先给出唯一答案；若程序验收失败，只把“失败原因”反馈给AI做定向修正。
-  const descriptionSystem = `你是徐胖虎资源社的“核心简介决策器”。
-你的任务：根据真实来源内容和第一核心用途，生成一条自然、准确、恰好16字符的中文为主简介。
-只输出JSON：{"description":"..."}。
-规则：
-1. description必须恰好16字符；中文、英文、数字、标点均各计1字符。
-2. 必须以中文为主体；允许AI、Git、GitHub、API、RSS、CI、PR等必要英文缩写，但禁止整句纯英文。
-3. 只表达第一核心用途，不罗列次要功能，不把名称或SEO标题改写成简介。
-4. 简介必须来自真实资料，不得猜测不存在的功能。
-5. 禁止营销词：专业、强大、超强、顶级、领先、完美、神器、极速、优质、爆款、必备、一站式。
-6. 禁止使用“工具、平台、软件、资源、应用、实用、便捷”等空泛词凑长度；只有它们本身就是核心用途且不可替代时才允许使用。
-7. 英文可以出现在中文简介中，例如“AI结合八字生成个人运势K线图”，但全英文简介不允许。
-8. 先在内部逐字符计数，再返回唯一结果；不要解释，不要返回候选数组。`;
-  const descriptionUser = `${source}\n\nAI事实分析：\n核心用途：${core}\n事实：${facts.join('；')}\n分类：${category}/${subcategory}\n\n请生成唯一的16字符核心简介。`;
-
-  const validationReason = value => {
-    const v = clean(value);
-    if (!v) return '简介为空。';
-    const n = count(v), cjk = cjkCount(v);
-    const reasons = [];
-    if (n !== 16) reasons.push(`当前为${n}字符，必须恰好16字符。`);
-    if (cjk < 6) reasons.push(`当前中文字符仅${cjk}个，必须以中文为主体。`);
-    if (/^[A-Za-z0-9\\s.,!?;:()[\\]{}+\\-_/&%#]+$/.test(v)) reasons.push('不能是全英文/数字/符号。');
-    if (banned.test(v)) reasons.push('包含禁止的营销词。');
-    if (emptyPadding.test(v)) reasons.push('存在用于凑长度的空泛结尾词。');
-    return reasons.join(' ');
-  };
-
-  let description = '';
-  let descriptionCalls = 0;
-  let lastFailure = '';
-  const maxDescriptionAttempts = 4; // 1次初稿 + 最多3次定向修正，不形成候选池。
-  for (let attempt = 1; attempt <= maxDescriptionAttempts; attempt++) {
-    const prompt = attempt === 1
-      ? descriptionUser
-      : `${descriptionUser}\n\n上一次唯一简介：${description}\n程序验收失败原因：${lastFailure}\n请只针对上述失败原因修正这一条简介。不要生成候选列表，不要解释，仍然只返回 {"description":"..."}。`;
+  let resolved = resolveClassification(semantic?.category, semantic?.subcategory, taxonomy);
+  if (!resolved) {
     try {
-      const result = await callDeepSeek(env, [
-        { role: 'system', content: descriptionSystem },
-        { role: 'user', content: prompt }
-      ], 260);
-      descriptionCalls++;
-      description = clean(result.value?.description);
-      lastFailure = validationReason(description);
-      if (!lastFailure) {
-        return new Response(JSON.stringify({
-          description,
-          category,
-          subcategory,
-          model: MODEL,
-          calls: 1 + descriptionCalls,
-          descriptionAttempts: attempt
-        }), { status: 200, headers });
-      }
+      const classifySystem = `你是资源分类器。只能从给出的合法分类ID中选择一个。禁止创造任何新ID或名称。只返回JSON：{"category":"...","subcategory":"..."}`;
+      const retry = (await callDeepSeek(env, [
+        { role:'system', content:classifySystem },
+        { role:'user', content:`${source}\n核心用途：${core}\n\n合法分类：\n${taxonomyPrompt}\n\n只返回一个合法category和subcategory。` }
+      ], 180, 0.05)).value;
+      resolved = resolveClassification(retry?.category, retry?.subcategory, taxonomy);
+    } catch {}
+  }
+  if (!resolved) return responseEnvelope({ ok:false, status:'error', stage:'understanding_content', code:ERR.CLASSIFICATION_FAILED, message:'无法从合法分类词库中确定可靠分类，请检查分类词库或真实来源内容' }, headers, 422);
+
+  const icon = iconMap[resolved.subcategory];
+  if (!icon) return responseEnvelope({ ok:false, status:'error', stage:'finalizing', code:ERR.CLASSIFICATION_FAILED, message:`子分类 ${resolved.subcategory} 没有合法 Icon 映射` }, headers, 422);
+
+  if (manualDescription) {
+    return responseEnvelope({
+      ok:true, status:'completed', stage:'completed',
+      data:{ contractVersion:XPH_RESOURCE_CONTRACT.version, core, facts, category:resolved.category, categoryName:resolved.categoryName, subcategory:resolved.subcategory, subcategoryName:resolved.subcategoryName, icon, candidates:[], selectedIndex:null, description:manualDescription, model:MODEL, generationCalls:0, selectionCalls:0, validCandidates:0 }
+    }, headers, 200);
+  }
+
+  const generationSystem = `你是徐胖虎资源社的16字简介候选生成器。\n一次只能生成1条候选。\n只返回JSON：{"candidate":"..."}\n严格规则：\n1. candidate恰好16字符；中文、英文、数字、标点均按1字符计算。\n2. 中文至少6个字符。\n3. 只表达第一核心用途，不写营销词，不写空泛凑字词。\n4. 不得编造真实来源没有的功能。\n5. 禁止解释，禁止返回其他字段。\n禁止词：专业、强大、超强、顶级、领先、完美、神器、极速、优质、爆款、必备、一站式。`;
+  const generationUser = `${source}\n\n核心用途：${core}\n事实：${facts.join('；')}\n分类：${resolved.categoryName}/${resolved.subcategoryName}\n\n这是一次独立生成，只生成1条候选。`;
+
+  const allCandidates = [];
+  const attemptReports = [];
+  let generationCalls = 0;
+  for (let attempt = 1; attempt <= POLICY.maxAttempts; attempt++) {
+    try {
+      const result = (await callDeepSeek(env, [
+        { role:'system', content:generationSystem },
+        { role:'user', content:`${generationUser}\n独立生成编号：${attempt}` }
+      ], 160, 0.85)).value;
+      generationCalls++;
+      const raw = clean(result?.candidate);
+      const checked = validation(raw);
+      if (checked.valid && !allCandidates.includes(checked.value)) allCandidates.push(checked.value);
+      attemptReports.push({ attempt, returned: raw ? 1 : 0, valid: checked.valid ? 1 : 0, reasons: checked.valid ? [] : checked.reasons });
     } catch (error) {
-      descriptionCalls++;
-      lastFailure = error?.message || '简介生成请求失败。';
+      generationCalls++;
+      attemptReports.push({ attempt, returned:0, valid:0, error:error?.message || '生成失败' });
     }
   }
 
-  return new Response(JSON.stringify({
-    error: `简介最终验收失败：${lastFailure || '未生成有效简介'}（已进行${descriptionCalls}次简介决策/修正，不生成候选池）`,
-    category,
-    subcategory,
-    model: MODEL,
-    calls: 1 + descriptionCalls,
-    descriptionAttempts: descriptionCalls
-  }), { status: 422, headers });
+  if (!allCandidates.length) return responseEnvelope({
+    ok:false, status:'error', stage:'validating_candidates', code:ERR.NO_VALID_CANDIDATE,
+    message:`最多${POLICY.maxAttempts}次独立生成后没有候选通过严格16字程序验收`,
+    details:{ generationCalls, maxAttempts:POLICY.maxAttempts, candidatesPerAttempt:POLICY.candidatesPerAttempt, attemptReports }
+  }, headers, 422);
+
+  let selectedIndex;
+  try {
+    const selectionSystem = `你是徐胖虎资源社简介最终选择器。\n你只能从候选列表中原样选择一条。\n禁止修改、润色、截断、合并、重写任何候选。\n只返回JSON：{"selectedIndex":1}\nselectedIndex必须是列表中的整数。`;
+    const selectionUser = `真实核心用途：${core}\n真实事实：${facts.join('；')}\n\n合法候选（原样，不得修改）：\n${allCandidates.map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\n只能返回selectedIndex。`;
+    const selected = (await callDeepSeek(env, [
+      { role:'system', content:selectionSystem },
+      { role:'user', content:selectionUser }
+    ], 80, 0.05)).value;
+    const idx = Number(selected?.selectedIndex);
+    if (!Number.isInteger(idx) || idx < 1 || idx > allCandidates.length) throw new Error('selectedIndex无效');
+    selectedIndex = idx;
+  } catch (error) {
+    return responseEnvelope({ ok:false, status:'error', stage:'selecting_candidate', code:ERR.INVALID_SELECTION, message:error?.message || 'AI最终选择失败', details:{ validCandidates:allCandidates.length } }, headers, 422);
+  }
+
+  const description = allCandidates[selectedIndex - 1];
+  if (!isValid16(description)) return responseEnvelope({ ok:false, status:'error', stage:'finalizing', code:ERR.FINAL_VALIDATION_FAILED, message:'最终选择结果未通过程序验收', details:{ selectedIndex, validCandidates:allCandidates.length } }, headers, 422);
+
+  return responseEnvelope({
+    ok:true, status:'completed', stage:'completed',
+    data:{
+      contractVersion:XPH_RESOURCE_CONTRACT.version,
+      core, facts,
+      category:resolved.category, categoryName:resolved.categoryName,
+      subcategory:resolved.subcategory, subcategoryName:resolved.subcategoryName,
+      icon,
+      candidates:allCandidates,
+      selectedIndex,
+      description,
+      model:MODEL,
+      generationCalls,
+      selectionCalls:1,
+      validCandidates:allCandidates.length,
+      maxAttempts:POLICY.maxAttempts,
+      candidatesPerAttempt:POLICY.candidatesPerAttempt,
+      attemptReports
+    }
+  }, headers, 200);
+}
