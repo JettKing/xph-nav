@@ -14,6 +14,7 @@ export const XPH_RESOURCE_CONTRACT = Object.freeze({
   }),
   requestFields: Object.freeze(['name','website','github','seoTitle','seoDescription','githubName','content','manualDescription','taxonomy','iconMap']),
   responseFields: Object.freeze(['ok','status','stage','data','error']),
+  statuses: Object.freeze(['completed','error']),
   aiDecision: Object.freeze({ semantic:['core','facts','category','subcategory'], generation:['candidate'], selection:['selectedIndex'] }),
   resourceSchema: Object.freeze({
     '$schema':'https://json-schema.org/draft/2020-12/schema',
