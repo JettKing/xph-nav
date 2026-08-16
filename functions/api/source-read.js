@@ -1,4 +1,9 @@
+import { XPH_RESOURCE_CONTRACT } from '../../shared/resource-contract.js';
 const clean = value => typeof value === 'string' ? value.trim() : '';
+const json = (payload, status=200, extra={}) => new Response(JSON.stringify(payload), { status, headers: { 'Content-Type':'application/json; charset=utf-8', 'Cache-Control':'no-store', 'Access-Control-Allow-Origin':'*', ...extra } });
+const ok = (data, stage='reading_source') => json({ ok:true, status:'completed', stage, data, error:null });
+const fail = (code, message, status=422, stage='reading_source', details=null) => json({ ok:false, status:'error', stage, data:null, error:{ code, message, details } }, status);
+
 const normalizeUrl = value => {
   const raw = clean(value);
   if (!raw) return '';
@@ -47,6 +52,7 @@ function normalizeProjectName(value) {
   const parts = x.split(/\s*(?:â|â|Â·|â¢|\s+-\s+|\||ï½)\s*|\s*:\s+/).map(v => v.trim()).filter(Boolean);
   if (parts.length > 1 && parts[0].length >= 2 && parts[0].length <= 48) x = parts[0];
   x = x.replace(/\s+(?:[-ââ|ï½:ï¼]\s*)?(?:your|the|a)\s+(?:private|open[- ]source|free|online)\b.*$/i, '').trim();
+  x = x.replace(/\s+(?:community|community forum|official community|official site|homepage|home)$/i, '').trim();
   return x;
 }
 function nameSignal(value) {
@@ -88,11 +94,11 @@ async function fetchText(url, ms = 18000) {
 export async function onRequestOptions() { return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' } }); }
 export async function onRequestGet({ request }) {
   const input = normalizeUrl(new URL(request.url).searchParams.get('url'));
-  if (!input) return new Response(JSON.stringify({ error: 'å®ç½ URL æ æ' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-  try { if (isGithubHost(new URL(input).hostname)) throw new Error('GitHub URL åºèµ° GitHub ä¸ç¨è¯»åå±'); } catch (e) { return new Response(JSON.stringify({ error: e.message || 'å®ç½ URL æ æ' }), { status: 400, headers: { 'Content-Type': 'application/json' } }); }
+  if (!input) return fail(XPH_RESOURCE_CONTRACT.errors.INVALID_REQUEST, 'å®ç½ URL æ æ', 400);
+  try { if (isGithubHost(new URL(input).hostname)) throw new Error('GitHub URL åºèµ° GitHub ä¸ç¨è¯»åå±'); } catch (e) { return fail(XPH_RESOURCE_CONTRACT.errors.INVALID_REQUEST, e.message || 'å®ç½ URL æ æ', 400); }
   let response;
-  try { response = await fetchText(input); } catch (e) { return new Response(JSON.stringify({ error: e?.name === 'AbortError' ? 'å®ç½è¯»åè¶æ¶' : 'å®ç½è¯»åå¤±è´¥' }), { status: 504, headers: { 'Content-Type': 'application/json' } }); }
-  if (!response.ok || !response.text) return new Response(JSON.stringify({ error: `å®ç½è¯»åå¤±è´¥ï¼HTTP ${response.status || 0}` }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+  try { response = await fetchText(input); } catch (e) { return fail(XPH_RESOURCE_CONTRACT.errors.SOURCE_READ_FAILED, e?.name === 'AbortError' ? 'å®ç½è¯»åè¶æ¶' : 'å®ç½è¯»åå¤±è´¥', 504); }
+  if (!response.ok || !response.text) return fail(XPH_RESOURCE_CONTRACT.errors.SOURCE_READ_FAILED, `å®ç½è¯»åå¤±è´¥ï¼HTTP ${response.status || 0}`, 502);
   const raw = response.text;
   const name = chooseName(raw, input);
   const title = extractTitle(raw);
@@ -101,5 +107,5 @@ export async function onRequestGet({ request }) {
   const thumbnail = extractThumbnail(raw);
   const githubCandidates = extractGithubCandidates(raw);
   const content = [`å®æ¹ç½ç«ï¼${normalizeUrl(response.url) || input}`, name ? `çå®åç§°åéï¼${name}` : '', title ? `ç½é¡µæ é¢ï¼${title}` : '', description ? `SEOæè¿°ï¼${description}` : '', canonical ? `Canonicalï¼${canonical}` : '', githubCandidates.length ? `GitHubåéï¼${githubCandidates.join(' | ')}` : '', `ç½é¡µçå®åå®¹ï¼${stripHtml(raw).slice(0, 22000)}`].filter(Boolean).join('\n\n').slice(0, 26000);
-  return new Response(JSON.stringify({ website: normalizeUrl(response.url) || input, name, seoTitle: title, seoDescription: description, canonical, github: githubCandidates[0] || '', githubCandidates, thumbnail, content, source: 'official-web-server' }), { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' } });
+  return ok({ website: normalizeUrl(response.url) || input, name, seoTitle: title, seoDescription: description, canonical, github: githubCandidates[0] || '', githubCandidates, thumbnail, content, source: 'official-web-server' });
 }
