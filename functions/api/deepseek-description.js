@@ -17,6 +17,19 @@ const normalizeTaxonomy = input => Array.isArray(input)
   ? input.map(x => ({ category: clean(x?.category), categoryName: clean(x?.categoryName), subcategory: clean(x?.subcategory), subcategoryName: clean(x?.subcategoryName) })).filter(x => x.category && x.subcategory && x.categoryName && x.subcategoryName)
   : [];
 const classificationIsValid = (category, subcategory, taxonomy) => taxonomy.some(x => x.category === category && x.subcategory === subcategory);
+const resolveClassification = (category, subcategory, taxonomy) => {
+  const c = clean(category), sc = clean(subcategory);
+  const exact = taxonomy.find(x => x.category === c && x.subcategory === sc);
+  if (exact) return exact;
+  const byLabel = taxonomy.find(x =>
+    (x.categoryName === c || x.category === c) &&
+    (x.subcategoryName === sc || x.subcategory === sc)
+  );
+  if (byLabel) return byLabel;
+  const bySubLabel = taxonomy.find(x => x.subcategoryName === sc);
+  if (bySubLabel) return bySubLabel;
+  return null;
+};
 const cors = origin => ({
   'Content-Type': 'application/json; charset=utf-8',
   'Access-Control-Allow-Origin': ['https://xph.asia', 'https://www.xph.asia'].includes(origin) ? origin : 'https://xph.asia',
@@ -84,54 +97,80 @@ export async function onRequestPost({ request, env }) {
   } catch (error) {
     return new Response(JSON.stringify({ error: error?.message || 'DeepSeek语义分析失败' }), { status: 422, headers });
   }
-  const category = clean(semantic?.category), subcategory = clean(semantic?.subcategory), core = clean(semantic?.core);
+  const core = clean(semantic?.core);
+  const resolved = resolveClassification(semantic?.category, semantic?.subcategory, taxonomy);
+  if (!resolved) return new Response(JSON.stringify({ error: 'AI返回的分类不在现有合法分类词库中' }), { status: 422, headers });
+  const category = resolved.category, subcategory = resolved.subcategory;
   const facts = Array.isArray(semantic?.facts) ? semantic.facts.map(clean).filter(Boolean).slice(0, 5) : [];
   if (!classificationIsValid(category, subcategory, taxonomy)) return new Response(JSON.stringify({ error: 'AI返回的分类不在现有合法分类词库中' }), { status: 422, headers });
   if (manualDescription) return new Response(JSON.stringify({ description: manualDescription, category, subcategory, model: MODEL, calls: 1 }), { status: 200, headers });
 
-  // 第2次AI调用：一次生成多个候选；如果一个都没有通过程序硬校验，只允许再做一次独立生成。
-  const candidateSystem = `你是徐胖虎资源社的“核心简介生成器”。
-你的任务是把资源的第一核心用途压缩成自然、准确、恰好16字符的中文为主简介。
-输出JSON：{"candidates":["...","..."]}。
+  // 第2阶段：唯一简介决策。禁止候选池、禁止5×5、禁止让AI从多个候选中再挑一个。
+  // AI先给出唯一答案；若程序验收失败，只把“失败原因”反馈给AI做定向修正。
+  const descriptionSystem = `你是徐胖虎资源社的“核心简介决策器”。
+你的任务：根据真实来源内容和第一核心用途，生成一条自然、准确、恰好16字符的中文为主简介。
+只输出JSON：{"description":"..."}。
 规则：
-1. 每条必须恰好16字符，中文、英文、数字、标点各计1字符。
-2. 中文为主体；AI、Git、GitHub、API、RSS、CI、PR等只有在确属核心用途时才可出现。
-3. 只表达第一核心用途，不把多个次要功能硬塞进一句话。
-4. 不照搬名称、SEO标题或原句。
+1. description必须恰好16字符；中文、英文、数字、标点均各计1字符。
+2. 必须以中文为主体；允许AI、Git、GitHub、API、RSS、CI、PR等必要英文缩写，但禁止整句纯英文。
+3. 只表达第一核心用途，不罗列次要功能，不把名称或SEO标题改写成简介。
+4. 简介必须来自真实资料，不得猜测不存在的功能。
 5. 禁止营销词：专业、强大、超强、顶级、领先、完美、神器、极速、优质、爆款、必备、一站式。
-6. 禁止机械用“工具、平台、软件、资源、应用、实用、便捷”凑长度。
-7. 每条候选都必须可以直接作为资源卡片简介。
-8. 先在内部逐字符计数，最终只返回JSON。`;
-  const candidateUser = `${source}\n\nAI事实分析：\n核心：${core}\n事实：${facts.join('；')}\n分类：${category}/${subcategory}\n\n生成5条彼此独立、但都只围绕第一核心用途的候选。`;
-  let candidates = [];
-  let candidateCalls = 0;
-  for (let round = 1; round <= 2 && !candidates.length; round++) {
+6. 禁止使用“工具、平台、软件、资源、应用、实用、便捷”等空泛词凑长度；只有它们本身就是核心用途且不可替代时才允许使用。
+7. 英文可以出现在中文简介中，例如“AI结合八字生成个人运势K线图”，但全英文简介不允许。
+8. 先在内部逐字符计数，再返回唯一结果；不要解释，不要返回候选数组。`;
+  const descriptionUser = `${source}\n\nAI事实分析：\n核心用途：${core}\n事实：${facts.join('；')}\n分类：${category}/${subcategory}\n\n请生成唯一的16字符核心简介。`;
+
+  const validationReason = value => {
+    const v = clean(value);
+    if (!v) return '简介为空。';
+    const n = count(v), cjk = cjkCount(v);
+    const reasons = [];
+    if (n !== 16) reasons.push(`当前为${n}字符，必须恰好16字符。`);
+    if (cjk < 6) reasons.push(`当前中文字符仅${cjk}个，必须以中文为主体。`);
+    if (/^[A-Za-z0-9\\s.,!?;:()[\\]{}+\\-_/&%#]+$/.test(v)) reasons.push('不能是全英文/数字/符号。');
+    if (banned.test(v)) reasons.push('包含禁止的营销词。');
+    if (emptyPadding.test(v)) reasons.push('存在用于凑长度的空泛结尾词。');
+    return reasons.join(' ');
+  };
+
+  let description = '';
+  let descriptionCalls = 0;
+  let lastFailure = '';
+  const maxDescriptionAttempts = 4; // 1次初稿 + 最多3次定向修正，不形成候选池。
+  for (let attempt = 1; attempt <= maxDescriptionAttempts; attempt++) {
+    const prompt = attempt === 1
+      ? descriptionUser
+      : `${descriptionUser}\n\n上一次唯一简介：${description}\n程序验收失败原因：${lastFailure}\n请只针对上述失败原因修正这一条简介。不要生成候选列表，不要解释，仍然只返回 {"description":"..."}。`;
     try {
-      const result = await callDeepSeek(env, [{ role: 'system', content: candidateSystem }, { role: 'user', content: `${candidateUser}\n这是第${round}轮，请重新独立理解，不参考上一轮任何候选。` }], 650);
-      candidateCalls++;
-      candidates = [...new Set((Array.isArray(result.value?.candidates) ? result.value.candidates : []).map(clean).filter(isValid16))];
-    } catch { candidateCalls++; }
-  }
-  if (!candidates.length) return new Response(JSON.stringify({ error: `简介生成未通过：已完成${candidateCalls}轮独立候选生成，但没有找到合格的16字符简介。` }), { status: 422, headers });
-
-  // 第3次AI调用：只能选择，不允许改写候选。
-  const judgeSystem = `你是徐胖虎资源社的最终简介审核器。只能从候选中选择，绝对不能改写。
-选择标准：
-1. 最准确表达第一核心用途；
-2. 最忠实于真实资料；
-3. 最自然易懂；
-4. 没有功能堆砌；
-5. 没有营销和凑字痕迹。
-只输出JSON：{"index":1}，index必须对应候选序号。`;
-  const judgeUser = `${source}\n\n核心：${core}\n事实：${facts.join('；')}\n\n候选：\n${candidates.map((x, i) => `${i + 1}. ${x}`).join('\n')}`;
-  try {
-    const judged = (await callDeepSeek(env, [{ role: 'system', content: judgeSystem }, { role: 'user', content: judgeUser }], 200)).value;
-    const index = Number(judged?.index);
-    if (Number.isInteger(index) && candidates[index - 1]) {
-      return new Response(JSON.stringify({ description: candidates[index - 1], category, subcategory, model: MODEL, calls: 2 + candidateCalls, candidateCount: candidates.length }), { status: 200, headers });
+      const result = await callDeepSeek(env, [
+        { role: 'system', content: descriptionSystem },
+        { role: 'user', content: prompt }
+      ], 260);
+      descriptionCalls++;
+      description = clean(result.value?.description);
+      lastFailure = validationReason(description);
+      if (!lastFailure) {
+        return new Response(JSON.stringify({
+          description,
+          category,
+          subcategory,
+          model: MODEL,
+          calls: 1 + descriptionCalls,
+          descriptionAttempts: attempt
+        }), { status: 200, headers });
+      }
+    } catch (error) {
+      descriptionCalls++;
+      lastFailure = error?.message || '简介生成请求失败。';
     }
-  } catch {}
+  }
 
-  // 最终兜底只从已经通过程序严格验收的候选中选择；不再生成、不补字、不改写。
-  return new Response(JSON.stringify({ description: candidates[0], category, subcategory, model: MODEL, calls: 2 + candidateCalls, candidateCount: candidates.length, judgeFallback: true }), { status: 200, headers });
-}
+  return new Response(JSON.stringify({
+    error: `简介最终验收失败：${lastFailure || '未生成有效简介'}（已进行${descriptionCalls}次简介决策/修正，不生成候选池）`,
+    category,
+    subcategory,
+    model: MODEL,
+    calls: 1 + descriptionCalls,
+    descriptionAttempts: descriptionCalls
+  }), { status: 422, headers });
