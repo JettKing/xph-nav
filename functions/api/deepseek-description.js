@@ -142,8 +142,8 @@ export async function onRequestPost({ request, env }) {
 
   if (manualDescription) {
     return responseEnvelope({
-      ok:true, status:'completed', stage:'completed',
-      data:{ contractVersion:XPH_RESOURCE_CONTRACT.version, core, facts, category:resolved.category, categoryName:resolved.categoryName, subcategory:resolved.subcategory, subcategoryName:resolved.subcategoryName, icon, candidates:[], selectedIndex:null, description:manualDescription, model:MODEL, generationCalls:0, selectionCalls:0, validCandidates:0 }
+      ok:true, status:XPH_RESOURCE_CONTRACT.statuses[0], stage:'completed',
+      data:{ contractVersion:XPH_RESOURCE_CONTRACT.version, core, facts, category:resolved.category, categoryName:resolved.categoryName, subcategory:resolved.subcategory, subcategoryName:resolved.subcategoryName, icon, candidates:[], selectedIndex:null, description:manualDescription, model:MODEL }
     }, headers, 200);
   }
 
@@ -173,7 +173,7 @@ export async function onRequestPost({ request, env }) {
   if (!allCandidates.length) return responseEnvelope({
     ok:false, status:'error', stage:'validating_candidates', code:ERR.NO_VALID_CANDIDATE,
     message:`最多${POLICY.maxAttempts}次独立生成后没有候选通过严格16字程序验收`,
-    details:{ generationCalls, maxAttempts:POLICY.maxAttempts, candidatesPerAttempt:POLICY.candidatesPerAttempt, attemptReports }
+    details:{ generationCalls, maxAttempts:POLICY.maxAttempts }
   }, headers, 422);
 
   let selectedIndex;
@@ -195,7 +195,7 @@ export async function onRequestPost({ request, env }) {
   if (!isValid16(description)) return responseEnvelope({ ok:false, status:'error', stage:'finalizing', code:ERR.FINAL_VALIDATION_FAILED, message:'最终选择结果未通过程序验收', details:{ selectedIndex, validCandidates:allCandidates.length } }, headers, 422);
 
   return responseEnvelope({
-    ok:true, status:'completed', stage:'completed',
+    ok:true, status:XPH_RESOURCE_CONTRACT.statuses[0], stage:'completed',
     data:{
       contractVersion:XPH_RESOURCE_CONTRACT.version,
       core, facts,
@@ -205,13 +205,7 @@ export async function onRequestPost({ request, env }) {
       candidates:allCandidates,
       selectedIndex,
       description,
-      model:MODEL,
-      generationCalls,
-      selectionCalls:1,
-      validCandidates:allCandidates.length,
-      maxAttempts:POLICY.maxAttempts,
-      candidatesPerAttempt:POLICY.candidatesPerAttempt,
-      attemptReports
+      model:MODEL
     }
   }, headers, 200);
 }
