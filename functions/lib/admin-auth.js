@@ -1,0 +1,15 @@
+const encoder=new TextEncoder();
+const clean=v=>String(v??'').trim();
+const b64u=b=>btoa(b).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const fromB64u=s=>{const b=s.replace(/-/g,'+').replace(/_/g,'/');return Uint8Array.from(atob(b+'='.repeat((4-b.length%4)%4)),c=>c.charCodeAt(0));};
+async function digestHex(value){const hash=await crypto.subtle.digest('SHA-256',encoder.encode(value));return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+async function hmac(secret,value){const key=await crypto.subtle.importKey('raw',encoder.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign','verify']);return new Uint8Array(await crypto.subtle.sign('HMAC',key,encoder.encode(value)));}
+async function timingSafeHexEqual(a,b){const aa=encoder.encode(clean(a).toLowerCase()),bb=encoder.encode(clean(b).toLowerCase());if(aa.length!==bb.length)return false;let diff=0;for(let i=0;i<aa.length;i++)diff|=aa[i]^bb[i];return diff===0;}
+export async function verifyPassword(password,env){const expected=clean(env?.ADMIN_PASSWORD_SHA256);if(!/^[0-9a-f]{64}$/i.test(expected))return false;return timingSafeHexEqual(await digestHex(password),expected);}
+export async function createSession(env,ttlSeconds=21600){const secret=clean(env?.ADMIN_SESSION_SECRET);if(secret.length<32)throw new Error('ADMIN_SESSION_SECRET æªéç½®æé¿åº¦ä¸è¶³32å­ç¬¦');const exp=Math.floor(Date.now()/1000)+ttlSeconds;const payload=`${exp}`;const payload64=b64u(payload);const sig=b64u(String.fromCharCode(...await hmac(secret,payload)));return `${payload64}.${sig}`;}
+export async function verifySession(request,env){const secret=clean(env?.ADMIN_SESSION_SECRET);if(secret.length<32)return false;const cookie=request.headers.get('Cookie')||'';const m=cookie.match(/(?:^|;\s*)xph_admin_session=([^;]+)/);if(!m)return false;const [encoded,signature]=decodeURIComponent(m[1]).split('.');if(!encoded||!signature)return false;let payload;try{payload=new TextDecoder().decode(fromB64u(encoded));}catch{return false;}if(!/^\d+$/.test(payload)||Number(payload)<=Math.floor(Date.now()/1000))return false;const expected=await hmac(secret,payload);const actual=fromB64u(signature);if(expected.length!==actual.length)return false;let diff=0;for(let i=0;i<expected.length;i++)diff|=expected[i]^actual[i];return diff===0;}
+export async function requireAdmin(request,env){return verifySession(request,env);}
+export function sessionCookie(value,maxAge=21600){return `xph_admin_session=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/; HttpOnly; Secure; SameSite=Strict`}
+export function clearSessionCookie(){return 'xph_admin_session=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Strict';}
+export function sameOrigin(request){const origin=request.headers.get('Origin');if(!origin)return true;try{const u=new URL(origin);return ['xph.asia','www.xph.asia'].includes(u.hostname.toLowerCase());}catch{return false;}}
+export function json(data,status=200,headers={}){return new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...headers}})}
