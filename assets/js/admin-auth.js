@@ -1,15 +1,8 @@
-/** 徐胖虎资源社 V5.3 后台页面保护 */
+/** XPH V5.3 admin page guard: server-issued HttpOnly session only. */
 (function(){
-"use strict";
-function isLoginPage(){
- const p=(window.location.pathname||"").replace(/\/+$/,"");
- return p==="/admin/login.html" || p==="/login.html" || p.endsWith("/admin/login");
-}
-function requireAuth(){
- if(sessionStorage.getItem("xph_admin_auth")==="1") return true;
- window.location.replace("/admin/login.html");
- return false;
-}
+'use strict';
+function isLoginPage(){const p=(location.pathname||'').replace(/\/+$/,'');return p==='/admin/login.html'||p==='/login.html'||p.endsWith('/admin/login');}
+async function requireAuth(){if(isLoginPage())return true;try{const r=await fetch('/api/admin-session',{headers:{Accept:'application/json'},credentials:'same-origin',cache:'no-store'});if(r.ok){const data=await r.json().catch(()=>({}));if(data.ok===true)return true;}}catch{}location.replace('/admin/login.html');return false;}
 window.XPHAdminAuth={requireAuth,isLoginPage};
-if(!isLoginPage() && (window.location.pathname||"").includes("/admin/")){ requireAuth(); }
+if(!isLoginPage()&&(location.pathname||'').includes('/admin/'))requireAuth();
 })();
