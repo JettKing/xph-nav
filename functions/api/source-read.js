@@ -1,4 +1,5 @@
 import { XPH_RESOURCE_CONTRACT } from '../../shared/resource-contract.js';
+import { requireAdmin, sameOrigin } from '../lib/admin-auth.js';
 const clean = value => typeof value === 'string' ? value.trim() : '';
 const json = (payload, status=200, extra={}) => new Response(JSON.stringify(payload), { status, headers: { 'Content-Type':'application/json; charset=utf-8', 'Cache-Control':'no-store', 'Access-Control-Allow-Origin':'*', ...extra } });
 const ok = (data, stage='reading_source') => json({ ok:true, status:XPH_RESOURCE_CONTRACT.statuses[0], stage, data:{ contractVersion:XPH_RESOURCE_CONTRACT.version, ...data }, error:null });
@@ -15,6 +16,11 @@ const normalizeGithub = value => {
   return m ? `https://github.com/${m[1]}/${m[2].replace(/\.git$/i, '')}` : '';
 };
 const isGithubHost = host => /(?:^|\.)(?:github\.com|githubusercontent\.com)$/i.test(host);
+const isPrivateIPv4 = ip => { const p=ip.split('.').map(Number); if(p.length!==4||p.some(Number.isNaN))return false; return p[0]===10||p[0]===127||(p[0]===169&&p[1]===254)||(p[0]===172&&p[1]>=16&&p[1]<=31)||(p[0]===192&&p[1]===168)||p[0]===0||p[0]>=224; };
+const isPrivateIPv6 = ip => { const x=ip.toLowerCase(); return x==='::1'||x==='::'||x.startsWith('fc')||x.startsWith('fd')||x.startsWith('fe8')||x.startsWith('fe9')||x.startsWith('fea')||x.startsWith('feb'); };
+function isPrivateHost(host){const h=host.toLowerCase().replace(/^\[|\]$/g,'');if(h==='localhost'||h.endsWith('.localhost')||h.endsWith('.local')||h.endsWith('.internal')||h.endsWith('.home.arpa')||h==='metadata.google.internal'||h==='metadata.google')return true;if(/^(?:\d{1,3}\.){3}\d{1,3}$/.test(h))return isPrivateIPv4(h);if(h.includes(':'))return isPrivateIPv6(h);return false;}
+async function dnsHasPrivateAddress(host){if(isPrivateHost(host))return true;try{const r=await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(host)}&type=A`,{headers:{accept:'application/dns-json'},signal:AbortSignal.timeout(5000)});const j=await r.json();for(const a of (j.Answer||[])){if(a.type===1&&isPrivateIPv4(a.data))return true;}const r6=await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(host)}&type=AAAA`,{headers:{accept:'application/dns-json'},signal:AbortSignal.timeout(5000)});const j6=await r6.json();for(const a of (j6.Answer||[])){if(a.type===28&&isPrivateIPv6(a.data))return true;}return false;}catch{return true;}}
+async function assertPublicUrl(value){const u=new URL(value);if(!/^https?:$/.test(u.protocol))throw new Error('ä»åè®¸ HTTP/HTTPS URL');if(await dnsHasPrivateAddress(u.hostname))throw new Error('ç®æ å°åè§£æå°ç§æãä¿çææ¬å°ç½ç»å°å');return u.href;}
 const validExternal = value => {
   const u = normalizeUrl(value);
   if (!u) return '';
@@ -88,11 +94,19 @@ function extractDescription(html) { return cleanText(extractMeta(html, 'descript
 function extractThumbnail(html) { return validExternal(extractMeta(html, 'og:image') || extractMeta(html, 'twitter:image')); }
 async function fetchText(url, ms = 18000) {
   const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
-  try { const r = await fetch(url, { headers: { Accept: 'text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8', 'User-Agent': 'XPH-Resource-Importer/5.3' }, signal: c.signal, redirect: 'follow' }); return { ok: r.ok, status: r.status, text: r.ok ? await r.text() : '', url: r.url || url }; }
-  finally { clearTimeout(t); }
+  try {
+    let current=await assertPublicUrl(url);
+    for(let hop=0;hop<4;hop++){
+      const r=await fetch(current,{headers:{Accept:'text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8','User-Agent':'XPH-Resource-Importer/5.3'},signal:c.signal,redirect:'manual'});
+      if(r.status>=300&&r.status<400){const location=r.headers.get('Location');if(!location)throw new Error('éå®åç¼ºå°ç®æ å°å');current=await assertPublicUrl(new URL(location,current).href);continue;}
+      return {ok:r.ok,status:r.status,text:r.ok?await r.text():'',url:r.url||current};
+    }
+    throw new Error('éå®åæ¬¡æ°è¶è¿éå¶');
+  } finally { clearTimeout(t); }
 }
-export async function onRequestOptions() { return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' } }); }
-export async function onRequestGet({ request }) {
+export async function onRequestOptions({request}) { const origin=request.headers.get('Origin')||'https://xph.asia'; return new Response(null,{status:204,headers:{'Access-Control-Allow-Origin':sameOrigin(request)?origin:'https://xph.asia','Access-Control-Allow-Methods':'GET,OPTIONS','Access-Control-Allow-Headers':'Content-Type','Vary':'Origin'}}); }
+export async function onRequestGet({ request, env }) {
+  if (!sameOrigin(request) || !(await requireAdmin(request, env))) return fail(XPH_RESOURCE_CONTRACT.errors.UNAUTHORIZED, 'æªç»å½ç®¡çåä¼è¯', 401);
   const input = normalizeUrl(new URL(request.url).searchParams.get('url'));
   if (!input) return fail(XPH_RESOURCE_CONTRACT.errors.INVALID_REQUEST, 'å®ç½ URL æ æ', 400);
   try { if (isGithubHost(new URL(input).hostname)) throw new Error('GitHub URL åºèµ° GitHub ä¸ç¨è¯»åå±'); } catch (e) { return fail(XPH_RESOURCE_CONTRACT.errors.INVALID_REQUEST, e.message || 'å®ç½ URL æ æ', 400); }
