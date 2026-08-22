@@ -12,8 +12,10 @@
 @media(max-width:420px){.actions button{flex-basis:100%}.wrap{width:calc(100% - 16px)}}
 </style>
 <script src="/assets/js/admin-auth.js"></script>
+<link rel="stylesheet" href="/assets/css/admin-v5.3.css">
 </head>
 <body>
+<nav class="xph-admin-nav" aria-label="后台导航"><a class="xph-brand" href="/admin/index.html"><span class="xph-brand-mark">徐</span><span>徐胖虎资源社</span></a><div class="xph-nav-links"><a href="/admin/index.html">总览</a><a class="active" href="/admin/resource-import.html">智能录入</a><a href="/admin/vocabulary.html">词库管理</a><a href="/admin/data-check.html">数据检查</a><a href="/resources/ai.html">前台资源</a></div><div class="xph-nav-status"><i class="xph-nav-dot"></i>已验证</div></nav>
 <main class="wrap" id="resourceImporter">
 <header class="top"><div><a class="back" href="/admin/index.html">← 返回后台</a><div class="eyebrow">徐胖虎资源社 · V5.3</div><div class="title">智能资源录入系统</div><div class="sub">保留真实网页 / GitHub 读取层。资源名称人工填写优先，留空时才采用真实官网 / GitHub 名称；真实名称读取优先识别网页标题、主标题等有效名称，不交给 AI 改名。简介生成单独通过安全的 Cloudflare DeepSeek 代理完成。</div></div><div class="pill">无运营标签 · 禁止自创标签</div></header>
 <div class="grid">
@@ -51,6 +53,6 @@
 <script src="/assets/js/config/vocabulary.js"></script>
 <script src="/assets/js/config/resource-icons.js"></script>
 <script src="/assets/js/data/ai.js"></script><script src="/assets/js/data/software.js"></script><script src="/assets/js/data/productivity.js"></script><script src="/assets/js/data/website.js"></script><script src="/assets/js/data/digital.js"></script><script src="/assets/js/data/solution.js"></script>
-<script src="/assets/js/core/engine.js"></script><script src="/assets/js/core/vocabulary-validator.js"></script>
+<script src="/assets/js/core/engine.js"></script><script src="/assets/js/config/resource-validator.js"></script><script src="/assets/js/core/vocabulary-validator.js"></script>
 <script type="module" src="/assets/js/admin/resource-importer.js"></script>
 </body></html>
