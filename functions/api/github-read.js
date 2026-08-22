@@ -1,4 +1,5 @@
 import { XPH_RESOURCE_CONTRACT } from '../../shared/resource-contract.js';
+import { requireAdmin, sameOrigin } from '../lib/admin-auth.js';
 const clean = value => typeof value === 'string' ? value.trim() : '';
 const json = (payload, status=200, extra={}) => new Response(JSON.stringify(payload), { status, headers: { 'Content-Type':'application/json; charset=utf-8', 'Cache-Control':'no-store', 'Access-Control-Allow-Origin':'*', ...extra } });
 const ok = (data, stage='reading_source') => json({ ok:true, status:XPH_RESOURCE_CONTRACT.statuses[0], stage, data:{ contractVersion:XPH_RESOURCE_CONTRACT.version, ...data }, error:null });
@@ -226,10 +227,9 @@ async function discoverRepo(name, website) {
   return best && best.score >= 260 ? best.repo : '';
 }
 
-export async function onRequestOptions({ request }) {
-  return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' } });
-}
-export async function onRequestGet({ request }) {
+export async function onRequestOptions({ request }) { const origin=request.headers.get('Origin')||'https://xph.asia'; return new Response(null,{status:204,headers:{'Access-Control-Allow-Origin':sameOrigin(request)?origin:'https://xph.asia','Access-Control-Allow-Methods':'GET,OPTIONS','Access-Control-Allow-Headers':'Content-Type','Vary':'Origin'}}); }
+export async function onRequestGet({ request, env }) {
+  if (!sameOrigin(request) || !(await requireAdmin(request, env))) return fail(XPH_RESOURCE_CONTRACT.errors.UNAUTHORIZED, 'æªç»å½ç®¡çåä¼è¯', 401);
   const url = new URL(request.url);
   let repo = normalizeRepo(url.searchParams.get('repo'));
   const discoverName = clean(url.searchParams.get('discoverName'));
