@@ -20,13 +20,37 @@ window.ResourceTemplates = {
 
     },
 
+    subcategoryLabel(id) {
+
+        if (!id) return "";
+
+        const categories = window.categories || {};
+
+        for (const group of Object.values(categories)) {
+
+            const children = group?.children || {};
+
+            if (Object.prototype.hasOwnProperty.call(children, id)) {
+                return children[id];
+            }
+
+        }
+
+        return "";
+
+    },
+
     badge(text) {
 
         if (!text) return "";
 
+        const label = this.subcategoryLabel(text);
+
+        if (!label) return "";
+
         return `
 <span class="tool-tag">
-${this.escape(text)}
+${this.escape(label)}
 </span>
 `;
 
