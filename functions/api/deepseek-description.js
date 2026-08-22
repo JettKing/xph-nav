@@ -1,4 +1,5 @@
 import { XPH_RESOURCE_CONTRACT } from '../../shared/resource-contract.js';
+import { requireAdmin, sameOrigin } from '../lib/admin-auth.js';
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
 const MODEL = 'deepseek-v4-pro';
@@ -25,25 +26,12 @@ const isValid16 = value => validation(value).valid;
 
 const normalizeTaxonomy = input => Array.isArray(input)
   ? input.map(x => ({ category: clean(x?.category), categoryName: clean(x?.categoryName), subcategory: clean(x?.subcategory), subcategoryName: clean(x?.subcategoryName) }))
-    .filter(x => x.category && x.subcategory && x.categoryName && x.subcategoryName)
+    .filter(x => /^[a-z][a-z0-9_]*$/.test(x.category) && /^[a-z][a-z0-9_]*$/.test(x.subcategory) && x.categoryName && x.subcategoryName)
   : [];
 const normalizeIconMap = input => input && typeof input === 'object' && !Array.isArray(input)
-  ? Object.fromEntries(Object.entries(input).map(([k,v]) => [clean(k), clean(v)]).filter(([k,v]) => k && v))
+  ? Object.fromEntries(Object.entries(input).map(([k,v]) => [clean(k), clean(v)]).filter(([k,v]) => /^[a-z][a-z0-9_]*$/.test(k) && v))
   : {};
-const norm = value => clean(value).toLowerCase().replace(/[\s_\-–—·•/|｜:：]+/g, '');
-const resolveClassification = (category, subcategory, taxonomy) => {
-  const c = norm(category), sc = norm(subcategory);
-  if (!c && !sc) return null;
-  const exact = taxonomy.find(x => norm(x.category) === c && norm(x.subcategory) === sc);
-  if (exact) return exact;
-  const labelPair = taxonomy.find(x => (norm(x.category) === c || norm(x.categoryName) === c) && (norm(x.subcategory) === sc || norm(x.subcategoryName) === sc));
-  if (labelPair) return labelPair;
-  const subOnly = taxonomy.filter(x => norm(x.subcategory) === sc || norm(x.subcategoryName) === sc);
-  if (subOnly.length === 1) return subOnly[0];
-  const catOnly = taxonomy.filter(x => norm(x.category) === c || norm(x.categoryName) === c);
-  if (catOnly.length === 1) return catOnly[0];
-  return null;
-};
+const resolveClassification = (category, subcategory, taxonomy) => taxonomy.find(x => x.category === clean(category) && x.subcategory === clean(subcategory)) || null;
 
 const cors = origin => ({
   'Content-Type': 'application/json; charset=utf-8',
@@ -98,6 +86,7 @@ export async function onRequestOptions({ request }) {
 }
 
 export async function onRequestPost({ request, env }) {
+  if (!sameOrigin(request) || !(await requireAdmin(request, env))) return responseEnvelope({ ok:false, status:'error', stage:'error', code:ERR.UNAUTHORIZED, message:'未登录管理员会话' }, headers, 401);
   const headers = cors(request.headers.get('Origin') || '');
   if (!env.DEEPSEEK_API_KEY) return responseEnvelope({ ok:false, status:'error', stage:'error', code:ERR.AI_NOT_CONFIGURED, message:'Cloudflare 未配置 DEEPSEEK_API_KEY' }, headers, 500);
 
@@ -116,7 +105,7 @@ export async function onRequestPost({ request, env }) {
   const taxonomyPrompt = taxonomyText(taxonomy);
   let semantic;
   try {
-    const semanticSystem = `你是徐胖虎资源社资源事实分析器。只理解真实来源，不写营销文案。\n输出JSON：{"core":"...","facts":["..."],"category":"合法分类ID或分类名","subcategory":"合法子分类ID或子分类名"}\n规则：\n1. core只写第一核心用途。\n2. facts最多5条，只允许真实内容明确支持的事实。\n3. 分类必须从下方词库选择，不得创造新词。优先输出ID。\n4. 按真实用途分类，不按URL类型分类。\n合法词库：\n${taxonomyPrompt}`;
+    const semanticSystem = `你是徐胖虎资源社资源事实分析器。只理解真实来源，不写营销文案。\n输出JSON：{"core":"...","facts":["..."],"category":"合法分类ID或分类名","subcategory":"合法子分类ID或子分类名"}\n规则：\n1. core只写第一核心用途。\n2. facts最多5条，只允许真实内容明确支持的事实。\n3. 分类必须从下方词库选择，只能输出合法ID，不得输出名称，不得创造新ID。\n4. 按真实用途分类，不按URL类型分类。\n合法分类ID词库（只允许输出ID，不允许输出名称）：\n${taxonomyPrompt}`;
     semantic = (await callDeepSeek(env, [{ role:'system', content:semanticSystem }, { role:'user', content:`${source}\n\n只返回JSON。` }], 650, 0.15)).value;
   } catch (error) {
     return responseEnvelope({ ok:false, status:'error', stage:'understanding_content', code:ERR.AI_SEMANTIC_FAILED, message:error?.message || 'DeepSeek语义分析失败' }, headers, 422);
