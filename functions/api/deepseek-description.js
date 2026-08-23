@@ -24,6 +24,25 @@ function validation(value) {
 }
 const isValid16 = value => validation(value).valid;
 
+async function repairCandidate(env, source, core, facts, resolved, raw, feedback) {
+  const repairSystem = `你是严格16字中文简介修复器。
+只返回JSON：{\"candidate\":\"...\"}。
+要求：candidate必须恰好16个Unicode字符；中文至少6个；只表达真实核心用途；禁止营销词；禁止解释；禁止换行；禁止在末尾使用“工具、平台、软件、资源、应用、实用、便捷”。
+必须先在内部逐字符计数16个槽位，再输出最终candidate。`;
+  const repairUser = `${source}\n\n核心用途：${core}\n事实：${facts.join('；')}\n分类：${resolved.categoryName}/${resolved.subcategoryName}\n原候选：${clean(raw)}\n程序失败原因：${feedback || '长度不正确'}\n\n请只修复原候选，不新增未经来源支持的事实；最终严格16字符。`;
+  try {
+    const result = (await callDeepSeek(env, [
+      { role:'system', content:repairSystem },
+      { role:'user', content:repairUser }
+    ], 120, 0.05)).value;
+    const candidate = clean(result?.candidate);
+    const checked = validation(candidate);
+    return { candidate, checked };
+  } catch (error) {
+    return { candidate:'', checked:validation(''), error:error?.message || '修复调用失败' };
+  }
+}
+
 const normalizeTaxonomy = input => Array.isArray(input)
   ? input.map(x => ({ category: clean(x?.category), categoryName: clean(x?.categoryName), subcategory: clean(x?.subcategory), subcategoryName: clean(x?.subcategoryName) }))
     .filter(x => /^[a-z][a-z0-9_]*$/.test(x.category) && /^[a-z][a-z0-9_]*$/.test(x.subcategory) && x.categoryName && x.subcategoryName)
@@ -163,11 +182,22 @@ export async function onRequestPost({ request, env }) {
       ], repairMode ? 220 : 180, repairMode ? 0.25 : 0.55)).value;
       generationCalls++;
       const raw = clean(result?.candidate);
-      const checked = validation(raw);
+      let checked = validation(raw);
+      let repaired = false;
+      let repairReasons = [];
+      if (!checked.valid && raw && count(raw) >= 8 && count(raw) <= 32 && cjkCount(raw) >= 4) {
+        const repairedResult = await repairCandidate(env, source, core, facts, resolved, raw, checked.reasons.join('、'));
+        generationCalls++;
+        repairReasons = repairedResult.checked.reasons;
+        if (repairedResult.checked.valid) {
+          checked = repairedResult.checked;
+          repaired = true;
+        }
+      }
       if (checked.valid && !allCandidates.includes(checked.value)) allCandidates.push(checked.value);
-      const reasons = checked.valid ? [] : checked.reasons;
+      const reasons = checked.valid ? [] : (repairReasons.length ? repairReasons : checked.reasons);
       previousFeedback = reasons.join('、') || '候选为空';
-      attemptReports.push({ attempt, mode: repairMode ? 'repair' : 'normal', returned: raw ? 1 : 0, valid: checked.valid ? 1 : 0, reasons });
+      attemptReports.push({ attempt, mode: repairMode ? 'repair' : 'normal', returned: raw ? 1 : 0, repaired: repaired ? 1 : 0, valid: checked.valid ? 1 : 0, reasons });
     } catch (error) {
       generationCalls++;
       previousFeedback = error?.message || '生成失败';
@@ -175,9 +205,18 @@ export async function onRequestPost({ request, env }) {
     }
   }
 
+  if (!allCandidates.length) {
+    // 最终兜底：直接基于已验证的核心事实进行一次低温度严格修复，不放宽16字Contract。
+    for (let i = 1; i <= 2 && !allCandidates.length; i++) {
+      const repaired = await repairCandidate(env, source, core, facts, resolved, core, '前面所有候选均未通过；请重新压缩为严格16字符');
+      generationCalls++;
+      if (repaired.checked.valid) allCandidates.push(repaired.checked.value);
+      attemptReports.push({ attempt:`final-repair-${i}`, mode:'final-repair', returned:repaired.candidate?1:0, repaired:repaired.checked.valid?1:0, valid:repaired.checked.valid?1:0, reasons:repaired.checked.reasons });
+    }
+  }
   if (!allCandidates.length) return responseEnvelope({
     ok:false, status:'error', stage:'validating_candidates', code:ERR.NO_VALID_CANDIDATE,
-    message:`${POLICY.maxAttempts}次独立生成均未通过严格16字程序验收`,
+    message:`${POLICY.maxAttempts}次独立生成及最终严格修复均未通过16字程序验收`,
     details:{ generationCalls, maxAttempts:POLICY.maxAttempts, attemptReports }
   }, headers, 422);
 
