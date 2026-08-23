@@ -86,8 +86,8 @@ export async function onRequestOptions({ request }) {
 }
 
 export async function onRequestPost({ request, env }) {
-  if (!sameOrigin(request) || !(await requireAdmin(request, env))) return responseEnvelope({ ok:false, status:'error', stage:'error', code:ERR.UNAUTHORIZED, message:'未登录管理员会话' }, headers, 401);
   const headers = cors(request.headers.get('Origin') || '');
+  if (!sameOrigin(request) || !(await requireAdmin(request, env))) return responseEnvelope({ ok:false, status:'error', stage:'error', code:ERR.UNAUTHORIZED, message:'未登录管理员会话' }, headers, 401);
   if (!env.DEEPSEEK_API_KEY) return responseEnvelope({ ok:false, status:'error', stage:'error', code:ERR.AI_NOT_CONFIGURED, message:'Cloudflare 未配置 DEEPSEEK_API_KEY' }, headers, 500);
 
   let body;
@@ -136,33 +136,49 @@ export async function onRequestPost({ request, env }) {
     }, headers, 200);
   }
 
-  const generationSystem = `你是徐胖虎资源社的16字简介候选生成器。\n一次只能生成1条候选。\n只返回JSON：{"candidate":"..."}\n严格规则：\n1. candidate恰好16字符；中文、英文、数字、标点均按1字符计算。\n2. 中文至少6个字符。\n3. 只表达第一核心用途，不写营销词，不写空泛凑字词。\n4. 不得编造真实来源没有的功能。\n5. 禁止解释，禁止返回其他字段。\n禁止词：专业、强大、超强、顶级、领先、完美、神器、极速、优质、爆款、必备、一站式。`;
-  const generationUser = `${source}\n\n核心用途：${core}\n事实：${facts.join('；')}\n分类：${resolved.categoryName}/${resolved.subcategoryName}\n\n这是一次独立生成，只生成1条候选。`;
+  const generationSystem = `你是徐胖虎资源社的16字简介候选生成器。
+一次只能生成1条候选。
+只返回JSON：{\"candidate\":\"...\"}
+严格规则：
+1. candidate必须恰好16个Unicode字符；中文、英文、数字、标点、空格都各计1个字符。
+2. 中文至少6个字符。
+3. 只表达第一核心用途，必须来自真实来源事实，不写营销词。
+4. 不得编造真实来源没有的功能。
+5. 禁止解释、禁止换行、禁止返回其他字段。
+6. 输出前请在内部逐字计数到16；如果不是16，必须先自行修改再输出。
+7. 结尾禁止使用“工具、平台、软件、资源、应用、实用、便捷”等空泛词。
+禁止词：专业、强大、超强、顶级、领先、完美、神器、极速、优质、爆款、必备、一站式。`;
 
   const allCandidates = [];
   const attemptReports = [];
   let generationCalls = 0;
+  let previousFeedback = '';
   for (let attempt = 1; attempt <= POLICY.maxAttempts; attempt++) {
+    const repairMode = attempt >= Math.max(3, POLICY.maxAttempts - 1);
+    const generationUser = `${source}\n\n核心用途：${core}\n事实：${facts.join('；')}\n分类：${resolved.categoryName}/${resolved.subcategoryName}\n${previousFeedback ? `\n上一次程序验收失败原因：${previousFeedback}。这一次必须逐项修正。` : ''}${repairMode ? '\n进入严格修复模式：优先保证恰好16字符，再保证语义完整；不要使用空泛结尾。' : ''}\n\n这是第${attempt}次独立生成，只生成1条候选。`;
     try {
       const result = (await callDeepSeek(env, [
         { role:'system', content:generationSystem },
-        { role:'user', content:`${generationUser}\n独立生成编号：${attempt}` }
-      ], 160, 0.85)).value;
+        { role:'user', content:generationUser }
+      ], repairMode ? 220 : 180, repairMode ? 0.25 : 0.55)).value;
       generationCalls++;
       const raw = clean(result?.candidate);
       const checked = validation(raw);
       if (checked.valid && !allCandidates.includes(checked.value)) allCandidates.push(checked.value);
-      attemptReports.push({ attempt, returned: raw ? 1 : 0, valid: checked.valid ? 1 : 0, reasons: checked.valid ? [] : checked.reasons });
+      const reasons = checked.valid ? [] : checked.reasons;
+      previousFeedback = reasons.join('、') || '候选为空';
+      attemptReports.push({ attempt, mode: repairMode ? 'repair' : 'normal', returned: raw ? 1 : 0, valid: checked.valid ? 1 : 0, reasons });
     } catch (error) {
       generationCalls++;
-      attemptReports.push({ attempt, returned:0, valid:0, error:error?.message || '生成失败' });
+      previousFeedback = error?.message || '生成失败';
+      attemptReports.push({ attempt, mode: repairMode ? 'repair' : 'normal', returned:0, valid:0, error:previousFeedback });
     }
   }
 
   if (!allCandidates.length) return responseEnvelope({
     ok:false, status:'error', stage:'validating_candidates', code:ERR.NO_VALID_CANDIDATE,
-    message:`最多${POLICY.maxAttempts}次独立生成后没有候选通过严格16字程序验收`,
-    details:{ generationCalls, maxAttempts:POLICY.maxAttempts }
+    message:`${POLICY.maxAttempts}次独立生成均未通过严格16字程序验收`,
+    details:{ generationCalls, maxAttempts:POLICY.maxAttempts, attemptReports }
   }, headers, 422);
 
   let selectedIndex;
