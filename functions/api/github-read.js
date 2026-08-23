@@ -104,19 +104,35 @@ function pickHomepage({ apiHomepage, readme, html, repo, projectName }) {
   return scored[0]?.score >= 140 ? scored[0].url : '';
 }
 function extractName(api, html, readme, repo) {
+  const slug = repo.split('/').pop() || '';
+  const apiName = normalizeProjectName(api?.name, slug);
+  const apiCompact = apiName.toLowerCase().replace(/[^a-z0-9]+/g, '');
   const candidates = [];
-  const add = (value, score) => {
-    const x = normalizeProjectName(value, repo.split('/').pop()).replace(/^#+\s*/, '').replace(/\s*[Â·|â-]\s*GitHub\s*$/i, '').trim();
-    if (x && x.length <= 80) candidates.push({ x, score });
+  const add = (value, score, source='') => {
+    const x = normalizeProjectName(value, slug).replace(/^#+\s*/, '').replace(/\s*[Â·|â-]\s*GitHub\s*$/i, '').trim();
+    if (!x || x.length > 80) return;
+    const low = x.toLowerCase();
+    if (/^(install|installation|getting started|quick start|quickstart|one[- ]click deployment|deployment|deploy|setup|prerequisites|usage|configuration|configuration guide|documentation|docs|license|changelog|roadmap|contributing|credits|screenshot|ui|features|core features|tech stack|community|contact|support)\b/i.test(x)) return;
+    if (/^(published time|updated time|created time|release time|commit time|view raw|raw|source|image|download|home|homepage|website|menu|navigation)$/i.test(x)) return;
+    let finalScore = score;
+    if (apiCompact && low.replace(/[^a-z0-9]+/g, '') === apiCompact) finalScore += 80;
+    if (source === 'api') finalScore += 40;
+    candidates.push({ x, score: finalScore, source });
   };
-  const h1 = String(readme || '').match(/^#\s+(.+)$/m); if (h1) add(h1[1], 520);
-  if (api?.name) add(api.name, 450);
-  const og = String(html || '').match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i); if (og) add(og[1], 320);
-  const title = String(html || '').match(/<title[^>]*>([^<]+)/i); if (title) add(title[1], 300);
-  const slug = repo.split('/').pop() || ''; if (slug) add(slug, 180);
-  const bad = /^(published time|updated time|created time|release time|commit time|view raw|raw|source|image|download|home|homepage|website|menu|navigation)$/i;
-  const best = candidates.filter(x => !bad.test(x.x)).sort((a, b) => b.score - a.score)[0];
-  return normalizeProjectName(best?.x || slug, slug);
+  if (apiName) add(apiName, 500, 'api');
+  if (apiName) {
+    const escaped = apiName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp('\\b' + escaped + '\\b', 'i');
+    const hit = String(readme || '').match(re);
+    if (hit?.[0]) add(hit[0], 560, 'brand');
+  }
+  const h1Matches = String(readme || '').match(/^#\s+(.+)$/gm) || [];
+  for (const line of h1Matches.slice(0, 8)) add(line.replace(/^#\s+/, ''), 420, 'readme-h1');
+  const og = String(html || '').match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i); if (og) add(og[1], 300, 'og:title');
+  const title = String(html || '').match(/<title[^>]*>([^<]+)/i); if (title) add(title[1], 280, 'title');
+  if (slug) add(slug, 180, 'slug');
+  const best = candidates.sort((a, b) => b.score - a.score)[0];
+  return normalizeProjectName(best?.x || apiName || slug, slug);
 }
 async function readText(url, headers, ms) {
   try {
