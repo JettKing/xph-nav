@@ -69,11 +69,13 @@ function extractLabeledWebsite(text) {
 
 function normalizeProjectName(value, fallback = '') {
   let x = cleanText(value)
+    .replace(/^github\s*[-:|ï½]\s*[^/\s]+\/([^\s]+)$/i, '$1')
+    .replace(/^github\s*[-:|ï½]\s*/i, '')
     .replace(/\s*(?:\||ï½|â|â|-|Â·|â¢)\s*(?:github|gitlab|bitbucket)\s*$/i, '')
     .trim();
   const parts = x.split(/\s*(?:â|â|\||ï½|Â·|â¢)\s*|:\s+/).map(v => v.trim()).filter(Boolean);
-  if (parts.length > 1 && parts[0].length >= 2 && parts[0].length <= 40) x = parts[0];
-  x = x.replace(/\s+(?:community|community forum|official community)$/i, '').trim();
+  if (parts.length > 1 && parts[0].length >= 2 && parts[0].length <= 48) x = parts[0];
+  x = x.replace(/\s+(?:community|community forum|official community|å¾®ä¿¡å¬ä¼?å·|AIç¥è¯åº|å·¥ä½æµ|Agentå¹³å°|RAGå¤§æ¨¡å.*)$/i, '').trim();
   return x || cleanText(fallback);
 }
 function homepageScore(url, repo, projectName = '') {
@@ -107,10 +109,10 @@ function extractName(api, html, readme, repo) {
     const x = normalizeProjectName(value, repo.split('/').pop()).replace(/^#+\s*/, '').replace(/\s*[Â·|â-]\s*GitHub\s*$/i, '').trim();
     if (x && x.length <= 80) candidates.push({ x, score });
   };
-  if (api?.name) add(api.name, 400);
+  const h1 = String(readme || '').match(/^#\s+(.+)$/m); if (h1) add(h1[1], 520);
+  if (api?.name) add(api.name, 450);
   const og = String(html || '').match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i); if (og) add(og[1], 320);
   const title = String(html || '').match(/<title[^>]*>([^<]+)/i); if (title) add(title[1], 300);
-  const h1 = String(readme || '').match(/^#\s+(.+)$/m); if (h1) add(h1[1], 260);
   const slug = repo.split('/').pop() || ''; if (slug) add(slug, 180);
   const bad = /^(published time|updated time|created time|release time|commit time|view raw|raw|source|image|download|home|homepage|website|menu|navigation)$/i;
   const best = candidates.filter(x => !bad.test(x.x)).sort((a, b) => b.score - a.score)[0];
