@@ -1,20 +1,10 @@
 /**
  * ==========================================================
  * 徐胖虎资源社
- * Home v5.2
+ * Home v5.3
  * ----------------------------------------------------------
  * 首页资源入口渲染
  *
- * V3.1:
- * 支持能力入口
- *
- * 保留:
- * url
- * name
- * icon
- *
- * 新增:
- * capability
  * ==========================================================
  */
 
@@ -130,55 +120,10 @@ window.ResourceHome = {
 
 
 
-    /**
-     * V3.1
-     *
-     * 获取入口地址
-     *
-     * 兼容:
-     *
-     * 旧:
-     * url
-     *
-     * 新:
-     * capability
-     */
+    /** 当前 V5.3 首页入口仅使用显式导航 URL。 */
 
     getItemUrl(item){
-
-
-        if(item.url){
-
-
-            return item.url;
-
-
-        }
-
-
-
-        if(item.capability){
-
-
-
-            return (
-
-                "./index.html?capability=" +
-
-                encodeURIComponent(
-                    item.capability
-                )
-
-            );
-
-
-        }
-
-
-
-        return "#";
-
-
+        return typeof item?.url === "string" && item.url.trim() ? item.url.trim() : "#";
     },
 
 
