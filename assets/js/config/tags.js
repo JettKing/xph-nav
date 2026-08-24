@@ -1,5 +1,5 @@
 /**
- * 徐胖虎资源社 V5.2 资源标签体系
+ * 徐胖虎资源社 V5.3 资源标签体系
  * 五个维度：Category / SubCategory / Capability / Scenario / Attribute
  * 不再使用 tags[]，不设置运营标签。
  */
