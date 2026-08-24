@@ -55,8 +55,8 @@ function extractUrls(text) {
 function extractLabeledWebsite(text) {
   const s = String(text || '');
   const patterns = [
-    /(?:official\s+(?:website|site)|homepage|home\s*page|website|å®ç½|é¡¹ç®ä¸»é¡µ|å®æ¹ç½ç«)[^\n]{0,260}?(https?:\/\/[^\s<>)"']+)/i,
-    /(?:https?:\/\/[^\s<>)"']+)[^\n]{0,100}(?:official\s+(?:website|site)|homepage|website|å®ç½)/i
+    /(?:official\s+(?:website|site)|homepage|home\s*page|website|Ã¥Â®ÂÃ§Â½Â|Ã©Â¡Â¹Ã§ÂÂ®Ã¤Â¸Â»Ã©Â¡Âµ|Ã¥Â®ÂÃ¦ÂÂ¹Ã§Â½ÂÃ§Â«Â)[^\n]{0,260}?(https?:\/\/[^\s<>)"']+)/i,
+    /(?:https?:\/\/[^\s<>)"']+)[^\n]{0,100}(?:official\s+(?:website|site)|homepage|website|Ã¥Â®ÂÃ§Â½Â)/i
   ];
   for (const re of patterns) {
     const m = s.match(re);
@@ -69,13 +69,13 @@ function extractLabeledWebsite(text) {
 
 function normalizeProjectName(value, fallback = '') {
   let x = cleanText(value)
-    .replace(/^github\s*[-:|ï½]\s*[^/\s]+\/([^\s]+)$/i, '$1')
-    .replace(/^github\s*[-:|ï½]\s*/i, '')
-    .replace(/\s*(?:\||ï½|â|â|-|Â·|â¢)\s*(?:github|gitlab|bitbucket)\s*$/i, '')
+    .replace(/^github\s*[-:|Ã¯Â½Â]\s*[^/\s]+\/([^\s]+)$/i, '$1')
+    .replace(/^github\s*[-:|Ã¯Â½Â]\s*/i, '')
+    .replace(/\s*(?:\||Ã¯Â½Â|Ã¢ÂÂ|Ã¢ÂÂ|-|ÃÂ·|Ã¢ÂÂ¢)\s*(?:github|gitlab|bitbucket)\s*$/i, '')
     .trim();
-  const parts = x.split(/\s*(?:â|â|\||ï½|Â·|â¢)\s*|:\s+/).map(v => v.trim()).filter(Boolean);
+  const parts = x.split(/\s*(?:Ã¢ÂÂ|Ã¢ÂÂ|\||Ã¯Â½Â|ÃÂ·|Ã¢ÂÂ¢)\s*|:\s+/).map(v => v.trim()).filter(Boolean);
   if (parts.length > 1 && parts[0].length >= 2 && parts[0].length <= 48) x = parts[0];
-  x = x.replace(/\s+(?:community|community forum|official community|å¾®ä¿¡å¬ä¼?å·|AIç¥è¯åº|å·¥ä½æµ|Agentå¹³å°|RAGå¤§æ¨¡å.*)$/i, '').trim();
+  x = x.replace(/\s+(?:community|community forum|official community|Ã¥Â¾Â®Ã¤Â¿Â¡Ã¥ÂÂ¬Ã¤Â¼Â?Ã¥ÂÂ·|AIÃ§ÂÂ¥Ã¨Â¯ÂÃ¥ÂºÂ|Ã¥Â·Â¥Ã¤Â½ÂÃ¦ÂµÂ|AgentÃ¥Â¹Â³Ã¥ÂÂ°|RAGÃ¥Â¤Â§Ã¦Â¨Â¡Ã¥ÂÂ.*)$/i, '').trim();
   return x || cleanText(fallback);
 }
 function homepageScore(url, repo, projectName = '') {
@@ -103,31 +103,47 @@ function pickHomepage({ apiHomepage, readme, html, repo, projectName }) {
   const scored = unique(candidates).map(url => ({ url, score: homepageScore(url, repo, projectName) })).sort((a, b) => b.score - a.score);
   return scored[0]?.score >= 140 ? scored[0].url : '';
 }
+function stripMarkdownCodeBlocks(markdown) {
+  return String(markdown || '')
+    .replace(/```[\s\S]*?```/g, '\n')
+    .replace(/~~~[\s\S]*?~~~/g, '\n')
+    .split('\n')
+    .filter(line => !/^ {4}\S/.test(line))
+    .join('\n');
+}
+function extractMarkdownH1(markdown) {
+  const prose = stripMarkdownCodeBlocks(markdown);
+  return [...prose.matchAll(/^#\s+(.+?)\s*#?$/gm)].map(m => cleanText(m[1])).filter(Boolean);
+}
+function extractBrandBySlug(markdown, slug) {
+  const prose = stripMarkdownCodeBlocks(markdown);
+  const compactSlug = clean(slug).toLowerCase().replace(/[^a-z0-9]+/g, '');
+  if (!compactSlug) return '';
+  const tokenPattern = new RegExp('\\b' + compactSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+  const hit = prose.match(tokenPattern);
+  return hit?.[0] || '';
+}
+function isGenericProjectName(value) {
+  return /^(install(?:ing)?|installation|getting started|quick start|quickstart|one[- ]click deployment|deployment|deploy|setup|prerequisites|usage|configuration(?: guide)?|documentation|docs|license|changelog|roadmap|contributing|credits|screenshot|ui|features|core features|tech stack|community|contact|support|home|homepage|website|menu|navigation|search|source|download|image|raw)$/i.test(cleanText(value));
+}
 function extractName(api, html, readme, repo) {
   const slug = repo.split('/').pop() || '';
   const apiName = normalizeProjectName(api?.name, slug);
   const apiCompact = apiName.toLowerCase().replace(/[^a-z0-9]+/g, '');
   const candidates = [];
   const add = (value, score, source='') => {
-    const x = normalizeProjectName(value, slug).replace(/^#+\s*/, '').replace(/\s*[Â·|â-]\s*GitHub\s*$/i, '').trim();
-    if (!x || x.length > 80) return;
+    const x = normalizeProjectName(value, slug).replace(/^#+\s*/, '').trim();
+    if (!x || x.length > 80 || isGenericProjectName(x)) return;
     const low = x.toLowerCase();
-    if (/^(install|installation|getting started|quick start|quickstart|one[- ]click deployment|deployment|deploy|setup|prerequisites|usage|configuration|configuration guide|documentation|docs|license|changelog|roadmap|contributing|credits|screenshot|ui|features|core features|tech stack|community|contact|support)\b/i.test(x)) return;
-    if (/^(published time|updated time|created time|release time|commit time|view raw|raw|source|image|download|home|homepage|website|menu|navigation)$/i.test(x)) return;
     let finalScore = score;
     if (apiCompact && low.replace(/[^a-z0-9]+/g, '') === apiCompact) finalScore += 80;
     if (source === 'api') finalScore += 40;
     candidates.push({ x, score: finalScore, source });
   };
-  if (apiName) add(apiName, 500, 'api');
-  if (apiName) {
-    const escaped = apiName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp('\\b' + escaped + '\\b', 'i');
-    const hit = String(readme || '').match(re);
-    if (hit?.[0]) add(hit[0], 560, 'brand');
-  }
-  const h1Matches = String(readme || '').match(/^#\s+(.+)$/gm) || [];
-  for (const line of h1Matches.slice(0, 8)) add(line.replace(/^#\s+/, ''), 420, 'readme-h1');
+  if (apiName && !isGenericProjectName(apiName)) add(apiName, 500, 'api');
+  const brand = extractBrandBySlug(readme, slug);
+  if (brand && !isGenericProjectName(brand)) add(brand, 620, 'brand');
+  for (const heading of extractMarkdownH1(readme).slice(0, 12)) add(heading, 420, 'readme-h1');
   const og = String(html || '').match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i); if (og) add(og[1], 300, 'og:title');
   const title = String(html || '').match(/<title[^>]*>([^<]+)/i); if (title) add(title[1], 280, 'title');
   if (slug) add(slug, 180, 'slug');
@@ -193,14 +209,14 @@ async function discoverRepo(name, website) {
     candidates.set(normalized, old);
   };
 
-  // 1) GitHub APIï¼å¯ç¨æ¶è·åé«è´¨éåéï¼403/429ä¸é»æ­åç»­ç½é¡µæç´¢ã
+  // 1) GitHub APIÃ¯Â¼ÂÃ¥ÂÂ¯Ã§ÂÂ¨Ã¦ÂÂ¶Ã¨ÂÂ·Ã¥ÂÂÃ©Â«ÂÃ¨Â´Â¨Ã©ÂÂÃ¥ÂÂÃ©ÂÂÃ¯Â¼Â403/429Ã¤Â¸ÂÃ©ÂÂ»Ã¦ÂÂ­Ã¥ÂÂÃ§Â»Â­Ã§Â½ÂÃ©Â¡ÂµÃ¦ÂÂÃ§Â´Â¢Ã£ÂÂ
   await Promise.all(terms.map(async term => {
     const api = await readJson(`https://api.github.com/search/repositories?q=${encodeURIComponent(term)}&per_page=10`, headers, 9000);
     const items = Array.isArray(api.data?.items) ? api.data.items : [];
     for (const item of items) addCandidate(item?.html_url, 0, item?.homepage, item?.description);
   }));
 
-  // 2) GitHubå¬å¼æç´¢é¡µï¼APIåéæ¶ä»è½åç°ä»åºã
+  // 2) GitHubÃ¥ÂÂ¬Ã¥Â¼ÂÃ¦ÂÂÃ§Â´Â¢Ã©Â¡ÂµÃ¯Â¼ÂAPIÃ¥ÂÂÃ©ÂÂÃ¦ÂÂ¶Ã¤Â»ÂÃ¨ÂÂ½Ã¥ÂÂÃ§ÂÂ°Ã¤Â»ÂÃ¥ÂºÂÃ£ÂÂ
   const htmlResults = await Promise.all(terms.map(term => readText(
     `https://github.com/search?q=${encodeURIComponent(term)}&type=repositories`,
     { Accept: 'text/html', 'User-Agent': 'XPH-Resource-Importer/5.3' }, 12000
@@ -216,7 +232,7 @@ async function discoverRepo(name, website) {
   let ranked = [...candidates.values()].sort((a, b) => b.score - a.score).slice(0, 8);
   if (!ranked.length) return '';
 
-  // 3) å¯¹æé«ç¸å³åéåä¸æ¬¡è½»éäº¤åéªè¯ï¼è¯»åä»åºé¡µ/READMEï¼ç¡®è®¤å®ç½æ¯å¦çæ­£å¯¹åºè¾å¥å®ç½ã
+  // 3) Ã¥Â¯Â¹Ã¦ÂÂÃ©Â«ÂÃ§ÂÂ¸Ã¥ÂÂ³Ã¥ÂÂÃ©ÂÂÃ¥ÂÂÃ¤Â¸ÂÃ¦Â¬Â¡Ã¨Â½Â»Ã©ÂÂÃ¤ÂºÂ¤Ã¥ÂÂÃ©ÂªÂÃ¨Â¯ÂÃ¯Â¼ÂÃ¨Â¯Â»Ã¥ÂÂÃ¤Â»ÂÃ¥ÂºÂÃ©Â¡Âµ/READMEÃ¯Â¼ÂÃ§Â¡Â®Ã¨Â®Â¤Ã¥Â®ÂÃ§Â½ÂÃ¦ÂÂ¯Ã¥ÂÂ¦Ã§ÂÂÃ¦Â­Â£Ã¥Â¯Â¹Ã¥ÂºÂÃ¨Â¾ÂÃ¥ÂÂ¥Ã¥Â®ÂÃ§Â½ÂÃ£ÂÂ
   const verified = await Promise.all(ranked.map(async item => {
     const path = repoPath(item.repo);
     const [page, readme] = await Promise.all([
@@ -236,7 +252,7 @@ async function discoverRepo(name, website) {
   }));
   ranked = verified.sort((a, b) => b.score - a.score);
 
-  // æå®ç½è¾å¥æ¶ï¼ä¼åè¦æ±åéä»åºè½è¯æä¸è¯¥å®ç½å­å¨å¯¹åºå³ç³»ï¼å¦åéååç§°é«ç½®ä¿¡å¹éã
+  // Ã¦ÂÂÃ¥Â®ÂÃ§Â½ÂÃ¨Â¾ÂÃ¥ÂÂ¥Ã¦ÂÂ¶Ã¯Â¼ÂÃ¤Â¼ÂÃ¥ÂÂÃ¨Â¦ÂÃ¦Â±ÂÃ¥ÂÂÃ©ÂÂÃ¤Â»ÂÃ¥ÂºÂÃ¨ÂÂ½Ã¨Â¯ÂÃ¦ÂÂÃ¤Â¸ÂÃ¨Â¯Â¥Ã¥Â®ÂÃ§Â½ÂÃ¥Â­ÂÃ¥ÂÂ¨Ã¥Â¯Â¹Ã¥ÂºÂÃ¥ÂÂ³Ã§Â³Â»Ã¯Â¼ÂÃ¥ÂÂ¦Ã¥ÂÂÃ©ÂÂÃ¥ÂÂÃ¥ÂÂÃ§Â§Â°Ã©Â«ÂÃ§Â½Â®Ã¤Â¿Â¡Ã¥ÂÂ¹Ã©ÂÂÃ£ÂÂ
   if (host) {
     const sameSite = ranked.find(x => x.homepage && (() => { try { const h = new URL(x.homepage).hostname.replace(/^www\./, '').toLowerCase(); return h === host || h.endsWith(`.${host}`) || host.endsWith(`.${h}`); } catch { return false; } })() && x.score >= 500);
     if (sameSite) return sameSite.repo;
@@ -247,15 +263,15 @@ async function discoverRepo(name, website) {
 
 export async function onRequestOptions({ request }) { const origin=request.headers.get('Origin')||'https://xph.asia'; return new Response(null,{status:204,headers:{'Access-Control-Allow-Origin':sameOrigin(request)?origin:'https://xph.asia','Access-Control-Allow-Methods':'GET,OPTIONS','Access-Control-Allow-Headers':'Content-Type','Vary':'Origin'}}); }
 export async function onRequestGet({ request, env }) {
-  if (!sameOrigin(request) || !(await requireAdmin(request, env))) return fail(XPH_RESOURCE_CONTRACT.errors.UNAUTHORIZED, 'æªç»å½ç®¡çåä¼è¯', 401);
+  if (!sameOrigin(request) || !(await requireAdmin(request, env))) return fail(XPH_RESOURCE_CONTRACT.errors.UNAUTHORIZED, 'Ã¦ÂÂªÃ§ÂÂ»Ã¥Â½ÂÃ§Â®Â¡Ã§ÂÂÃ¥ÂÂÃ¤Â¼ÂÃ¨Â¯Â', 401);
   const url = new URL(request.url);
   let repo = normalizeRepo(url.searchParams.get('repo'));
   const discoverName = clean(url.searchParams.get('discoverName'));
   const discoverWebsite = clean(url.searchParams.get('discoverWebsite'));
   if (!repo && discoverName) repo = await discoverRepo(discoverName, discoverWebsite);
-  if (!repo) return fail(XPH_RESOURCE_CONTRACT.errors.SOURCE_READ_FAILED, 'æªæ¾å°å¯éªè¯çå®æ¹ GitHub ä»åº', 404);
+  if (!repo) return fail(XPH_RESOURCE_CONTRACT.errors.SOURCE_READ_FAILED, 'Ã¦ÂÂªÃ¦ÂÂ¾Ã¥ÂÂ°Ã¥ÂÂ¯Ã©ÂªÂÃ¨Â¯ÂÃ§ÂÂÃ¥Â®ÂÃ¦ÂÂ¹ GitHub Ã¤Â»ÂÃ¥ÂºÂ', 404);
   const path = repoPath(repo);
-  if (!path) return fail(XPH_RESOURCE_CONTRACT.errors.INVALID_REQUEST, 'GitHub ä»åºå°åæ æ', 400);
+  if (!path) return fail(XPH_RESOURCE_CONTRACT.errors.INVALID_REQUEST, 'GitHub Ã¤Â»ÂÃ¥ÂºÂÃ¥ÂÂ°Ã¥ÂÂÃ¦ÂÂ Ã¦ÂÂ', 400);
 
   const api = await readJson(`https://api.github.com/repos/${path}`, { Accept: 'application/vnd.github+json', 'User-Agent': 'XPH-Resource-Importer/5.3' }, 10000);
   const html = await readText(repo, { Accept: 'text/html', 'User-Agent': 'XPH-Resource-Importer/5.3' }, 15000);
@@ -266,7 +282,7 @@ export async function onRequestGet({ request, env }) {
   const description = cleanText(d.description || '');
   const readmeText = cleanText(readme.text).slice(0, 16000);
   const htmlText = stripHtml(html.text).slice(0, 10000);
-  const content = [`GitHubä»åºï¼${repo}`, `é¡¹ç®åç§°ï¼${name}`, description ? `é¡¹ç®æè¿°ï¼${description}` : '', website ? `å®æ¹ä¸»é¡µï¼${website}` : '', readmeText ? `READMEï¼${readmeText}` : '', htmlText ? `GitHubé¡µé¢ï¼${htmlText}` : ''].filter(Boolean).join('\n\n').slice(0, 24000);
-  if (!content || content.length < 30) return fail(XPH_RESOURCE_CONTRACT.errors.SOURCE_READ_FAILED, 'GitHubçå®åå®¹è¯»åå¤±è´¥', 502, 'reading_source', { apiStatus: api.status, htmlStatus: html.status, readmeStatus: readme.status });
+  const content = [`GitHubÃ¤Â»ÂÃ¥ÂºÂÃ¯Â¼Â${repo}`, `Ã©Â¡Â¹Ã§ÂÂ®Ã¥ÂÂÃ§Â§Â°Ã¯Â¼Â${name}`, description ? `Ã©Â¡Â¹Ã§ÂÂ®Ã¦ÂÂÃ¨Â¿Â°Ã¯Â¼Â${description}` : '', website ? `Ã¥Â®ÂÃ¦ÂÂ¹Ã¤Â¸Â»Ã©Â¡ÂµÃ¯Â¼Â${website}` : '', readmeText ? `READMEÃ¯Â¼Â${readmeText}` : '', htmlText ? `GitHubÃ©Â¡ÂµÃ©ÂÂ¢Ã¯Â¼Â${htmlText}` : ''].filter(Boolean).join('\n\n').slice(0, 24000);
+  if (!content || content.length < 30) return fail(XPH_RESOURCE_CONTRACT.errors.SOURCE_READ_FAILED, 'GitHubÃ§ÂÂÃ¥Â®ÂÃ¥ÂÂÃ¥Â®Â¹Ã¨Â¯Â»Ã¥ÂÂÃ¥Â¤Â±Ã¨Â´Â¥', 502, 'reading_source', { apiStatus: api.status, htmlStatus: html.status, readmeStatus: readme.status });
   return ok({ github: repo, name, website: website || '', seoTitle: name, seoDescription: description, thumbnail: '', content, keywords: Array.isArray(d.topics) ? d.topics : [], apiStatus: api.status, htmlStatus: html.status, readmeStatus: readme.status });
 }
