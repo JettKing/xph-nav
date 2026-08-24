@@ -10,14 +10,15 @@ const ERR = XPH_RESOURCE_CONTRACT.errors;
 const clean = value => String(value ?? '').trim().replace(/[\r\n]+/g, ' ').replace(/^['"“”‘’]+|['"“”‘’]+$/g, '').trim();
 const count = value => Array.from(clean(value)).length;
 const cjkCount = value => Array.from(clean(value)).filter(ch => /[\u3400-\u9fff]/.test(ch)).length;
+const hanOnly = value => /^[\u3400-\u9fff]{16}$/.test(clean(value));
 const banned = /(专业|强大|超强|顶级|领先|完美|神器|极速|优质|爆款|必备|一站式)/;
 const filler = /(工具|平台|软件|资源|应用|实用|便捷)$/;
 
 function validation(value) {
   const v = clean(value), reasons = [];
   if (count(v) !== 16) reasons.push(`长度${count(v)}`);
-  if (cjkCount(v) < 6) reasons.push(`中文${cjkCount(v)}`);
-  if (/^[A-Za-z0-9\s.,!?;:()[\]{}+\-_/&%#]+$/.test(v)) reasons.push('纯英文/数字');
+  if (cjkCount(v) !== 16) reasons.push(`汉字${cjkCount(v)}`);
+  if (!hanOnly(v)) reasons.push('包含非汉字字符');
   if (banned.test(v)) reasons.push('营销词');
   if (filler.test(v)) reasons.push('空泛结尾');
   return { value: v, valid: reasons.length === 0, reasons };
@@ -27,14 +28,14 @@ const isValid16 = value => validation(value).valid;
 async function repairCandidate(env, source, core, facts, resolved, raw, feedback) {
   const repairSystem = `你是严格16字中文简介修复器。
 只返回JSON：{\"candidate\":\"...\"}。
-要求：candidate必须恰好16个Unicode字符；中文至少6个；只表达真实核心用途；禁止营销词；禁止解释；禁止换行；禁止在末尾使用“工具、平台、软件、资源、应用、实用、便捷”。
-必须先在内部逐字符计数16个槽位，再输出最终candidate。`;
-  const repairUser = `${source}\n\n核心用途：${core}\n事实：${facts.join('；')}\n分类：${resolved.categoryName}/${resolved.subcategoryName}\n原候选：${clean(raw)}\n程序失败原因：${feedback || '长度不正确'}\n\n请只修复原候选，不新增未经来源支持的事实；最终严格16字符。`;
+要求：candidate必须恰好16个汉字，只允许Unicode汉字；不得出现标点、英文、数字或空格；只表达真实核心用途；禁止营销词；禁止解释；禁止换行；禁止在末尾使用“工具、平台、软件、资源、应用、实用、便捷”。
+必须先在内部逐字符计数16个汉字槽位，再输出最终candidate。`;
+  const repairUser = `${source}\n\n核心用途：${core}\n事实：${facts.join('；')}\n分类：${resolved.categoryName}/${resolved.subcategoryName}\n原候选：${clean(raw)}\n程序失败原因：${feedback || '长度不正确'}\n\n请只修复原候选，不新增未经来源支持的事实；最终必须是16个汉字，不得出现任何标点、英文、数字或空格。`;
   try {
     const result = (await callDeepSeek(env, [
       { role:'system', content:repairSystem },
       { role:'user', content:repairUser }
-    ], 120, 0.05)).value;
+    ], 160, 0.05)).value;
     const candidate = clean(result?.candidate);
     const checked = validation(candidate);
     return { candidate, checked };
@@ -159,12 +160,11 @@ export async function onRequestPost({ request, env }) {
 一次只能生成1条候选。
 只返回JSON：{\"candidate\":\"...\"}
 严格规则：
-1. candidate必须恰好16个Unicode字符；中文、英文、数字、标点、空格都各计1个字符。
-2. 中文至少6个字符。
+1. candidate必须恰好16个汉字，只允许Unicode汉字，不得出现标点、英文、数字或空格。
 3. 只表达第一核心用途，必须来自真实来源事实，不写营销词。
 4. 不得编造真实来源没有的功能。
 5. 禁止解释、禁止换行、禁止返回其他字段。
-6. 输出前请在内部逐字计数到16；如果不是16，必须先自行修改再输出。
+6. 输出前请在内部逐字计数16个汉字；如果不是16，必须先自行修改再输出。
 7. 结尾禁止使用“工具、平台、软件、资源、应用、实用、便捷”等空泛词。
 禁止词：专业、强大、超强、顶级、领先、完美、神器、极速、优质、爆款、必备、一站式。`;
 
@@ -174,7 +174,7 @@ export async function onRequestPost({ request, env }) {
   let previousFeedback = '';
   for (let attempt = 1; attempt <= POLICY.maxAttempts; attempt++) {
     const repairMode = attempt >= Math.max(3, POLICY.maxAttempts - 1);
-    const generationUser = `${source}\n\n核心用途：${core}\n事实：${facts.join('；')}\n分类：${resolved.categoryName}/${resolved.subcategoryName}\n${previousFeedback ? `\n上一次程序验收失败原因：${previousFeedback}。这一次必须逐项修正。` : ''}${repairMode ? '\n进入严格修复模式：优先保证恰好16字符，再保证语义完整；不要使用空泛结尾。' : ''}\n\n这是第${attempt}次独立生成，只生成1条候选。`;
+    const generationUser = `${source}\n\n核心用途：${core}\n事实：${facts.join('；')}\n分类：${resolved.categoryName}/${resolved.subcategoryName}\n${previousFeedback ? `\n上一次程序验收失败原因：${previousFeedback}。这一次必须逐项修正。` : ''}${repairMode ? '\n进入严格修复模式：优先保证恰好16个汉字，再保证语义完整；不要使用空泛结尾。' : ''}\n\n这是第${attempt}次独立生成，只生成1条候选。`;
     try {
       const result = (await callDeepSeek(env, [
         { role:'system', content:generationSystem },
@@ -185,7 +185,7 @@ export async function onRequestPost({ request, env }) {
       let checked = validation(raw);
       let repaired = false;
       let repairReasons = [];
-      if (!checked.valid && raw && count(raw) >= 8 && count(raw) <= 32 && cjkCount(raw) >= 4) {
+      if (!checked.valid && raw && count(raw) >= 8 && count(raw) <= 40 && cjkCount(raw) >= 4) {
         const repairedResult = await repairCandidate(env, source, core, facts, resolved, raw, checked.reasons.join('、'));
         generationCalls++;
         repairReasons = repairedResult.checked.reasons;
