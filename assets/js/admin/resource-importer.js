@@ -71,8 +71,9 @@ async function readRealSources(manualNameOverride=''){
   // 名称决策必须优先采用 GitHub/API/README 的项目正式名称，不能让官网 SEO 标题覆盖真实项目名。
   // 只有用户明确手动修改过名称时，才使用人工名称。
   const name=manualName||githubName||websiteName||normalizeSourceName(inputGithub.split('/').pop())||'';
-  const website=normalizeWebsite(websiteInput)||normalizeWebsite(web?.website)||normalizeWebsite(gh?.website)||'';
-  const github=inputGithub||normalizeGithub(gh?.github)||normalizeGithub(web?.github)||'';
+  const website=normalizeWebsite(websiteInput)||normalizeWebsite(gh?.website)||'';
+  // GitHub 必须来自已成功读取并验证的 GitHub 结果；网页中的任意 github 链接不能直接写入最终字段。
+  const github=inputGithub||normalizeGithub(gh?.github)||'';
   const content=[web?.content,gh?.content].filter(Boolean).join('\n\n--- GitHub ---\n').slice(0,30000);
   if(!name)throw new Error(sourceErrors[0]||'真实来源未读取到可靠资源名称');
   if(!website&&!github)throw new Error(sourceErrors[0]||'未能确认官方官网或GitHub来源');
