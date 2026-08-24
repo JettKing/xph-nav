@@ -93,8 +93,7 @@ window.aiResources = [
         "github": "",
         "capabilities": [
             "图片生成",
-            "图片编辑",
-            "图片生成"
+            "图片编辑"
         ],
         "scenarios": [
             "设计",
