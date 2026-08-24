@@ -94,37 +94,32 @@ function homepageScore(url, repo, projectName = '') {
   } catch {}
   return score;
 }
+function homepageLooksLikeResource(url, projectName = '', repo = '') {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, '').toLowerCase();
+    const path = u.pathname.toLowerCase().replace(/\/+$/, '');
+    const first = host.split('.')[0];
+    const repoSlug = (repo.split('/').pop() || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const name = clean(projectName).toLowerCase().replace(/[^a-z0-9]+/g, '');
+    if (!/^https?:$/.test(u.protocol)) return false;
+    if (/^(?:docs?|documentation|developer|developers|api|status|support|help|blog|forum|community|changelog|careers|jobs)\./i.test(host)) return false;
+    if (/^\/(?:docs?|documentation|developer|developers|api|reference|references|status|support|help|blog|forum|community|changelog|careers|jobs)(?:\/|$)/i.test(path)) return false;
+    if (/(?:discord\.(?:gg|com)|twitter\.com|x\.com|linkedin\.com|youtube\.com|twitch\.tv|npmjs\.com|pypi\.org|medium\.com|buymeacoffee\.com)$/i.test(host)) return false;
+    if (repoSlug && host.replace(/[^a-z0-9]+/g, '') === repoSlug) return true;
+    if (name && host.replace(/[^a-z0-9]+/g, '').includes(name)) return true;
+    if (first && (first === repoSlug || first === name)) return true;
+    return true;
+  } catch { return false; }
+}
 function pickHomepage({ apiHomepage, readme, html, repo, projectName }) {
   const direct = validWebsite(apiHomepage);
-  if (direct) return direct;
-  const labeled = extractLabeledWebsite(readme) || extractLabeledWebsite(html);
-  if (labeled) return labeled;
-  const candidates = [...extractUrls(readme), ...extractUrls(html)].map(validWebsite).filter(Boolean);
+  if (direct && homepageLooksLikeResource(direct, projectName, repo)) return direct;
+  const labeledCandidates = [extractLabeledWebsite(readme), extractLabeledWebsite(html)].map(validWebsite).filter(Boolean).filter(url => homepageLooksLikeResource(url, projectName, repo));
+  if (labeledCandidates.length) return labeledCandidates[0];
+  const candidates = [...extractUrls(readme), ...extractUrls(html)].map(validWebsite).filter(Boolean).filter(url => homepageLooksLikeResource(url, projectName, repo));
   const scored = unique(candidates).map(url => ({ url, score: homepageScore(url, repo, projectName) })).sort((a, b) => b.score - a.score);
   return scored[0]?.score >= 140 ? scored[0].url : '';
-}
-function stripMarkdownCodeBlocks(markdown) {
-  return String(markdown || '')
-    .replace(/```[\s\S]*?```/g, '\n')
-    .replace(/~~~[\s\S]*?~~~/g, '\n')
-    .split('\n')
-    .filter(line => !/^ {4}\S/.test(line))
-    .join('\n');
-}
-function extractMarkdownH1(markdown) {
-  const prose = stripMarkdownCodeBlocks(markdown);
-  return [...prose.matchAll(/^#\s+(.+?)\s*#?$/gm)].map(m => cleanText(m[1])).filter(Boolean);
-}
-function extractBrandBySlug(markdown, slug) {
-  const prose = stripMarkdownCodeBlocks(markdown);
-  const compactSlug = clean(slug).toLowerCase().replace(/[^a-z0-9]+/g, '');
-  if (!compactSlug) return '';
-  const tokenPattern = new RegExp('\\b' + compactSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
-  const hit = prose.match(tokenPattern);
-  return hit?.[0] || '';
-}
-function isGenericProjectName(value) {
-  return /^(install(?:ing)?|installation|getting started|quick start|quickstart|one[- ]click deployment|deployment|deploy|setup|prerequisites|usage|configuration(?: guide)?|documentation|docs|license|changelog|roadmap|contributing|credits|screenshot|ui|features|core features|tech stack|community|contact|support|home|homepage|website|menu|navigation|search|source|download|image|raw)$/i.test(cleanText(value));
 }
 function extractName(api, html, readme, repo) {
   const slug = repo.split('/').pop() || '';
@@ -132,18 +127,25 @@ function extractName(api, html, readme, repo) {
   const apiCompact = apiName.toLowerCase().replace(/[^a-z0-9]+/g, '');
   const candidates = [];
   const add = (value, score, source='') => {
-    const x = normalizeProjectName(value, slug).replace(/^#+\s*/, '').trim();
-    if (!x || x.length > 80 || isGenericProjectName(x)) return;
+    const x = normalizeProjectName(value, slug).replace(/^#+\s*/, '').replace(/\s*[ÃÂ·|Ã¢ÂÂ-]\s*GitHub\s*$/i, '').trim();
+    if (!x || x.length > 80) return;
     const low = x.toLowerCase();
+    if (/^(install|installation|getting started|quick start|quickstart|one[- ]click deployment|deployment|deploy|setup|prerequisites|usage|configuration|configuration guide|documentation|docs|license|changelog|roadmap|contributing|credits|screenshot|ui|features|core features|tech stack|community|contact|support)\b/i.test(x)) return;
+    if (/^(published time|updated time|created time|release time|commit time|view raw|raw|source|image|download|home|homepage|website|menu|navigation)$/i.test(x)) return;
     let finalScore = score;
     if (apiCompact && low.replace(/[^a-z0-9]+/g, '') === apiCompact) finalScore += 80;
     if (source === 'api') finalScore += 40;
     candidates.push({ x, score: finalScore, source });
   };
-  if (apiName && !isGenericProjectName(apiName)) add(apiName, 500, 'api');
-  const brand = extractBrandBySlug(readme, slug);
-  if (brand && !isGenericProjectName(brand)) add(brand, 620, 'brand');
-  for (const heading of extractMarkdownH1(readme).slice(0, 12)) add(heading, 420, 'readme-h1');
+  if (apiName) add(apiName, 500, 'api');
+  if (apiName) {
+    const escaped = apiName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp('\\b' + escaped + '\\b', 'i');
+    const hit = String(readme || '').match(re);
+    if (hit?.[0]) add(hit[0], 560, 'brand');
+  }
+  const h1Matches = String(readme || '').match(/^#\s+(.+)$/gm) || [];
+  for (const line of h1Matches.slice(0, 8)) add(line.replace(/^#\s+/, ''), 420, 'readme-h1');
   const og = String(html || '').match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i); if (og) add(og[1], 300, 'og:title');
   const title = String(html || '').match(/<title[^>]*>([^<]+)/i); if (title) add(title[1], 280, 'title');
   if (slug) add(slug, 180, 'slug');
