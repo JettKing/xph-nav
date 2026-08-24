@@ -1,6 +1,6 @@
 /** XPH V5.3 strict resource validator. Legacy fields are hard failures. */
 window.XPHResourceValidator = (() => {
-  const legacy = new Set(['platform','pricing','language','audience','subcategories','desc','project','tags','_meta','features']);
+  const legacy = new Set(['platform','pricing','language','audience','subcategories','desc','project','tags','_meta','features']); // 仅检查顶层旧字段；attributes.* 是 V5.3 合法结构
   const fail=(errors,msg)=>errors.push(msg);
   function validate(resource,{allIds=new Set(),allNames=new Map()}={}){
     const errors=[];
@@ -25,7 +25,7 @@ window.XPHResourceValidator = (() => {
       for(const v of attrs.audience) if(!(window.tags?.attributes?.audience||[]).includes(v)) fail(errors,`${resource.id||resource.name} 非法受众：${v}`);
     }
     if(allIds.has(resource.id)) fail(errors,`重复ID：${resource.id}`);
-    if(allNames.has(resource.name) && allNames.get(resource.name)!==resource.website) fail(errors,`重复名称：${resource.name}`);
+    if(allNames.has(resource.name)) fail(errors,`重复名称：${resource.name}`);
     return errors;
   }
   function validateAll(resources){
