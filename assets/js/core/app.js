@@ -26,7 +26,7 @@ window.ResourceApp={
     applyUrlState(){
         const p=new URLSearchParams(location.search);
         ResourceStore.setKeyword(p.get("q")||"");
-        // V5.3 前台不再使用分类/平台/语言/受众筛选；兼容旧 URL 时直接忽略这些条件。
+        // V5.3 URL 状态仅接受当前 Contract 支持的筛选参数。
         ResourceStore.setCapability(p.get("capability")||"all");
         ResourceStore.setScenario(p.get("scenario")||"all");
         ResourceStore.setPricing(p.get("pricing")||"all");
