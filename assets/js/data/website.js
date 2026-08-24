@@ -123,7 +123,6 @@ window.websiteResources = [
         "github": "",
         "capabilities": [
             "搜索",
-            "搜索",
             "数据分析"
         ],
         "scenarios": [
